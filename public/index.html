@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    <%= htmlWebpackPlugin.options.yandexMetrika %> <%= htmlWebpackPlugin.options.isDev %>
+    <script>
+      window.onload = function () {
+        window.RqloggerError = ({ type, error }) => {
+          if (window.rq_errors === undefined) {
+            window.rq_errors = []
+          }
+          if (window.rq_errors.length > 10) {
+            window.rq_errors.shift()
+          }
+          window.rq_errors.push({ type, error, timestamp: Date.now() })
+        }
+
+        window.addEventListener('error', (e) => {
+          window.RqloggerError({ type: 'global', error: e })
+        })
+
+        window.addEventListener('unhandledrejection', function (e) {
+          window.RqloggerError({ type: 'promise', error: e })
+        })
+
+        window.rq_errors_interval_id = setInterval(function () {
+          if (window.rq_errors && window.rq_errors.length) {
+            if (isDev) console.error('error monitor', window.rq_errors)
+            var postBody = JSON.stringify({ errors: window.rq_errors })
+            window.rq_errors = []
+            var xhr = new XMLHttpRequest()
+            xhr.open('POST', 'https://back.monitor.ruqi.ru/api/errors/', true)
+            xhr.timeout = 3000
+            xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8')
+            try {
+              xhr.send(postBody)
+            } catch (e) {
+              console.error(e)
+            }
+          }
+        }, 2000)
+      }
+    </script>
+  </head>
+  <body class="scrollbar">
+    <div id="app"></div>
+  </body>
+</html>

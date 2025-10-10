@@ -1,0 +1,107 @@
+.air-datepicker {
+  .air-datepicker--pointer {
+    display: none;
+  }
+}
+.air-datepicker {
+  z-index: 250;
+  border-radius: 8px;
+  background-color: white;
+  color: #dadada;
+  border: none;
+  box-shadow:
+    0px 4px 20px 5px #0234e30a,
+    0px -1px 4px 0px #0234e308;
+
+  &.-inline- {
+    position: absolute;
+  }
+  .air-datepicker-nav {
+    border-bottom: 0;
+  }
+  .air-datepicker--buttons,
+  .air-datepicker--time {
+    border: 0;
+    padding: 0 6px 6px 6px;
+  }
+  .air-datepicker-button {
+    border-radius: 5px;
+    color: #1735f5;
+  }
+  .air-datepicker-nav--title,
+  .air-datepicker-nav--title i,
+  .air-datepicker-nav--action,
+  .air-datepicker-nav--title:hover,
+  .air-datepicker-nav--action:hover {
+    color: #263043;
+  }
+  .air-datepicker--pointer:after {
+    background: #dadada;
+    border-top: 1px solid #dadada;
+    border-right: 1px solid #dadada;
+  }
+  .air-datepicker-button:hover,
+  .air-datepicker-nav--title:hover,
+  .air-datepicker-nav--action:hover {
+    background-color: #dcecff;
+  }
+  .air-datepicker-body--day-name {
+    color: #666666;
+  }
+  .air-datepicker-cell {
+    border: none;
+    color: #888f9d;
+  }
+  .air-datepicker-cell.-focus- {
+    background-color: #1735f5;
+    color: white;
+  }
+  .air-datepicker-cell.-current- {
+    color: #1735f5;
+  }
+  .air-datepicker-cell.-current-.-focus- {
+    color: #f3faff;
+  }
+  .air-datepicker-cell.-current-.-selected- {
+    color: #f3faff;
+  }
+  .air-datepicker-cell.-in-range- {
+    background-color: #1735f5;
+  }
+  .air-datepicker-cell.-in-range-.-focus- {
+    background-color: #0b28e3;
+  }
+  .air-datepicker-cell.-selected- {
+    background-color: #1735f5;
+    color: white;
+  }
+  .air-datepicker-cell.-selected-.-focus- {
+    background-color: #0b28e3;
+    color: white;
+  }
+  .air-datepicker-cell.-other-month- {
+    color: #dadada;
+  }
+  .air-datepicker-cell.-other-month-.-in-range- {
+    color: #dadada;
+  }
+  .air-datepicker-cell.-disabled- {
+    color: #efefef;
+  }
+  .air-datepicker-cell.-disabled-.-focus- {
+    background-color: #efefef;
+    color: #dadada;
+  }
+  .air-datepicker-cell.-day-.-weekend- {
+    color: #ed2b2b;
+  }
+  .air-datepicker-cell.-day-.-weekend-.-focus- {
+    color: #ffffff;
+  }
+  .air-datepicker-cell.-day-.-weekend-.-other-month- {
+    color: #dadada;
+  }
+  .air-datepicker-cell.-day-.-weekend-.-other-month-.-focus- {
+    color: #ffffff;
+  }
+}

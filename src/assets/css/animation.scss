@@ -1,0 +1,68 @@
+@keyframes heartbeat {
+  from {
+    transform: scale(1);
+    transform-origin: center center;
+    animation-timing-function: ease-out;
+  }
+  10% {
+    transform: scale(0.98);
+    animation-timing-function: ease-in;
+  }
+  17% {
+    transform: scale(1.02);
+    animation-timing-function: ease-out;
+  }
+  33% {
+    transform: scale(0.97);
+    animation-timing-function: ease-in;
+  }
+  45% {
+    transform: scale(1);
+    animation-timing-function: ease-out;
+  }
+}
+
+@keyframes vertical-shaking {
+  0% {
+    transform: translateY(0);
+  }
+  2% {
+    transform: translateY(-4px);
+  }
+  5% {
+    transform: translateY(4px);
+  }
+  10% {
+    transform: translateY(-3px);
+  }
+  15% {
+    transform: translateY(3px);
+  }
+  20% {
+    transform: translateY(-2px);
+  }
+  30% {
+    transform: translateY(2px);
+  }
+  45% {
+    transform: translateY(-1px);
+  }
+  60% {
+    transform: translateY(1px);
+  }
+  80% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes onset {
+  0% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: translateY(1);
+  }
+}
