@@ -56,7 +56,7 @@ module.exports = () => ({
       favicon: 'src/favicon.ico',
       filename: 'index.html',
       inject: 'body',
-      isDev,
+      templateParameters: { isDev, },
     }),
     new Dotenv({
       path: './.env',
@@ -87,4 +87,22 @@ module.exports = () => ({
     children: true,
     errorDetails: true,
   },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+        common: {
+          name: 'common',
+          minChunks: 2,
+          chunks: 'all',
+          enforce: true
+        }
+      }
+    }
+  }
 })
