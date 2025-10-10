@@ -9,7 +9,6 @@
       }
     ],
     "env": {
-      "API_URL": "https://api.stage2.ruqi.ru/api/",
-      "NODE_ENV": "development"
+      "API_URL": "https://api.stage2.ruqi.ru/api/"
     }
   }
