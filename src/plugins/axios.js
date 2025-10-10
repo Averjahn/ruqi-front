@@ -20,7 +20,8 @@ const serialize = (params) => {
 console.log('API_URL:', process.env.API_URL)
 
 const instance = axios.create({
-  baseURL: process.env.API_URL,
+  // baseURL: process.env.API_URL,
+  baseURL: 'https://api.stage2.ruqi.ru/api/', //test hardcode
   paramsSerializer: serialize,
 })
 
