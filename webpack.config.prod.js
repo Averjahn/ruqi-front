@@ -9,7 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const Dotenv = require('dotenv-webpack')
 
 const yandexMetrika = fs.readFileSync('./config/build/yandexMetrika.html', 'utf8')
-
+console.log('Webpack API_URL:', process.env.API_URL)
 module.exports = () => ({
   mode: 'production',
   target: 'browserslist',
@@ -60,7 +60,8 @@ module.exports = () => ({
       yandexMetrika,
     }),
     new Dotenv({
-      path: './.env',
+      path: './.env.stage2',
+      systemvars: true, // Важно! Читает переменные из Vercel
     }),
     new VueLoaderPlugin(),
     new CopyWebpackPlugin({
@@ -72,6 +73,7 @@ module.exports = () => ({
     new DefinePlugin({
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
+      'process.env.API_URL': JSON.stringify(process.env.API_URL),
     }),
   ],
   resolve: {
