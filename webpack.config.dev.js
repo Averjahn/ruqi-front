@@ -56,7 +56,7 @@ module.exports = () => ({
       favicon: 'src/favicon.ico',
       filename: 'index.html',
       inject: 'body',
-      templateParameters: { isDev }
+      isDev,
     }),
     new Dotenv({
       path: './.env',
