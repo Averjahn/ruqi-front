@@ -65,6 +65,7 @@ module.exports = () => ({
     new DefinePlugin({
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: true,
+      'process.env.API_URL': JSON.stringify(process.env.API_URL),
     }),
   ],
   devServer: {

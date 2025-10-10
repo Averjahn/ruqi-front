@@ -17,6 +17,8 @@ const serialize = (params) => {
   })
 }
 
+console.log('API_URL:', process.env.API_URL)
+
 const instance = axios.create({
   baseURL: process.env.API_URL,
   paramsSerializer: serialize,
