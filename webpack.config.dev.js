@@ -59,7 +59,7 @@ module.exports = () => ({
       isDev,
     }),
     new Dotenv({
-      path: './.env',
+      path: './.env.stage2',
     }),
     new VueLoaderPlugin(),
     new DefinePlugin({
