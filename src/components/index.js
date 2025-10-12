@@ -22,6 +22,7 @@ import InfoV2 from '@/components/atoms/InfoV2'
 import ThinLineLoading from '@/components/atoms/loaders/ThinLineLoading'
 import Textarea from '@/components/atoms/Textarea'
 import Checkbox from '@/components/atoms/Checkbox'
+import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
 import Icon from '@/components/atoms/icon/Icon'
 
 export default [
@@ -50,4 +51,5 @@ export default [
   ThinLineLoading,
   Textarea,
   Checkbox,
+  ResendCodeTimer,
 ]

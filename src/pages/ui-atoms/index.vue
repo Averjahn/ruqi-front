@@ -126,6 +126,36 @@
             <Radio v-model="radioValue" value="option2" label="Option 2" />
             <Radio v-model="radioValue" value="option3" label="Option 3" />
           </div>
+          
+          <div class="ui-atoms__item">
+            <h4>ResendCodeTimer</h4>
+            <div class="ui-atoms__timer-demo">
+              <div class="ui-atoms__timer-item">
+                <h5>Timer Active (Disabled)</h5>
+                <ResendCodeTimer 
+                  :duration="10" 
+                  :auto-start="true"
+                  @resend="handleResendCode"
+                />
+              </div>
+              <div class="ui-atoms__timer-item">
+                <h5>Timer Ready (Active)</h5>
+                <ResendCodeTimer 
+                  :duration="0" 
+                  :auto-start="false"
+                  @resend="handleResendCode"
+                />
+              </div>
+              <div class="ui-atoms__timer-item">
+                <h5>Custom Duration (30s)</h5>
+                <ResendCodeTimer 
+                  :duration="30" 
+                  :auto-start="true"
+                  @resend="handleResendCode"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -490,6 +520,10 @@ export default {
       } catch (error) {
         // Игнорируем ошибки в callback
       }
+    },
+    handleResendCode() {
+      console.log('Resend code requested')
+      // В реальном приложении здесь будет API вызов для повторной отправки SMS
     }
   },
   mounted() {
@@ -561,6 +595,26 @@ export default {
       color: #263043;
       border-bottom: 1px solid #eee;
       padding-bottom: 10px;
+    }
+  }
+
+  // Timer Demo Styles
+  &__timer-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__timer-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    h5 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      margin: 0;
     }
   }
 

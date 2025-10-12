@@ -77,6 +77,13 @@ export default {
       gap: 8px;
     }
   }
+  &.xl {
+    font-size: 18px;
+    .slot {
+      line-height: 26px;
+      gap: 8px;
+    }
+  }
   &.blue {
     color: #1735f5;
     &:hover {
@@ -108,6 +115,12 @@ export default {
     color: #25a3e0;
     &:hover {
       color: #1b8cc5;
+    }
+  }
+  &.light-blue {
+    color: #b0baff;
+    &:hover {
+      color: #9ba8ff;
     }
   }
   &.red {

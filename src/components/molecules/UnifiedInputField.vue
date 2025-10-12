@@ -344,7 +344,7 @@ export default {
 
 <style lang="scss" scoped>
 .unified_input_container {
-  width: 300px; 
+  width: auto; 
   
 
   .progress_wrap {

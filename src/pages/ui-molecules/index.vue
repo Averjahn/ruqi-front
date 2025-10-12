@@ -181,6 +181,13 @@
                     :error-message="unifiedValidation.smsCode.errorMessage"
                     :success-message="unifiedValidation.smsCode.successMessage"
                   />
+                  <div class="ui-molecules__resend-timer">
+                    <ResendCodeTimer 
+                      :duration="60" 
+                      :auto-start="true"
+                      @resend="handleResendSmsCode"
+                    />
+                  </div>
                 </div>
                 
                 <!-- INN Field -->
@@ -473,6 +480,11 @@ export default {
     handleRatingChange(rating) {
       console.log('Изменен рейтинг:', rating)
     },
+    handleResendSmsCode() {
+      console.log('Запрос на повторную отправку SMS кода')
+      // В реальном приложении здесь будет API вызов для повторной отправки SMS
+      // После успешной отправки можно сбросить таймер
+    },
       validateUnifiedField(fieldType, value) {
         // Сбрасываем состояние
         this.unifiedValidation[fieldType].error = false
@@ -616,7 +628,6 @@ export default {
     padding: 24px;
     border: 1px solid #e8e8e8;
     border-radius: 8px;
-    background: #fafafa;
     
     &--wide {
       max-width: 100%;
@@ -638,7 +649,7 @@ export default {
   &__field-demo {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    gap: 24px;
     margin-top: 20px;
   }
 
@@ -664,6 +675,14 @@ export default {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
+    }
+
+    // Resend Timer Styles
+    &__resend-timer {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      text-align: center;
     }
 }
 </style>
