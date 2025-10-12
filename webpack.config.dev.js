@@ -65,7 +65,6 @@ module.exports = () => ({
     new DefinePlugin({
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: true,
-      'process.env.API_URL': JSON.stringify(process.env.API_URL),
     }),
   ],
   devServer: {
@@ -73,7 +72,7 @@ module.exports = () => ({
     compress: false,
     historyApiFallback: true,
     hot: true,
-    port: 3000,
+    port: 8080,
     client: {
       overlay: true,
     },

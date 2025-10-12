@@ -1,5 +1,5 @@
 <template>
-  <div class="field_message" :class="{ open: !!text }">
+  <div class="field_message" :class="{ open: !!text, success: type === 'success' }">
     <div class="text_wrap">
       <div class="text">{{ innerText }}</div>
     </div>
@@ -14,6 +14,11 @@ export default {
     text: {
       type: String,
       default: null,
+    },
+    type: {
+      type: String,
+      default: 'error',
+      validator: (value) => ['error', 'success'].includes(value)
     },
   },
   data () {
@@ -65,6 +70,10 @@ export default {
     font-size: 14px;
     line-height: 22px;
     color: #eb4d3d;
+  }
+
+  &.success .text {
+    color: #71d472;
   }
 }
 </style>

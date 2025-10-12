@@ -13,6 +13,10 @@ const i = (str) => () => import(`@/pages${str}`)
 
 export const routes = [
   { path: '/', component: i('/main/index.vue'), meta },
+  { path: '/ui-kit', component: i('/ui-kit/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-atoms', component: i('/ui-atoms/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-molecules', component: i('/ui-molecules/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-organisms', component: i('/ui-organisms/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/promo', component: i('/promo/index.vue'), meta },
   { path: '/promo/invite-friend', component: i('/promo/inviteFriend.vue'), meta },
   { path: '/promo/grades', component: i('/promo/grades.vue'), meta },
