@@ -41,6 +41,7 @@ import supportPerson from './supportPerson.vue'
 import user from './user.vue'
 import promo from './promo.vue'
 import star from './star.vue'
+import telegram from './telegram.vue'
 import rewards from './rewards.vue'
 import dislike from './dislike.vue'
 import arrowLeft from './arrowLeft.vue'
@@ -51,6 +52,15 @@ import personal from './personal.vue'
 import accountGuard from './accountGuard.vue'
 import warning from './warning.vue'
 import documentsFolder from './documentsFolder.vue'
+import magnifier from './magnifier.vue'
+import location from './location.vue'
+import flame from './flame.vue'
+import calendar from './calendar.vue'
+import paperPlane from './paper-plane.vue'
+import documentIcon from './document.vue'
+import copyIcon from './copy.vue'
+import documentCopyIcon from './document-copy.vue'
+import clock from './clock.vue'
 
 export const icons = shallowRef({
   file,
@@ -95,6 +105,7 @@ export const icons = shallowRef({
   user,
   promo,
   star,
+  telegram,
   rewards,
   dislike,
   arrowLeft,
@@ -105,4 +116,13 @@ export const icons = shallowRef({
   accountGuard,
   warning,
   documentsFolder,
+  magnifier,
+  location,
+  flame,
+  calendar,
+  paperPlane,
+  document: documentIcon,
+  copy: copyIcon,
+  documentCopy: documentCopyIcon,
+  clock,
 })

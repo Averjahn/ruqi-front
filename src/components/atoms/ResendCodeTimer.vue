@@ -1,22 +1,20 @@
 <template>
-  <ButtonText 
-    :color="buttonColor"
-    size="xl"
+  <button
+    class="resend-text-button"
+    :class="[`resend-text-button--${buttonColor}`, { 'resend-text-button--disabled': !isExpired }]"
     :disabled="!isExpired"
     @click="handleClick"
   >
     {{ isExpired ? 'Отправить код повторно' : `Отправить код повторно (${formattedTime})` }}
-  </ButtonText>
+  </button>
 </template>
 
 <script>
 import { computed } from 'vue'
 import useCountdown from '@/composables/useCountdown'
-import ButtonText from '@/components/atoms/ButtonText.vue'
 
 export default {
   name: 'ResendCodeTimer',
-  components: { ButtonText },
   props: {
     duration: {
       type: Number,
@@ -58,10 +56,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-:deep(.button_text) {
-  text-align: center;
+.resend-text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  font-family: 'Source Sans', sans-serif;
-  font-weight: 400;
+  height: 32px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: transparent;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 18px;
+  line-height: 26px;
+  color: #1735f5;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.resend-text-button--blue { color: #1735f5; }
+.resend-text-button--light-blue { color: #b0baff; }
+.resend-text-button--disabled { cursor: default; opacity: .7; }
+
+.resend-text-button:not(.resend-text-button--disabled):hover {
+  background: #f2f8ff;
 }
 </style>

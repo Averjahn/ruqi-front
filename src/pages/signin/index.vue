@@ -235,7 +235,7 @@ import SignInBySms from '@/components/molecules/SignInBySms.vue'
 import { getAPIError, replace8to7inPhone, clearPhoneAlwaysSeven, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 const tabs = [
   { text: 'Вход по паролю', value: 'by_password' },
   { text: 'Вход по звонку', value: 'by_phone_call' },

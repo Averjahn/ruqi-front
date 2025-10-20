@@ -10,29 +10,7 @@
       <div class="ui-atoms__subsection">
         <h3>Buttons</h3>
         <div class="ui-atoms__showcase">
-          <div class="ui-atoms__item">
-            <h4>Button (Primary)</h4>
-            <Button type="contained" color="blue">Primary Button</Button>
-            <Button type="contained" color="blue" size="s">Small</Button>
-            <Button type="contained" color="blue" size="l">Large</Button>
-            <Button type="contained" disabled>Disabled</Button>
-            <Button type="contained" loading>Loading</Button>
-            <Button type="outlined" color="blue">Outlined Button</Button>
-            <Button type="outlined" color="red">Red Outlined</Button>
-            <Button type="outlined" color="grey">Grey Outlined</Button>
-            <Button type="shadow" color="blue">Shadow Button</Button>
-          </div>
-          
-          <div class="ui-atoms__item">
-            <h4>ButtonText</h4>
-            <ButtonText color="blue">Blue Text Button</ButtonText>
-            <ButtonText color="green">Green Text Button</ButtonText>
-            <ButtonText color="grey">Grey Text Button</ButtonText>
-            <ButtonText color="telegram">Telegram Text Button</ButtonText>
-            <ButtonText color="white">White Text Button</ButtonText>
-            <ButtonText disabled>Disabled Text</ButtonText>
-            <ButtonText loading>Loading Text</ButtonText>
-          </div>
+        
           
           <div class="ui-atoms__item">
             <h4>ButtonIcon</h4>
@@ -72,13 +50,232 @@
               <Icon name="star" />
             </ButtonIconDeprecated>
           </div>
+          
+          <div class="ui-atoms__item">
+            <h4>CopyButton</h4>
+            <div class="copy-button-demo">
+              <CopyButton 
+                type="outline" 
+                icon="documentCopy"
+                :data-to-copy="'ID заявки: 12345\nСтатус: В обработке\nДата: 14.10.2024'"
+                @copy="onCopySuccess"
+                @error="onCopyError"
+              />
+            
+              <CopyButton 
+                type="outline" 
+                icon="documentCopy"
+                :data-to-copy="'ID заявки: 12345\nСтатус: В обработке\nДата: 14.10.2024'"
+                :loading="true"
+                @copy="onCopySuccess"
+                @error="onCopyError"
+              />
+              <CopyButton 
+                type="outline" 
+                icon="documentCopy"
+                :data-to-copy="'ID заявки: 12345\nСтатус: В обработке\nДата: 14.10.2024'"
+                :disabled="true"
+                @copy="onCopySuccess"
+                @error="onCopyError"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Form Elements -->
+      <!-- MainButton - Design System -->
       <div class="ui-atoms__subsection">
-        <h3>Form Elements</h3>
+        <h3>MainButton - Design System</h3>
         <div class="ui-atoms__showcase">
+          <div class="ui-atoms__item">
+            <h4>Primary</h4>
+            <div class="main-button-demo__states">
+              <MainButton type="primary" text="Button" left-icon="heart" right-icon="magnifier" />
+              <MainButton type="primary" text="Button" left-icon="heart" right-icon="magnifier" disabled />
+              <MainButton type="primary" text="Button" left-icon="heart" right-icon="magnifier" loading />
+            </div>
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>Error</h4>
+            <div class="main-button-demo__states">
+              <MainButton type="error" text="Button" left-icon="heart" right-icon="magnifier" />
+              <MainButton type="error" text="Button" left-icon="heart" right-icon="magnifier" disabled />
+              <MainButton type="error" text="Button" left-icon="heart" right-icon="magnifier" loading />
+            </div>
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>Neutral</h4>
+            <div class="main-button-demo__states">
+              <MainButton type="neutral" text="Button" left-icon="heart" right-icon="magnifier" />
+              <MainButton type="neutral" text="Button" left-icon="heart" right-icon="magnifier" disabled />
+              <MainButton type="neutral" text="Button" left-icon="heart" right-icon="magnifier" loading />
+            </div>
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>Primary Outline</h4>
+            <div class="main-button-demo__states">
+              <MainButton type="primary-outline" text="Button" left-icon="heart" right-icon="magnifier" />
+              <MainButton type="primary-outline" text="Button" left-icon="heart" right-icon="magnifier" disabled />
+              <MainButton type="primary-outline" text="Button" left-icon="heart" right-icon="magnifier" loading />
+            </div>
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>Error Outline</h4>
+            <div class="main-button-demo__states">
+              <MainButton type="error-outline" text="Button" left-icon="heart" right-icon="magnifier" />
+              <MainButton type="error-outline" text="Button" left-icon="heart" right-icon="magnifier" disabled />
+              <MainButton type="error-outline" text="Button" left-icon="heart" right-icon="magnifier" loading />
+            </div>
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>Primary White</h4>
+            <div class="main-button-demo__states">
+              <MainButton type="primary-white" text="Button" left-icon="heart" right-icon="magnifier" />
+              <MainButton type="primary-white" text="Button" left-icon="heart" right-icon="magnifier" disabled />
+              <MainButton type="primary-white" text="Button" left-icon="heart" right-icon="magnifier" loading />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <div class="ui-atoms__subsection">
+        <h3>Upload</h3>
+        <div class="ui-atoms__showcase">
+          <div class="ui-atoms__item">
+            <h4>Файлы</h4>
+            <Upload v-model="uploadFiles" label="Загрузите документы" :max-size-m-b="50" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Spinner -->
+      <div class="ui-atoms__subsection">
+        <h3>Spinner</h3>
+        <div class="ui-atoms__showcase">
+            <div class="ui-atoms__item">
+              <h4>Loading Spinner</h4>
+              <Spinner />
+            </div>
+          </div>
+        </div>
+
+        <!-- Snackbar -->
+        <div class="ui-atoms__subsection">
+          <h3>Snackbar</h3>
+          <div class="ui-atoms__showcase">
+            <div class="ui-atoms__item ui-atoms__item--wide">
+              <h4>Snackbar on Card</h4>
+              <div class="snackbar-card-demo">
+                <JobCard />
+              </div>
+            </div>
+            <div class="ui-atoms__item ui-atoms__item--wide">
+              <h4>JobCard Skeleton</h4>
+              <div class="snackbar-card-demo">
+                <SkeletonJobCard />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="snackbar-card-demo">
+                <JobCard />
+              </div>
+
+        <!-- Toast -->
+        <div class="ui-atoms__subsection">
+          <h3>Toast</h3>
+          <div class="ui-atoms__showcase">
+            <div class="ui-atoms__item ui-atoms__item--wide">
+              <h4>Toast Notifications</h4>
+              <div class="toast-demo">
+                <ToastDemo />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notification Blocks Demo -->
+        <div class="ui-atoms__subsection">
+          <h3>Notification Blocks Demo</h3>
+          <div class="ui-atoms__showcase">
+            <div class="ui-atoms__item ui-atoms__item--wide">
+              <h4>All Notification States</h4>
+              <div class="notification-blocks-demo">
+                <ModalNotification 
+                  v-for="state in notificationStates" 
+                  :key="state"
+                  :state="state"
+                  @action="onNotificationAction"
+                  class="notification-blocks-demo__item"
+                />
+              </div>
+            </div>
+            <div class="ui-atoms__item ui-atoms__item--wide">
+              <h4>ModalNotification Skeleton</h4>
+              <div class="notification-blocks-demo">
+                <SkeletonModalNotification class="notification-blocks-demo__item" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiselect -->
+        <div class="ui-atoms__subsection">
+          <h3>Multiselect</h3>
+          <div class="ui-atoms__showcase">
+            <div class="ui-atoms__item">
+              <h4>Multiselect States</h4>
+              <div class="multiselect-demo">
+                <div class="multiselect-demo__row">
+                  <h5>Off (Empty)</h5>
+                  <Multiselect 
+                    placeholder="Placeholder"
+                    v-model="multiselectEmpty"
+                    label="Label"
+                  />
+                </div>
+                <div class="multiselect-demo__row">
+                  <h5>On (Filled)</h5>
+                  <Multiselect 
+                    placeholder="Placeholder"
+                    v-model="multiselectFilled"
+                    label="Label"
+                  />
+                </div>
+                <div class="multiselect-demo__row">
+                  <h5>Error State</h5>
+                  <Multiselect 
+                    placeholder="Placeholder"
+                    v-model="multiselectError"
+                    :error="true"
+                    error-message="Prompt"
+                    label="Label"
+                  />
+                </div>
+                <div class="multiselect-demo__row">
+                  <h5>Disabled State</h5>
+                  <Multiselect 
+                    placeholder="Placeholder"
+                    v-model="multiselectDisabled"
+                    :disabled="true"
+                    label="Label"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Elements -->
+        <div class="ui-atoms__subsection">
+          <h3>Form Elements</h3>
+          <div class="ui-atoms__showcase">
           <div class="ui-atoms__item">
             <h4>Input</h4>
             <Input v-model="inputValues.text" label="Default Input" placeholder="Enter text" />
@@ -155,6 +352,18 @@
                 />
               </div>
             </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Toast Notifications -->
+      <div class="ui-atoms__subsection">
+        <h3>Toast Notifications</h3>
+        <div class="ui-atoms__showcase ui-atoms__showcase--single">
+          <div class="ui-atoms__item ui-atoms__item--wide">
+            <h4>ToastDemo</h4>
+            <ToastDemo />
           </div>
         </div>
       </div>
@@ -348,12 +557,6 @@
             </p>
           </div>
           
-          <div class="ui-atoms__item">
-            <h4>PopupContainer</h4>
-            <PopupContainer title="Тестовый контейнер">
-              <p>Это содержимое попап контейнера</p>
-            </PopupContainer>
-          </div>
         </div>
       </div>
 
@@ -390,6 +593,27 @@
           </div>
           
           <div class="ui-atoms__item">
+            <h4>Spinner</h4>
+            <Spinner />
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>DotsFlowLoader</h4>
+            <DotsFlowLoader />
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>DotsLoader</h4>
+            <DotsLoader />
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>LoadingCirclesWater</h4>
+            <LoadingCirclesWater />
+          </div>
+          
+          
+          <div class="ui-atoms__item">
             <h4>LazyLoad</h4>
             <LazyLoad :callBack="lazyLoadCallback">
               <div style="padding: 20px; background: #f0f0f0; border-radius: 8px;">
@@ -400,6 +624,14 @@
         </div>
       </div>
     </div>
+    
+    <!-- Test Popup - moved to bottom -->
+    <!-- <div class="ui-atoms__test-popup">
+      <h4>PopupContainer</h4>
+      <PopupContainer title="Тестовый контейнер">
+        <p>Это содержимое попап контейнера</p>
+      </PopupContainer>
+    </div> -->
   </div>
 </template>
 
@@ -415,8 +647,21 @@ import GlobalLoading from '@/components/atoms/GlobalLoading.vue'
 import HorizontalScroll from '@/components/atoms/HorizontalScroll.vue'
 import HoverHighlighter from '@/components/atoms/HoverHighlighter.vue'
 import LoadingCirclesWater from '@/components/atoms/LoadingCirclesWater.vue'
+import MainButton from '@/components/atoms/MainButton.vue'
+import DotsFlowLoader from '@/components/atoms/loaders/DotsFlowLoader.vue'
+import DotsLoader from '@/components/atoms/loaders/DotsLoader.vue'
+import Skeleton from '@/components/atoms/Skeleton.vue'
+import Snackbar from '@/components/atoms/Snackbar.vue'
+import CopyButton from '@/components/atoms/CopyButton.vue'
+import Spinner from '@/components/atoms/Spinner.vue'
+import SkeletonJobCard from '@/components/atoms/SkeletonJobCard.vue'
+import SkeletonModalNotification from '@/components/atoms/SkeletonModalNotification.vue'
+import Multiselect from '@/components/atoms/Multiselect.vue'
+import JobCard from '@/components/molecules/JobCard.vue'
+import ModalNotification from '@/components/molecules/ModalNotification.vue'
 import MonthDatePicker from '@/components/atoms/MonthDatePicker.vue'
 import Notifications from '@/components/atoms/Notifications.vue'
+import ToastDemo from '@/components/atoms/ToastDemo.vue'
 import ObjectLogo from '@/components/atoms/ObjectLogo.vue'
 import OtpInput from '@/components/atoms/OtpInput.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
@@ -435,6 +680,7 @@ import TopBannerDesktopSocial from '@/components/atoms/TopBannerDesktopSocial.vu
 import TopBannerMobile from '@/components/atoms/TopBannerMobile.vue'
 import UniversalSelect from '@/components/atoms/UniversalSelect.vue'
 import ViolationBannerItem from '@/components/atoms/ViolationBannerItem.vue'
+import Upload from '@/components/atoms/Upload.vue'
 
 export default {
   name: 'UIAtoms',
@@ -449,8 +695,22 @@ export default {
     HorizontalScroll,
     HoverHighlighter,
     LoadingCirclesWater,
+    MainButton,
+    DotsFlowLoader,
+    DotsLoader,
+    Skeleton,
+    Snackbar,
+    CopyButton,
+    Spinner,
+    Upload,
+    SkeletonJobCard,
+    SkeletonModalNotification,
+    Multiselect,
+    JobCard,
+    ModalNotification,
     MonthDatePicker,
     Notifications,
+    ToastDemo,
     ObjectLogo,
     OtpInput,
     Pagination,
@@ -469,6 +729,7 @@ export default {
     TopBannerMobile,
     UniversalSelect,
     ViolationBannerItem,
+    Upload,
   },
   data() {
     return {
@@ -488,6 +749,13 @@ export default {
       },
       checked1: false,
       checked2: true,
+      
+      // Multiselect data
+      multiselectEmpty: [],
+      multiselectFilled: ['programmer', 'designer'],
+      multiselectError: [],
+      multiselectDisabled: ['programmer'],
+      uploadFiles: [],
       checked3: false,
       switch1: false,
       switch2: true,
@@ -507,7 +775,18 @@ export default {
         molecules: 0,
         organisms: 0,
         total: 45
-      }
+      },
+      notificationStates: [
+        'Отклик не может быть отправлен',
+        'Ваши данные приняты',
+        'Требуется паспорт',
+        'Отклик на работу',
+        'Истек срок паспорта',
+        'State6',
+        'документ о Регистрации РФ',
+        'Загрузите Патент'
+      ],
+      uploadFiles: []
     }
   },
   methods: {
@@ -520,6 +799,22 @@ export default {
       } catch (error) {
         // Игнорируем ошибки в callback
       }
+    },
+    onCopySuccess(data) {
+      console.log('Данные скопированы:', data)
+      // Здесь можно показать уведомление об успешном копировании
+    },
+    onCopyError(error) {
+      console.error('Ошибка копирования:', error)
+      // Здесь можно показать уведомление об ошибке
+    },
+    onTimerEnd() {
+      console.log('Таймер подбора завершился')
+      // Здесь можно добавить логику для обработки окончания таймера
+    },
+    onNotificationAction(action) {
+      console.log('Notification action:', action)
+      // Здесь можно добавить логику для обработки действий уведомлений
     },
     handleResendCode() {
       console.log('Resend code requested')
@@ -625,7 +920,7 @@ export default {
   }
 
   &__item {
-    padding: 24px;
+    // padding: 24px;
     border: 1px solid #e8e8e8;
     border-radius: 8px;
     background: #fafafa;
@@ -639,6 +934,86 @@ export default {
     > * + * {
       margin-top: 10px;
     }
+    
+    &--wide {
+      grid-column: 1 / -1;
+      max-width: none;
+    }
+  }
+  
+  &__test-popup {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+    
+    h4 {
+      font-size: 1.2em;
+      margin-bottom: 15px;
+      color: #263043;
+    }
   }
 }
+
+// MainButton Demo Styles
+.main-button-demo__states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+// Snackbar Demo Styles
+.snackbar-demo {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.snackbar-card-demo {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 800px;
+}
+
+  .copy-button-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+// Multiselect Demo Styles
+.multiselect-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
+  &__row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    h5 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      margin: 0;
+    }
+  }
+}
+
+.notification-blocks-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 800px;
+    
+    &__item {
+      margin-bottom: 0;
+    }
+  }
+
 </style>

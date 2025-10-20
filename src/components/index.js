@@ -1,6 +1,5 @@
 import Badge from '@/components/atoms/Badge.vue'
-import Button from '@/components/atoms/Button.vue'
-import ButtonText from '@/components/atoms/ButtonText.vue'
+import MainButton from '@/components/atoms/MainButton.vue'
 import ButtonIcon from '@/components/atoms/ButtonIcon'
 import ButtonIconGhost from '@/components/atoms/ButtonIconGhost'
 import ButtonIconDeprecated from '@/components/atoms/ButtonIconDeprecated'
@@ -28,8 +27,7 @@ import Icon from '@/components/atoms/icon/Icon'
 export default [
   Icon,
   Badge,
-  Button,
-  ButtonText,
+  MainButton,
   ButtonIcon,
   ButtonIconGhost,
   ButtonIconDeprecated,

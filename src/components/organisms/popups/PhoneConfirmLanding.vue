@@ -142,7 +142,7 @@ import { getAPIError, replace8to7inPhone, getStringFromSeconds } from '@/constan
 import { mapMutations, mapActions } from 'vuex'
 import { formatPhone } from '@/constants/masks'
 import OtpInput from '@/components/atoms/OtpInput.vue'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 
 export default {
   components: {

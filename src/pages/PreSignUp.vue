@@ -127,7 +127,7 @@ import { rules, rulesSets } from '@/constants/validations'
 import { CITIZENSHIP_OPTIONS } from '@/constants/constants'
 import { formatNumericString } from '@/constants/masks'
 import usePassportPhotos from '@/composables/usePassportPhotos'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 import useGlobalLoading from '@/composables/useGlobalLoading'
 
 const CODE_DELAY = 180

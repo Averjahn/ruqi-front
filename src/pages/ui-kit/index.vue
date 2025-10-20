@@ -35,7 +35,7 @@
       <div class="ui-kit__nav-item">
         <h2>Molecules</h2>
         <p>Компоненты, состоящие из нескольких атомов</p>
-        <Button type="contained" color="green" @click="$router.push('/ui-molecules')">
+        <Button type="contained" color="blue" @click="$router.push('/ui-molecules')">
           Перейти к Molecules
         </Button>
       </div>
@@ -43,7 +43,7 @@
       <div class="ui-kit__nav-item">
         <h2>Organisms</h2>
         <p>Сложные блоки интерфейса</p>
-        <Button type="contained" color="purple" @click="$router.push('/ui-organisms')">
+        <Button type="contained" color="blue" @click="$router.push('/ui-organisms')">
           Перейти к Organisms
         </Button>
       </div>
@@ -100,8 +100,9 @@ export default {
   &__stats {
     display: flex;
     justify-content: center;
-    gap: 30px;
-    margin-bottom: 40px;
+    gap: 20px;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
   }
 
   &__stat {
@@ -110,6 +111,9 @@ export default {
     background: #f8f9fa;
     border-radius: 12px;
     min-width: 100px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
     
     strong {
       display: block;
@@ -131,6 +135,7 @@ export default {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     margin-bottom: 60px;
+    margin-top: 20px;
   }
 
   &__nav-item {
@@ -140,6 +145,9 @@ export default {
     background: #fafafa;
     text-align: center;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     
     &:hover {
       border-color: #007bff;
@@ -158,6 +166,7 @@ export default {
       color: #666;
       margin-bottom: 25px;
       line-height: 1.6;
+      flex-grow: 1;
     }
   }
 
@@ -175,6 +184,71 @@ export default {
     p {
       font-size: 1.2em;
       color: #666;
+    }
+  }
+}
+
+// Адаптивность
+@media (max-width: 768px) {
+  .ui-kit {
+    padding: 15px;
+    
+    &__header {
+      margin-bottom: 30px;
+      
+      h1 {
+        font-size: 2.5em;
+      }
+      
+      p {
+        font-size: 1.1em;
+      }
+    }
+    
+    &__stats {
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+    
+    &__stat {
+      padding: 15px;
+      min-width: 80px;
+      
+      strong {
+        font-size: 2em;
+      }
+      
+      span {
+        font-size: 1em;
+      }
+    }
+    
+    &__navigation {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    &__nav-item {
+      padding: 30px 20px;
+      
+      h2 {
+        font-size: 1.8em;
+      }
+      
+      p {
+        font-size: 1em;
+      }
+    }
+    
+    &__info {
+      h2 {
+        font-size: 2em;
+      }
+      
+      p {
+        font-size: 1.1em;
+      }
     }
   }
 }

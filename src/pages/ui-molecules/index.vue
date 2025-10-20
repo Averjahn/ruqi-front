@@ -84,6 +84,14 @@
             <ObjectCard :object="testObject" />
           </div>
         </div>
+        
+        <!-- Skeleton версия ObjectCard -->
+        <div class="ui-molecules__showcase ui-molecules__showcase--single">
+          <div class="ui-molecules__item ui-molecules__item--wide">
+            <h4>ObjectCard Skeleton</h4>
+            <ObjectCardSkeleton />
+          </div>
+        </div>
       </div>
 
       <!-- Password Reset Components -->
@@ -221,6 +229,19 @@
         </div>
     </div>
   </div>
+  <!-- Registration Steps -->
+  <RegistrationSteps 
+        :steps="registrationSteps"
+        :current-step="currentRegistrationStep"
+        :can-go-back="canGoBack"
+        :can-go-next="canGoNext"
+        :can-finish="canFinish"
+        finish-text="Завершить регистрацию"
+        @step-change="handleStepChange"
+        @previous-step="handlePreviousStep"
+        @next-step="handleNextStep"
+        @finish="handleFinish"
+      />
 </template>
 
 <script>
@@ -240,6 +261,9 @@ import PasswordResetByEmail from '@/components/molecules/PasswordResetByEmail.vu
 import PasswordResetByOldPassword from '@/components/molecules/PasswordResetByOldPassword.vue'
 import PasswordResetByPhone from '@/components/molecules/PasswordResetByPhone.vue'
 import UnifiedInputField from '@/components/molecules/UnifiedInputField.vue'
+import Skeleton from '@/components/atoms/Skeleton.vue'
+import ObjectCardSkeleton from '@/components/atoms/ObjectCardSkeleton.vue'
+import RegistrationSteps from '@/components/molecules/RegistrationSteps.vue'
 import UserNotificationItem from '@/components/molecules/UserNotificationItem.vue'
 import UserRating from '@/components/molecules/UserRating.vue'
 
@@ -261,6 +285,9 @@ export default {
       PasswordResetByOldPassword,
       PasswordResetByPhone,
       UnifiedInputField,
+      Skeleton,
+      ObjectCardSkeleton,
+      RegistrationSteps,
       UserNotificationItem,
       UserRating,
     },
@@ -407,6 +434,16 @@ export default {
         }
       },
       
+      // RegistrationSteps data
+      registrationSteps: [
+        { id: 1, title: 'Личные данные', description: 'Введите основную информацию' },
+        { id: 2, title: 'Документы', description: 'Загрузите необходимые документы' }
+      ],
+      currentRegistrationStep: 0,
+      canGoBack: true,
+      canGoNext: true,
+      canFinish: true,
+      
       // Component stats
       componentStats: {
         atoms: 0,
@@ -485,6 +522,27 @@ export default {
       // В реальном приложении здесь будет API вызов для повторной отправки SMS
       // После успешной отправки можно сбросить таймер
     },
+    
+    // RegistrationSteps methods
+    handleStepChange(stepIndex) {
+      this.currentRegistrationStep = stepIndex
+      console.log('Переход на шаг:', stepIndex + 1)
+    },
+    
+    handlePreviousStep(stepIndex) {
+      this.currentRegistrationStep = stepIndex
+      console.log('Предыдущий шаг:', stepIndex + 1)
+    },
+    
+    handleNextStep(stepIndex) {
+      this.currentRegistrationStep = stepIndex
+      console.log('Следующий шаг:', stepIndex + 1)
+    },
+    
+    handleFinish() {
+      console.log('Завершение регистрации')
+      alert('Регистрация завершена!')
+    },
       validateUnifiedField(fieldType, value) {
         // Сбрасываем состояние
         this.unifiedValidation[fieldType].error = false
@@ -510,6 +568,12 @@ export default {
         }
       },
       validateUnifiedPhone(phone) {
+        if (!phone) {
+          this.unifiedValidation.phone.error = true
+          this.unifiedValidation.phone.errorMessage = 'Неверный номер телефона'
+          return
+        }
+        
         const cleanPhone = phone.replace(/\D/g, '')
         
         if (cleanPhone.length > 11) {
@@ -537,6 +601,12 @@ export default {
         }
       },
       validateUnifiedPassword(password) {
+        if (!password) {
+          this.unifiedValidation.password.error = true
+          this.unifiedValidation.password.errorMessage = 'Пароль должен содержать минимум 8 символов'
+          return
+        }
+        
         if (password.length > 0 && password.length < 8) {
           this.unifiedValidation.password.error = true
           this.unifiedValidation.password.errorMessage = 'Пароль должен содержать минимум 8 символов'
@@ -556,6 +626,12 @@ export default {
         }
       },
       validateUnifiedSmsCode(code) {
+        if (!code) {
+          this.unifiedValidation.smsCode.error = true
+          this.unifiedValidation.smsCode.errorMessage = 'Введите код из SMS'
+          return
+        }
+        
         const cleanCode = code.replace(/\D/g, '')
         
         if (cleanCode.length === 6) {
@@ -567,6 +643,12 @@ export default {
         }
       },
       validateUnifiedInn(inn) {
+        if (!inn) {
+          this.unifiedValidation.inn.error = true
+          this.unifiedValidation.inn.errorMessage = 'Введите ИНН'
+          return
+        }
+        
         const cleanInn = inn.replace(/\D/g, '')
         
         if (cleanInn.length === 10 || cleanInn.length === 12) {

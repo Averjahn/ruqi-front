@@ -72,7 +72,7 @@ import { rules, rulesSets } from '@/constants/validations'
 import { getAPIError } from '@/constants/helpers'
 import { mapMutations, mapActions } from 'vuex'
 import OtpInput from '@/components/atoms/OtpInput.vue'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 
 export default {
   components: {

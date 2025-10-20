@@ -98,7 +98,7 @@
 import PopupContainer from '@/components/atoms/PopupContainer.vue'
 import PassportInfoBlock from '@/components/page/profile/PassportInfoBlock.vue'
 import OtpInput from '@/components/atoms/OtpInput.vue'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 import { mapGetters, mapActions } from 'vuex'
 import { getAPIError, repeatWithInterval, getStringFromSeconds, getClearPhone } from '@/constants/helpers'
 

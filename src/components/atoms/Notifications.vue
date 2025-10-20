@@ -68,6 +68,12 @@ export default {
   &.success {
     background-color: #71d472;
   }
+  &.info {
+    background-color: #1735f5;
+  }
+  &.warning {
+    background-color: #ffa726;
+  }
 }
 @media (max-width: 768px) {
   .fake_bottom_bar {

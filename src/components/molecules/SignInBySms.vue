@@ -44,7 +44,7 @@ import { clearPhoneAlwaysSeven, getStringFromSeconds } from '@/constants/helpers
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import OtpInput from '@/components/atoms/OtpInput.vue'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 
 export default {
   components: { OtpInput },

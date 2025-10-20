@@ -19,13 +19,13 @@
 </template>
 
 <script>
-import Button from '@/components/atoms/Button.vue'
+import MainButton from '@/components/atoms/MainButton.vue'
 import ButtonIcon from '@/components/atoms/ButtonIcon.vue'
 
 export default {
   name: 'TaskActions',
   emits: ['callAction'],
-  components: { Button, ButtonIcon },
+  components: { Button: MainButton, ButtonIcon },
   props: {
     actionsList: {
       type: Array,

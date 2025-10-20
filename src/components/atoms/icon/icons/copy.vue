@@ -1,6 +1,6 @@
-<!-- eslint-disable max-len -->
 <template>
-  <path
-    d="M10 4C8.89543 4 8 4.89543 8 6V16C8 17.1046 8.89543 18 10 18H16C17.1046 18 18 17.1046 18 16V6C18 4.89543 17.1046 4 16 4H10ZM9 6C9 5.44772 9.44772 5 10 5H16C16.5523 5 17 5.44772 17 6V16C17 16.5523 16.5523 17 16 17H10C9.44772 17 9 16.5523 9 16V6ZM6 8.00001C6 7.25973 6.4022 6.61339 7 6.26758V16.5C7 17.8807 8.11929 19 9.5 19H15.7324C15.3866 19.5978 14.7403 20 14 20H9.5C7.567 20 6 18.433 6 16.5V8.00001Z"
-  />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 5H6C4.89543 5 4 5.89543 4 7V18C4 19.1046 4.89543 20 6 20H17C18.1046 20 19 19.1046 19 18V16M8 5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7C16 8.10457 15.1046 9 14 9H10C8.89543 9 8 8.10457 8 7V5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 13H20M20 13L18 15M20 13L18 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
 </template>

@@ -128,7 +128,7 @@ import { rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import { clearPhoneAlwaysSeven, getAPIError, getStringFromSeconds } from '@/constants/helpers'
 import OtpInput from '@/components/atoms/OtpInput.vue'
-import useTimer from '@/composables/useTimer'
+import useTimer from '@/composables/useSnackbarTimer'
 import { mapActions } from 'vuex'
 
 export default {
