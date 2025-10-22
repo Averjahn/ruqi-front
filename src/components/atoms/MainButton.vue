@@ -1,5 +1,6 @@
 <template>
   <button
+    :type="buttonType"
     class="main-button"
     :class="[
       `main-button--${type}`,
@@ -49,6 +50,11 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    buttonType: {
+      type: String,
+      default: 'button',
+      validator: (value) => ['button', 'submit', 'reset'].includes(value)
     }
   },
   emits: ['click'],

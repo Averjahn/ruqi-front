@@ -15,24 +15,24 @@
             Отправить код повторно <b>{{ remainingTimeString }}</b>
           </div>
 
-          <Button
+          <MainButton
             v-if="isTimerRunning && step === 1"
+            type="primary"
+            text="Ввести код"
             :loading="loading"
             class="recover-password__btn"
             @click="step = 2"
             :disabled="loading"
-          >
-            Ввести код
-          </Button>
-          <Button
+          />
+          <MainButton
             v-if="!isTimerRunning && step === 1"
+            type="primary"
+            text="Отправить код"
             :loading="loading"
             class="recover-password__btn"
             @click="requestCode"
             :disabled="disableHandler || isTimerRunning"
-          >
-            Отправить код
-          </Button>
+          />
           <Button class="recover-password__btn" type="outlined" @click="back">Назад</Button>
         </div>
       </div>
@@ -128,12 +128,13 @@ import { rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import { clearPhoneAlwaysSeven, getAPIError, getStringFromSeconds } from '@/constants/helpers'
 import OtpInput from '@/components/atoms/OtpInput.vue'
+import MainButton from '@/components/atoms/MainButton.vue'
 import useTimer from '@/composables/useSnackbarTimer'
 import { mapActions } from 'vuex'
 
 export default {
   layout: 'empty',
-  components: { OtpInput },
+  components: { OtpInput, MainButton },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signinRecover',

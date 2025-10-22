@@ -161,9 +161,10 @@ export default {
     font-size: 14px;
     cursor: pointer;
     transition: all 0.1s ease-in 0s; // Переиспользуем из Button.vue
+    border: none; // обе кнопки без бордера
     
     &:first-child {
-      border: 2px solid #1735f5;
+      border: 1px solid #1735f5; // Синий бордер для кнопки с сердечком
     }
     
     &:first-child:hover {

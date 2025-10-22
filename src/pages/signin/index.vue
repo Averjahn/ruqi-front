@@ -8,7 +8,7 @@
         </div>
         <div class="form_header">Вход в систему</div>
       </div>
-      <Tabs :tabs="tabs" :value="currentTab" @change="changeTab" type="contained" wide />
+      <AuthTabs :value="currentTab" :old-method="oldMethod" @change="changeTab" />
 
       <template v-if="currentTab === 'by_password'">
         <Form ref="form" class="content_container">
@@ -38,9 +38,20 @@
             <ButtonText class="password_forgot" type="s" @click="forgot()">Забыли пароль?</ButtonText>
           </div>
           <div class="action_group">
-            <Button size="l" @click="signinHandler" :disabled="disableHandler" :loading="loading" class="signin_button">
-              Войти
-            </Button>
+            <MainButton 
+              type="primary" 
+              text="Войти"
+              @click="signinHandler" 
+              :loading="loading" 
+              class="signin_button"
+            />
+            <MainButton 
+              type="neutral" 
+              text="Регистрация"
+              @click="goToRegistration" 
+              class="signin_button signin_button--registration"
+              button-type="button"
+            />
             <div class="agreements_check">
               <div class="personal-agreement-checkbox">
                 <Checkbox v-model="termAgree" class="checkbox" />
@@ -66,7 +77,7 @@
               </div>
             </div>
           </div>
-          <div class="apps_block">
+          <!-- <div class="apps_block">
             <div class="title">Установите наше приложение</div>
 
             <div class="apps_button_block">
@@ -98,7 +109,7 @@
                 </div>
               </a>
             </div>
-          </div>
+          </div> -->
         </Form>
       </template>
       <template v-if="currentTab === 'by_phone_call'">
@@ -120,16 +131,14 @@
                   />
                 </div>
               </div>
-              <Button
-                size="l"
-                type="outlined"
+              <MainButton
+                type="primary-outline"
+                :text="'Подтвердить звонком'"
                 @click="onSubmitByCall"
                 :disabled="disablePhoneHandler"
                 :loading="loading"
                 class="signin_button"
-              >
-                <span class="action_btn_text">Подтвердить</span>звонком
-              </Button>
+              />
               <div class="footer_info">
                 Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для
                 проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с
@@ -152,17 +161,21 @@
                 </ButtonIconGhost>
               </div>
             </div>
-            <Button size="l" @click="makeCall" :loading="loading" class="signin_button call_btn"> Позвонить </Button>
-            <Button
-              size="l"
-              type="outlined"
+            <MainButton 
+              type="primary" 
+              text="Позвонить"
+              @click="makeCall" 
+              :loading="loading" 
+              class="signin_button call_btn" 
+            />
+            <MainButton
+              type="primary-outline"
+              :text="!!this.remaining ? `Изменить номер через ${remainingTimeString}` : 'Изменить номер'"
               @click="changeCallRequestedStatus"
               :disabled="loading || isTimerRunning"
               :loading="loading"
               class="signin_button"
-            >
-              {{ !!this.remaining ? `Изменить номер через ${remainingTimeString}` : 'Изменить номер' }}
-            </Button>
+            />
           </template>
           <div class="agreements_check">
             <div class="personal-agreement-checkbox">
@@ -188,7 +201,7 @@
               </div>
             </div>
           </div>
-          <div class="apps_block">
+          <!-- <div class="apps_block">
             <div class="title">Установите наше приложение</div>
             <div class="apps_button_block">
               <a href="https://play.google.com/store/apps/details?id=ruqi.app&pcampaignid=web_share" target="_blank">
@@ -219,7 +232,7 @@
                 </div>
               </a>
             </div>
-          </div>
+          </div> -->
         </div>
       </template>
       <template v-if="currentTab === 'by_phone_call' && oldMethod">
@@ -232,6 +245,8 @@
 <script>
 import { mapActions } from 'vuex'
 import SignInBySms from '@/components/molecules/SignInBySms.vue'
+import AuthTabs from '@/components/molecules/AuthTabs.vue'
+import MainButton from '@/components/atoms/MainButton.vue'
 import { getAPIError, replace8to7inPhone, clearPhoneAlwaysSeven, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
@@ -242,7 +257,7 @@ const tabs = [
 ]
 
 export default {
-  components: { SignInBySms },
+  components: { SignInBySms, AuthTabs, MainButton },
   layout: 'empty',
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
@@ -374,6 +389,7 @@ export default {
       }
       this.loading = true
       try {
+        // Используем правильный API v2/auth/sms/sendcode
         const response = await this.$axios.post(
           'v2/auth/sms/sendcode',
           { login_phone: clearPhoneAlwaysSeven(this.phone) },
@@ -455,6 +471,10 @@ export default {
 
     forgot () {
       this.$router.push('/signin-recover')
+    },
+
+    goToRegistration () {
+      this.$router.push('/signup')
     },
 
     makeCall () {
@@ -559,15 +579,9 @@ export default {
 
   .signin_button {
     width: 100%;
-    padding-right: 0;
-    padding-left: 0;
-
-    .slot {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+    min-height: 48px; // Увеличиваем высоту кнопки для лучшего UX
+    font-size: 16px;
+    font-weight: 500;
   }
   .password_forgot {
     cursor: pointer;
@@ -627,7 +641,7 @@ export default {
   }
   .phone_no_wrap {
     user-select: none;
-    text-wrap: nowrap;
+    white-space: nowrap;
   }
   .call_to_phone {
     font-size: 20px;

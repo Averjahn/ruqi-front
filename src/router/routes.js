@@ -74,6 +74,7 @@ export const routes = [
   { path: '/getfriend', component: LandingRegistration, meta: { layout: 'DefaultLayout' } },
   { path: '/landing-registration', component: LandingRegistration, meta: { layout: 'DefaultLayout' } },
   { path: '/signin', component: i('/signin/index.vue'), meta: { layout: 'EmptyLayout' } },
+  { path: '/signup', component: i('/signup/index.vue'), meta: { layout: 'EmptyLayout' } },
   { path: '/signin-recover', component: i('/signin-recover/index.vue'), meta: { layout: 'EmptyLayout' } },
   { path: '/presignup', component: i('/PreSignUp.vue'), meta: { layout: 'RegistrationLayout' } },
   { path: '/unavailable', component: i('/unavailablePage/index.vue'), meta: { layout: 'RegistrationLayout' } },

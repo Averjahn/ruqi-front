@@ -170,12 +170,6 @@
           <h3>Snackbar</h3>
           <div class="ui-atoms__showcase">
             <div class="ui-atoms__item ui-atoms__item--wide">
-              <h4>Snackbar on Card</h4>
-              <div class="snackbar-card-demo">
-                <JobCard />
-              </div>
-            </div>
-            <div class="ui-atoms__item ui-atoms__item--wide">
               <h4>JobCard Skeleton</h4>
               <div class="snackbar-card-demo">
                 <SkeletonJobCard />
@@ -183,9 +177,6 @@
             </div>
           </div>
         </div>
-        <div class="snackbar-card-demo">
-                <JobCard />
-              </div>
 
         <!-- Toast -->
         <div class="ui-atoms__subsection">
@@ -372,6 +363,22 @@
       <div class="ui-atoms__subsection">
         <h3>Display Components</h3>
         <div class="ui-atoms__showcase">
+          <div class="ui-atoms__item ui-atoms__item--wide">
+            <h4>Auth Tabs</h4>
+            <AuthTabs :value="demoAuthTab" :old-method="demoOldMethod" @change="demoAuthTab = $event" />
+          </div>
+          <div class="ui-atoms__item ui-atoms__item--wide">
+            <h4>Auth Phone Request API</h4>
+            <AuthPhoneRequest />
+          </div>
+          <div class="ui-atoms__item">
+            <h4>Auth Logo Header</h4>
+            <AuthLogoHeader title="Вход в систему" />
+          </div>
+          <div class="ui-atoms__item">
+            <h4>Auth Password Form (Demo)</h4>
+            <AuthPasswordForm v-model="authForm" :loading="false" @submit="()=>{}" />
+          </div>
           <div class="ui-atoms__item">
             <h4>Badge</h4>
             <Badge type="info">Info</Badge>
@@ -657,7 +664,6 @@ import Spinner from '@/components/atoms/Spinner.vue'
 import SkeletonJobCard from '@/components/atoms/SkeletonJobCard.vue'
 import SkeletonModalNotification from '@/components/atoms/SkeletonModalNotification.vue'
 import Multiselect from '@/components/atoms/Multiselect.vue'
-import JobCard from '@/components/molecules/JobCard.vue'
 import ModalNotification from '@/components/molecules/ModalNotification.vue'
 import MonthDatePicker from '@/components/atoms/MonthDatePicker.vue'
 import Notifications from '@/components/atoms/Notifications.vue'
@@ -680,6 +686,10 @@ import TopBannerDesktopSocial from '@/components/atoms/TopBannerDesktopSocial.vu
 import TopBannerMobile from '@/components/atoms/TopBannerMobile.vue'
 import UniversalSelect from '@/components/atoms/UniversalSelect.vue'
 import ViolationBannerItem from '@/components/atoms/ViolationBannerItem.vue'
+import AuthLogoHeader from '@/components/molecules/AuthLogoHeader.vue'
+import AuthPasswordForm from '@/components/molecules/AuthPasswordForm.vue'
+import AuthTabs from '@/components/molecules/AuthTabs.vue'
+import AuthPhoneRequest from '@/components/molecules/AuthPhoneRequest.vue'
 import Upload from '@/components/atoms/Upload.vue'
 
 export default {
@@ -706,7 +716,6 @@ export default {
     SkeletonJobCard,
     SkeletonModalNotification,
     Multiselect,
-    JobCard,
     ModalNotification,
     MonthDatePicker,
     Notifications,
@@ -729,6 +738,10 @@ export default {
     TopBannerMobile,
     UniversalSelect,
     ViolationBannerItem,
+    AuthLogoHeader,
+    AuthPasswordForm,
+    AuthTabs,
+    AuthPhoneRequest,
     Upload,
   },
   data() {
@@ -786,7 +799,10 @@ export default {
         'документ о Регистрации РФ',
         'Загрузите Патент'
       ],
-      uploadFiles: []
+      uploadFiles: [],
+      authForm: { phone_or_email: '', password: '' },
+      demoAuthTab: 'by_password',
+      demoOldMethod: false
     }
   },
   methods: {
