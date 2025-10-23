@@ -200,14 +200,6 @@
                 class="organisation-data-page__input"
                 @input="onInnChange"
               />
-              <MainButton 
-                type="primary-outline" 
-                text="Найти" 
-                :loading="dadataLoading"
-                @click="searchByInn"
-                class="organisation-data-page__search-button"
-                :disabled="!formData.inn || formData.inn.length < 10"
-              />
             </div>
             <div v-if="dadataError" class="organisation-data-page__error">
               {{ dadataError }}
@@ -284,12 +276,11 @@
             <label class="organisation-data-page__label">
               Должность*
             </label>
-            <Multiselect
+            <Input
               v-model="formData.position"
-              :options="positions"
-              placeholder="Выберите значение"
-              :multiple="false"
-              class="organisation-data-page__select"
+              placeholder="Введите должность"
+              :rules="[rules.required]"
+              class="organisation-data-page__input"
             />
           </div>
           <div class="organisation-data-page__field">
@@ -503,13 +494,6 @@ export default {
         'Индивидуальный предприниматель',
         'Физическое лицо'
       ],
-      positions: [
-        'Генеральный директор',
-        'Директор',
-        'Заместитель директора',
-        'Главный бухгалтер',
-        'Исполнительный директор'
-      ],
       bases: [
         'Устав',
         'Доверенность',
@@ -598,6 +582,13 @@ export default {
     onInnChange() {
       // Очищаем ошибку при изменении ИНН
       this.dadataError = null
+      
+      // Автоматический поиск при достижении 10 или 12 символов
+      const innLength = this.formData.inn.length
+      if (innLength === 10 || innLength === 12) {
+        console.log('🔍 Автоматический поиск по ИНН:', this.formData.inn)
+        this.searchByInn()
+      }
     },
 
     async searchByInn() {
@@ -610,15 +601,21 @@ export default {
       this.dadataError = null
 
       try {
+        console.log('🔍 Поиск организации по ИНН:', this.formData.inn)
         const result = await dadataApi.findParty(this.formData.inn)
+        
+        console.log('📡 Ответ от DaData API:', result)
         
         if (result.success && result.data.suggestions && result.data.suggestions.length > 0) {
           const organization = result.data.suggestions[0].data
+          console.log('🏢 Данные организации:', organization)
           this.fillOrganizationData(organization)
         } else {
+          console.log('❌ Организация не найдена')
           this.dadataError = 'Организация не найдена'
         }
       } catch (error) {
+        console.error('💥 Ошибка при поиске организации:', error)
         this.dadataError = 'Ошибка при поиске организации'
         console.error('DaData search error:', error)
       } finally {
@@ -627,11 +624,27 @@ export default {
     },
 
     fillOrganizationData(organization) {
+      console.log('📝 Заполнение формы данными организации...')
+      console.log('🔍 Полная структура данных организации:', organization)
+      
       // Заполняем поля формы данными из DaData
       this.formData.fullName = organization.name?.full_with_opf || organization.name?.full || ''
       this.formData.kpp = organization.kpp || ''
       this.formData.ogrn = organization.ogrn || ''
       this.formData.okato = organization.address?.data?.okato || ''
+      
+      console.log('📋 Основные данные:', {
+        fullName: this.formData.fullName,
+        kpp: this.formData.kpp,
+        ogrn: this.formData.ogrn,
+        okato: this.formData.okato
+      })
+      
+      console.log('🔴 Соответствия полей:')
+      console.log('🔴 Полное наименование:', organization.name?.full_with_opf || organization.name?.full, '→', this.formData.fullName)
+      console.log('🔴 КПП:', organization.kpp, '→', this.formData.kpp)
+      console.log('🔴 ОГРН:', organization.ogrn, '→', this.formData.ogrn)
+      console.log('🔴 ОКАТО:', organization.address?.data?.okato, '→', this.formData.okato)
       
       // Адрес
       if (organization.address?.data) {
@@ -646,6 +659,11 @@ export default {
         
         this.formData.legalAddress = fullAddress
         this.formData.mailingAddress = fullAddress
+        
+        console.log('🏠 Адрес:', {
+          raw: organization.address.data,
+          fullAddress: fullAddress
+        })
       }
 
       // Банковские реквизиты
@@ -653,6 +671,12 @@ export default {
         this.formData.bank = organization.bank.name || ''
         this.formData.bic = organization.bank.bic || ''
         this.formData.correspondentAccount = organization.bank.correspondent_account || ''
+        
+        console.log('🏦 Банковские реквизиты:', {
+          bank: this.formData.bank,
+          bic: this.formData.bic,
+          correspondentAccount: this.formData.correspondentAccount
+        })
       }
 
       // Статус организации
@@ -661,6 +685,27 @@ export default {
       } else if (organization.type === 'INDIVIDUAL') {
         this.formData.counterpartyType = 'Индивидуальный предприниматель'
       }
+
+      // Должность руководителя
+      console.log('🔍 Проверка management:', organization.management)
+      if (organization.management?.post) {
+        this.formData.position = organization.management.post
+        console.log('👔 Должность руководителя:', organization.management.post)
+        console.log('🔴 Соответствие: management.post → position:', organization.management.post, '→', this.formData.position)
+      } else {
+        console.log('❌ management.post не найден:', organization.management)
+      }
+
+      // ФИО руководителя
+      if (organization.management?.name) {
+        this.formData.fullNamePerson = organization.management.name
+        console.log('👤 ФИО руководителя:', organization.management.name)
+        console.log('🔴 Соответствие: management.name → fullNamePerson:', organization.management.name, '→', this.formData.fullNamePerson)
+      } else {
+        console.log('❌ management.name не найден:', organization.management)
+      }
+      
+      console.log('✅ Форма заполнена:', this.formData)
     },
 
     handleOgrnFileUpload(event) {
@@ -1262,13 +1307,8 @@ export default {
   // DaData стили
   .organisation-data-page__inn-search {
     display: flex;
-    gap: 12px;
-    align-items: flex-end;
-  }
-
-  .organisation-data-page__search-button {
-    flex-shrink: 0;
-    min-width: 100px;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .organisation-data-page__error {

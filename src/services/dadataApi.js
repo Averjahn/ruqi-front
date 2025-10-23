@@ -10,6 +10,12 @@ class DadataApiService {
   // Поиск организации по ИНН или ОГРН
   async findParty(inn) {
     try {
+      console.log('🚀 Отправка запроса в DaData API:', {
+        url: `${this.baseURL}/findById/party`,
+        query: inn,
+        token: this.apiToken
+      })
+      
       const response = await axios.post(`${this.baseURL}/findById/party`, {
         query: inn,
         count: 1
@@ -21,11 +27,14 @@ class DadataApiService {
         }
       })
 
+      console.log('📨 Ответ от DaData API:', response.data)
+
       return {
         success: true,
         data: response.data
       }
     } catch (error) {
+      console.error('❌ Ошибка в DaData API:', error)
       return this.handleError(error)
     }
   }
