@@ -42,7 +42,7 @@
               type="primary" 
               text="Войти"
               @click="signinHandler" 
-              :loading="loading" 
+              :loading="loading || this.authLoading" 
               class="signin_button"
             />
             <MainButton 
@@ -251,6 +251,7 @@ import { getAPIError, replace8to7inPhone, clearPhoneAlwaysSeven, getStringFromSe
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
+import { useAuth } from '@/composables/useAuth'
 const tabs = [
   { text: 'Вход по паролю', value: 'by_password' },
   { text: 'Вход по звонку', value: 'by_phone_call' },
@@ -259,16 +260,6 @@ const tabs = [
 export default {
   components: { SignInBySms, AuthTabs, MainButton },
   layout: 'empty',
-  setup () {
-    const { launchTimer, isTimerRunning, remaining } = useTimer({
-      timerId: 'signinBySms',
-    })
-    return {
-      launchTimer,
-      isTimerRunning,
-      remaining,
-    }
-  },
   data () {
     return {
       rules,
@@ -295,6 +286,21 @@ export default {
       onceToken: null,
       callToPhone: null,
       callRequestErrorMsg: null,
+      loginClient: null,
+      authLoading: false,
+      authError: null,
+    }
+  },
+  mounted () {
+    try {
+      // Инициализируем loginClient из useAuth
+      const { loginClient, loading: authLoading, error: authError } = useAuth()
+      
+      this.loginClient = loginClient
+      this.authLoading = authLoading
+      this.authError = authError
+    } catch (error) {
+      // Ошибка инициализации
     }
   },
   computed: {
@@ -432,7 +438,10 @@ export default {
     },
 
     async signinHandler () {
-      if (!this.$refs.form.validate() || this.loading) return
+      if (!this.$refs.form.validate() || this.loading || this.authLoading) {
+        return
+      }
+      
       if (!this.agree || !this.termAgree) {
         this.showNotification({
           type: 'error',
@@ -440,16 +449,54 @@ export default {
         })
         return
       }
+      
       if (this.login.phone_or_email && this.login.password) {
         this.loading = true
-        const login = JSON.parse(JSON.stringify(this.login))
-        login.phone_or_email = replace8to7inPhone(login.phone_or_email)
-        const response = await this.signIn(login)
-        if (response?.data?.success) {
-          this.$router.push('/')
-        } else {
+        const phoneOrEmail = replace8to7inPhone(this.login.phone_or_email)
+        const password = this.login.password
+        
+        try {
+          if (typeof this.loginClient === 'function') {
+            const success = await this.loginClient(phoneOrEmail, password)
+            
+            if (success) {
+              this.$router.push('/')
+            } else {
+              // Ошибка уже обработана в useAuth
+              if (this.authError) {
+                this.showNotification({
+                  text: this.authError.msg || 'Ошибка при попытке авторизоваться',
+                })
+              }
+            }
+          } else {
+            // Попробуем инициализировать loginClient
+            try {
+              const { loginClient } = useAuth()
+              this.loginClient = loginClient
+              
+              if (typeof this.loginClient === 'function') {
+                const success = await this.loginClient(phoneOrEmail, password)
+                
+                if (success) {
+                  this.$router.push('/')
+                } else {
+                  if (this.authError) {
+                    this.showNotification({
+                      text: this.authError.msg || 'Ошибка при попытке авторизоваться',
+                    })
+                  }
+                }
+              } else {
+                throw new Error('loginClient не является функцией после инициализации')
+              }
+            } catch (initError) {
+              throw new Error('Не удалось инициализировать loginClient')
+            }
+          }
+        } catch (error) {
           this.showNotification({
-            text: getAPIError(response) || 'Ошибка при попытке авторизоваться',
+            text: 'Ошибка при попытке авторизоваться',
           })
         }
       }
@@ -470,11 +517,11 @@ export default {
     },
 
     forgot () {
-      this.$router.push('/signin-recover')
+      this.$router.push('/client/signin-recovery')
     },
 
     goToRegistration () {
-      this.$router.push('/signup')
+      this.$router.push('/client/signup')
     },
 
     makeCall () {

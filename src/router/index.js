@@ -34,7 +34,7 @@ router.beforeEach((to, from, next) => {
     return
   }
   if (to.matched.some((record) => record.meta.requiresAuth) && !isLogged) {
-    next({ path: '/signin' })
+    next({ path: '/client/signin' })
     store.dispatch('app/stopLoading')
     return
   }

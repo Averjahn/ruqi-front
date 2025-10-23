@@ -168,9 +168,7 @@ export default {
     }
     
     &.main-button--disabled {
-      background-color: #b0baff;
-      color: #b0baff;
-      
+ 
       .main-button__icon {
         filter: brightness(0) saturate(100%) invert(69%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
       }

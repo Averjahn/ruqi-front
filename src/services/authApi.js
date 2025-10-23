@@ -5,7 +5,7 @@ import axios from 'axios'
  */
 class AuthApiService {
   constructor() {
-    this.baseURL = process.env.VUE_APP_API_URL || '/api'
+    this.baseURL = process.env.VUE_APP_API_URL || 'https://dev.ruqi.ru/api'
   }
 
   /**
@@ -63,13 +63,62 @@ class AuthApiService {
    */
   async loginWithPassword(login, password, userType = 'contractor') {
     try {
-      const endpoint = userType === 'contractor' 
-        ? `${this.baseURL}/v2/auth/login/contractor`
-        : `${this.baseURL}/v2/auth/login`
+      let endpoint
+      if (userType === 'contractor') {
+        endpoint = `${this.baseURL}/v2/auth/login/contractor`
+      } else if (userType === 'client') {
+        endpoint = `${this.baseURL}/v2/auth/login/client`
+      } else {
+        endpoint = `${this.baseURL}/v2/auth/login`
+      }
       
       const response = await axios.post(endpoint, {
         phone_or_email: login,
         password: password
+      })
+      
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Авторизация клиента по email/телефону и паролю
+   * @param {string} login - Email или телефон
+   * @param {string} password - Пароль
+   * @returns {Promise<Object>} Ответ API
+   */
+  async loginClient(login, password) {
+    try {
+      const response = await axios.post(`${this.baseURL}/v2/auth/login/client`, {
+        phone_or_email: login,
+        password: password
+      })
+      
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Запрос кода восстановления пароля для клиента
+   * @param {string} loginPhone - Телефон или email для восстановления
+   * @returns {Promise<Object>} Ответ API
+   */
+  async requestRecoveryCode(loginPhone) {
+    try {
+      const response = await axios.get(`${this.baseURL}/v2/auth/recovery/client/request-code`, {
+        params: {
+          login_phone: loginPhone
+        }
       })
       
       return {
@@ -110,7 +159,6 @@ class AuthApiService {
       const { data } = error.response
       
       if (data && data.success === false) {
-        // Стандартный формат ошибки API
         return {
           success: false,
           error: data.error

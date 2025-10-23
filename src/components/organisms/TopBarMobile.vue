@@ -111,10 +111,10 @@ export default {
     },
     exit () {
       this.logOut()
-      this.$router.push('/signin')
+      this.$router.push('/client/signin')
     },
     login () {
-      this.$router.push('/signin')
+      this.$router.push('/client/signin')
     },
     goTo (link) {
       this.open = false

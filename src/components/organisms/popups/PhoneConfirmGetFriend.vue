@@ -189,7 +189,7 @@ export default {
         } else {
           this.showNotification({ text: getAPIError(response) || 'Ошибка при отправке кода из смс' })
           if (response?.data?.error?.find((error) => error?.code === 353143)) {
-            this.$router.push('/signin')
+            this.$router.push('/client/signin')
           }
         }
       }

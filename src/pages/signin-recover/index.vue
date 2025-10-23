@@ -33,7 +33,7 @@
             @click="requestCode"
             :disabled="disableHandler || isTimerRunning"
           />
-          <Button class="recover-password__btn" type="outlined" @click="back">Назад</Button>
+          <MainButton class="recover-password__btn" type="neutral" text="Назад" @click="back" />
         </div>
       </div>
     </template>
@@ -66,7 +66,7 @@
           <Button :loading="loading" :disabled="continueDisabled" class="recover-password__btn" @click="submitCode">
             Продолжить
           </Button>
-          <Button class="recover-password__btn" type="outlined" @click="back">Назад</Button>
+          <MainButton class="recover-password__btn" type="neutral" text="Назад" @click="back" />
         </div>
       </div>
     </template>
@@ -234,20 +234,28 @@ export default {
       if (this.loading) return
       this.loading = true
       const phone = clearPhoneAlwaysSeven(this.formattedPhone)
-      const response = await this.$axios.get('v2/auth/recovery/requestcode', {
-        params: { user_type: 'contractor', login_phone: phone, verification_by: this.verification_by },
-        // errorMessage: 'Ошибка при запросе смс кода',
-      })
-      if (response?.data?.success) {
-        if (!this.initialResponseMethod)
-          this.initialResponseMethod = response.data.data?.code_sended?.method || 'telegram'
-        this.confirmMethod = response.data.data?.code_sended?.method || 'telegram'
-        this.sms_once_token = response.data.data?.once_token
-        this.step = 2
-        this.launchTimer(180)
-      } else {
-        this.showNotification({ type: 'error', text: getAPIError(response) || 'Ошибка при запросе смс кода' })
+      
+      try {
+        // Используем новый эндпоинт для клиентов
+        const response = await this.$axios.get('v2/auth/recovery/client/request-code', {
+          params: { login_phone: phone },
+          // errorMessage: 'Ошибка при запросе кода восстановления',
+        })
+        
+        if (response?.data?.success) {
+          if (!this.initialResponseMethod)
+            this.initialResponseMethod = response.data.data?.code_sended?.method || 'telegram'
+          this.confirmMethod = response.data.data?.code_sended?.method || 'telegram'
+          this.sms_once_token = response.data.data?.once_token
+          this.step = 2
+          this.launchTimer(180)
+        } else {
+          this.showNotification({ type: 'error', text: getAPIError(response) || 'Ошибка при запросе кода восстановления' })
+        }
+      } catch (error) {
+        this.showNotification({ type: 'error', text: 'Ошибка при запросе кода восстановления' })
       }
+      
       this.loading = false
     },
     async requestCodeAgain (method) {
@@ -262,7 +270,7 @@ export default {
     },
 
     back () {
-      this.step === 1 ? this.$router.push('/signin') : this.step--
+      this.step === 1 ? this.$router.push('/client/signin') : this.step--
     },
 
     async submitCode () {

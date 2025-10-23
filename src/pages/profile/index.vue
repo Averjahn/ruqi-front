@@ -279,7 +279,7 @@ export default {
 
     logout () {
       store.dispatch('auth/logOut')
-      this.$router.push('/signin')
+      this.$router.push('/client/signin')
     },
   },
 }

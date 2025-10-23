@@ -73,9 +73,9 @@ export const routes = [
   { path: '/faq-article/:id', component: i('/faqArticle/_id.vue'), meta: { layout: 'DefaultLayout' } },
   { path: '/getfriend', component: LandingRegistration, meta: { layout: 'DefaultLayout' } },
   { path: '/landing-registration', component: LandingRegistration, meta: { layout: 'DefaultLayout' } },
-  { path: '/signin', component: i('/signin/index.vue'), meta: { layout: 'EmptyLayout' } },
-  { path: '/signup', component: i('/signup/index.vue'), meta: { layout: 'EmptyLayout' } },
-  { path: '/signin-recover', component: i('/signin-recover/index.vue'), meta: { layout: 'EmptyLayout' } },
+  { path: '/client/signin', component: i('/signin/index.vue'), meta: { layout: 'EmptyLayout' } },
+  { path: '/client/signup', component: i('/signup/index.vue'), meta: { layout: 'EmptyLayout' } },
+  { path: '/client/signin-recovery', component: i('/signin-recover/index.vue'), meta: { layout: 'EmptyLayout' } },
   { path: '/presignup', component: i('/PreSignUp.vue'), meta: { layout: 'RegistrationLayout' } },
   { path: '/unavailable', component: i('/unavailablePage/index.vue'), meta: { layout: 'RegistrationLayout' } },
   { path: '/already-registered', component: i('/alreadyRegistered/index.vue'), meta: { layout: 'RegistrationLayout' } },
@@ -85,5 +85,10 @@ export const routes = [
     path: '/pre-registration-confirm-page',
     component: i('/preRegistrationConfirm/index.vue'),
     meta: { layout: 'RegistrationLayout' },
+  },
+  {
+    path: '/client/organisationData',
+    component: i('/organisationData/index.vue'),
+    meta: { layout: 'EmptyLayout' },
   },
 ]

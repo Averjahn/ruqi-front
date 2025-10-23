@@ -23,7 +23,7 @@ export default {
       this.$router.push('/profile')
     },
     login () {
-      this.$router.push('/signin')
+      this.$router.push('/client/signin')
     },
   },
 }

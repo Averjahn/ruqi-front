@@ -6,7 +6,7 @@
       что это точно были вы. Для подтверждения регистрации, нажмите кнопку ниже
     </div>
     <div class="button_block">
-      <Button class="action_button" :loading="loading" @click="approveEmail">Перейти в личный кабинет</Button>
+      <MainButton class="action_button" :loading="loading" @click="approveEmail">Перейти в личный кабинет</MainButton>
     </div>
   </div>
 </template>

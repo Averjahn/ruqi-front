@@ -102,6 +102,61 @@ export function useAuth() {
   }
 
   /**
+   * Авторизация клиента по email/телефону и паролю
+   * @param {string} login - Email или телефон
+   * @param {string} password - Пароль
+   * @returns {Promise<boolean>} Успешность авторизации
+   */
+  const loginClient = async (login, password) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const result = await authApiService.loginClient(login, password)
+      
+      if (result.success && result.data.token) {
+        // Сохраняем токен и авторизуем пользователя
+        await store.dispatch('auth/auth', result.data.token)
+        return true
+      } else {
+        error.value = result.error
+        return false
+      }
+    } catch (err) {
+      error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Запрос кода восстановления пароля для клиента
+   * @param {string} loginPhone - Телефон или email для восстановления
+   * @returns {Promise<boolean>} Успешность запроса
+   */
+  const requestRecoveryCode = async (loginPhone) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const result = await authApiService.requestRecoveryCode(loginPhone)
+      
+      if (result.success) {
+        return true
+      } else {
+        error.value = result.error
+        return false
+      }
+    } catch (err) {
+      error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
    * Авторизация через Telegram
    * @param {Object} telegramData - Данные от Telegram
    * @returns {Promise<boolean>} Успешность авторизации
@@ -134,7 +189,7 @@ export function useAuth() {
    */
   const logout = () => {
     store.dispatch('auth/logout')
-    router.push('/signin')
+    router.push('/client/signin')
   }
 
   /**
@@ -171,6 +226,8 @@ export function useAuth() {
     requestPhoneCode,
     confirmPhoneCode,
     loginWithPassword,
+    loginClient,
+    requestRecoveryCode,
     loginWithTelegram,
     logout,
     getErrorMessage

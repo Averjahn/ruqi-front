@@ -174,7 +174,7 @@ export default {
     },
 
     goToSignIn () {
-      this.$router.push('/signin')
+      this.$router.push('/client/signin')
     },
   },
 }

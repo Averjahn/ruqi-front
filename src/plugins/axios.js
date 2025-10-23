@@ -17,11 +17,11 @@ const serialize = (params) => {
   })
 }
 
-console.log('API_URL:', process.env.API_URL)
+// console.log('API_URL:', process.env.API_URL)
 
 const instance = axios.create({
   // baseURL: process.env.API_URL,
-  baseURL: 'https://api.stage2.ruqi.ru/api/', //test hardcode
+  baseURL: 'https://dev.ruqi.ru/api/', // Updated to dev.ruqi.ru
   paramsSerializer: serialize,
 })
 
@@ -37,7 +37,7 @@ instance.interceptors.response.use(
   (response) => {
     if (response?.data?.error?.code === 746200 && store.getters['auth/isLogged']) {
       store.dispatch('auth/logOut')
-      location.href = '/signin'
+      location.href = '/client/signin'
     }
     if (response.config.errorMessage && !response?.data?.success) {
       store.dispatch('notifications/showNotification', {
