@@ -121,9 +121,17 @@ class AuthApiService {
         }
       })
       
-      return {
-        success: true,
-        data: response.data
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
       }
     } catch (error) {
       return this.handleError(error)
@@ -143,9 +151,17 @@ class AuthApiService {
         code: code
       })
       
-      return {
-        success: true,
-        data: response.data
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
       }
     } catch (error) {
       return this.handleError(error)
@@ -167,9 +183,17 @@ class AuthApiService {
         new_password: newPassword
       })
       
-      return {
-        success: true,
-        data: response.data
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
       }
     } catch (error) {
       return this.handleError(error)

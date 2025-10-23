@@ -40,7 +40,7 @@
 
 <script>
 import { mapActions } from 'vuex'
-import { clearPhoneAlwaysSeven, getStringFromSeconds } from '@/constants/helpers'
+import { clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import OtpInput from '@/components/atoms/OtpInput.vue'
@@ -121,7 +121,7 @@ export default {
       this.loading = true
       const response = await this.$axios.post(
         'v2/auth/sms/sendcode',
-        { login_phone: clearPhoneAlwaysSeven(this.phone) },
+        { login_phone: clearPhoneWithoutPlus(this.phone) },
         { errorMessage: 'Ошибка при запросе смс кода' },
       )
       if (response?.data?.success) {
@@ -141,7 +141,7 @@ export default {
       this.loading = true
       const response = await this.$axios.post(
         'v2/auth/login/contractor',
-        { phone_or_email: clearPhoneAlwaysSeven(this.phone), code: this.code },
+        { phone_or_email: clearPhoneWithoutPlus(this.phone), code: this.code },
         { errorMessage: 'Ошибка при отправке смс кода' },
       )
       if (response?.data?.success) {

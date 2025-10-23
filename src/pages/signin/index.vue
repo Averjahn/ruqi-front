@@ -247,7 +247,7 @@ import { mapActions } from 'vuex'
 import SignInBySms from '@/components/molecules/SignInBySms.vue'
 import AuthTabs from '@/components/molecules/AuthTabs.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
-import { getAPIError, replace8to7inPhone, clearPhoneAlwaysSeven, getStringFromSeconds } from '@/constants/helpers'
+import { getAPIError, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
@@ -398,7 +398,7 @@ export default {
         // Используем правильный API v2/auth/sms/sendcode
         const response = await this.$axios.post(
           'v2/auth/sms/sendcode',
-          { login_phone: clearPhoneAlwaysSeven(this.phone) },
+          { login_phone: clearPhoneWithoutPlus(this.phone) },
           { errorMessage: 'Ошибка при запросе смс кода' },
         )
         if (response?.data?.success) {

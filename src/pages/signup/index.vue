@@ -86,7 +86,7 @@
 <script>
 import { mapActions } from 'vuex'
 import MainButton from '@/components/atoms/MainButton.vue'
-import { getAPIError, clearPhoneAlwaysSeven, getStringFromSeconds } from '@/constants/helpers'
+import { getAPIError, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
 
@@ -154,7 +154,7 @@ export default {
       try {
         const response = await this.$axios.post(
           'v2/auth/sms/sendcode',
-          { login_phone: clearPhoneAlwaysSeven(this.phone) },
+          { login_phone: clearPhoneWithoutPlus(this.phone) },
           { errorMessage: 'Ошибка при запросе кода' },
         )
         if (response?.data?.success) {
