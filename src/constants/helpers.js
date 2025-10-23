@@ -20,6 +20,14 @@ export const clearPhoneAlwaysSeven = (phone) => {
   return phone
 }
 
+export const clearPhoneWithoutPlus = (phone) => {
+  phone = phone.replace(/\s/g, '')
+  phone = phone.replace(/\D/g, '')
+  if (phone.length === 11 && phone[0] === '8') phone = '7' + phone.substring(1)
+  if (phone.length === 10) phone = '7' + phone
+  return phone
+}
+
 export function isJSON (str) {
   if (!str) return false
   try {

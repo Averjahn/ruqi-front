@@ -115,9 +115,12 @@ class AuthApiService {
    */
   async requestRecoveryCode(loginPhone) {
     try {
+      // Убираем "+" из номера телефона, если он есть
+      const cleanPhone = loginPhone.replace(/^\+/, '')
+      
       const response = await axios.get(`${this.baseURL}/api/v2/auth/recovery/client/request-code`, {
         params: {
-          login_phone: loginPhone
+          login_phone: cleanPhone
         }
       })
       

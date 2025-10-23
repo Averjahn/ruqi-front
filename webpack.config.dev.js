@@ -70,12 +70,20 @@ module.exports = () => ({
   devServer: {
     static: path.join(__dirname, 'dist'),
     compress: false,
-    historyApiFallback: true,
+    historyApiFallback: {
+      index: '/index.html',
+      disableDotRule: true,
+    },
     hot: true,
     port: 8080,
     client: {
       overlay: true,
     },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+    }
   },
   resolve: {
     extensions: ['.vue', '.js'],

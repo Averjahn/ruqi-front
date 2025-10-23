@@ -129,7 +129,7 @@
 <script>
 import { rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
-import { clearPhoneAlwaysSeven, getAPIError, getStringFromSeconds } from '@/constants/helpers'
+import { clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getAPIError, getStringFromSeconds } from '@/constants/helpers'
 import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
 import useTimer from '@/composables/useSnackbarTimer'
@@ -236,7 +236,7 @@ export default {
     async requestCode () {
       if (this.loading) return
       this.loading = true
-      const phone = clearPhoneAlwaysSeven(this.formattedPhone)
+      const phone = clearPhoneWithoutPlus(this.formattedPhone)
       
       try {
         // Используем новый эндпоинт для клиентов
