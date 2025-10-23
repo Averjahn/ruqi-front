@@ -424,15 +424,13 @@ import { mapActions } from 'vuex'
 import MainButton from '@/components/atoms/MainButton.vue'
 import Input from '@/components/atoms/Input.vue'
 import Multiselect from '@/components/atoms/Multiselect.vue'
+import LogoUpload from '@/components/atoms/LogoUpload.vue'
 import Upload from '@/components/atoms/Upload.vue'
 import Form from '@/components/atoms/Form.vue'
 import FieldsRow from '@/components/atoms/FieldsRow.vue'
+import RegistrationSteps from '@/components/molecules/RegistrationSteps.vue'
 import { rules } from '@/constants/validations'
 import dadataApi from '@/services/dadataApi'
-
-// Lazy load heavy components
-const LogoUpload = () => import('@/components/atoms/LogoUpload.vue')
-const RegistrationSteps = () => import('@/components/molecules/RegistrationSteps.vue')
 
 export default {
   name: 'OrganisationData',
