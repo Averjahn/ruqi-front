@@ -37,7 +37,7 @@
       </div>
       
       <div v-else class="logo-upload__preview-content">
-        <div class="logo-upload__preview-area" :class="{ 'logo-upload__preview-area--has-image': hasFile }">
+        <div class="logo-upload__preview-area logo-upload__preview-area--has-image" :style="{ background: 'transparent' }">
           <img 
             :src="previewUrl" 
             :alt="fileName" 
@@ -367,7 +367,7 @@ export default {
     overflow: hidden;
 
     &--has-image {
-      background: transparent;
+      background: transparent !important;
     }
   }
 
@@ -377,6 +377,7 @@ export default {
     object-fit: cover;
     object-position: center;
     border-radius: 8px;
+    display: block;
   }
 
   &__preview-texts {
