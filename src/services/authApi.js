@@ -110,18 +110,61 @@ class AuthApiService {
 
   /**
    * Запрос кода восстановления пароля для клиента
-   * @param {string} loginPhone - Телефон или email для восстановления
+   * @param {string} loginPhone - Телефон для восстановления (без +)
    * @returns {Promise<Object>} Ответ API
    */
   async requestRecoveryCode(loginPhone) {
     try {
-      // Убираем "+" из номера телефона, если он есть
-      const cleanPhone = loginPhone.replace(/^\+/, '')
-      
       const response = await axios.get(`${this.baseURL}/api/v2/auth/recovery/client/request-code`, {
         params: {
-          login_phone: cleanPhone
+          login_phone: loginPhone
         }
+      })
+      
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Подтверждение кода восстановления пароля для клиента
+   * @param {string} loginPhone - Телефон для восстановления (без +)
+   * @param {string} code - Код подтверждения
+   * @returns {Promise<Object>} Ответ API
+   */
+  async confirmRecoveryCode(loginPhone, code) {
+    try {
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/recovery/client/confirm-code`, {
+        login_phone: loginPhone,
+        code: code
+      })
+      
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Установка нового пароля после подтверждения кода восстановления
+   * @param {string} loginPhone - Телефон для восстановления (без +)
+   * @param {string} code - Код подтверждения
+   * @param {string} newPassword - Новый пароль
+   * @returns {Promise<Object>} Ответ API
+   */
+  async setNewPassword(loginPhone, code, newPassword) {
+    try {
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/recovery/client/set-password`, {
+        login_phone: loginPhone,
+        code: code,
+        new_password: newPassword
       })
       
       return {

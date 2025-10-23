@@ -133,6 +133,7 @@ import { clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getAPIError, getStringFro
 import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
 import useTimer from '@/composables/useSnackbarTimer'
+import { useAuth } from '@/composables/useAuth'
 import { mapActions } from 'vuex'
 
 export default {
@@ -142,10 +143,17 @@ export default {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signinRecover',
     })
+    const { requestRecoveryCode, confirmRecoveryCode, setNewPassword, loading: authLoading, error: authError } = useAuth()
+    
     return {
       launchTimer,
       isTimerRunning,
       remaining,
+      requestRecoveryCode,
+      confirmRecoveryCode,
+      setNewPassword,
+      authLoading,
+      authError,
     }
   },
   data () {
@@ -239,24 +247,23 @@ export default {
       const phone = clearPhoneWithoutPlus(this.formattedPhone)
       
       try {
-        // Используем новый эндпоинт для клиентов
-        const response = await this.$axios.get('api/v2/auth/recovery/client/request-code', {
-          params: { login_phone: phone },
-          // errorMessage: 'Ошибка при запросе кода восстановления',
-        })
+        // Используем новый эндпоинт через useAuth
+        const success = await this.requestRecoveryCode(phone)
         
-        if (response?.data?.success) {
-          if (!this.initialResponseMethod)
-            this.initialResponseMethod = response.data.data?.code_sended?.method || 'telegram'
-          this.confirmMethod = response.data.data?.code_sended?.method || 'telegram'
-          this.sms_once_token = response.data.data?.once_token
+        if (success) {
           this.step = 2
           this.launchTimer(180)
         } else {
-          this.showNotification({ type: 'error', text: getAPIError(response) || 'Ошибка при запросе кода восстановления' })
+          this.showNotification({ 
+            type: 'error', 
+            text: this.authError?.[0]?.msg || 'Ошибка при запросе кода восстановления' 
+          })
         }
       } catch (error) {
-        this.showNotification({ type: 'error', text: 'Ошибка при запросе кода восстановления' })
+        this.showNotification({ 
+          type: 'error', 
+          text: getAPIError(error) || 'Ошибка при запросе кода восстановления' 
+        })
       }
       
       this.loading = false
@@ -279,39 +286,56 @@ export default {
     async submitCode () {
       if (this.loading) return
       this.loading = true
-      const response = await this.$axios.post(
-        'v2/auth/recovery/submitcode',
-        { once_token: this.sms_once_token, code: this.code },
-        // { errorMessage: 'Ошибка при отправке смс кода' },
-      )
-      if (response?.data?.success) {
-        this.once_token = response.data.data?.once_token
-        this.step = 3
-      } else {
+      const phone = clearPhoneWithoutPlus(this.formattedPhone)
+      
+      try {
+        // Используем новый эндпоинт через useAuth
+        const success = await this.confirmRecoveryCode(phone, this.code)
+        
+        if (success) {
+          this.step = 3
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: this.authError?.[0]?.msg || 'Ошибка при отправке кода подтверждения на сервер',
+          })
+        }
+      } catch (error) {
         this.showNotification({
           type: 'error',
-          text: getAPIError(response) || 'Ошибка при отправке кода подтверждения на сервер',
+          text: getAPIError(error) || 'Ошибка при отправке кода подтверждения на сервер',
         })
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
 
     async changePassword () {
       if (this.loading) return
       if (!this.$refs.form.validate()) return
       this.loading = true
-      const response = await this.$axios.post(
-        'v2/auth/recovery/submitpassword',
-        { once_token: this.once_token, password: this.password },
-        // { errorMessage: 'Ошибка при сохранении нового пароля' },
-      )
-      if (response?.data?.success) {
-        await this.auth(response.data.authToken?.plainTextToken)
-        this.$router.push('/')
-      } else {
-        this.showNotification({ type: 'error', text: getAPIError(response) || 'Ошибка при сохранении нового пароля' })
+      const phone = clearPhoneWithoutPlus(this.formattedPhone)
+      
+      try {
+        // Используем новый эндпоинт через useAuth
+        const success = await this.setNewPassword(phone, this.code, this.password)
+        
+        if (success) {
+          this.$router.push('/client/signin')
+        } else {
+          this.showNotification({ 
+            type: 'error', 
+            text: this.authError?.[0]?.msg || 'Ошибка при сохранении нового пароля' 
+          })
+        }
+      } catch (error) {
+        this.showNotification({ 
+          type: 'error', 
+          text: getAPIError(error) || 'Ошибка при сохранении нового пароля' 
+        })
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
   },
 }

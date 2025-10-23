@@ -132,7 +132,7 @@ export function useAuth() {
 
   /**
    * Запрос кода восстановления пароля для клиента
-   * @param {string} loginPhone - Телефон или email для восстановления
+   * @param {string} loginPhone - Телефон для восстановления (без +)
    * @returns {Promise<boolean>} Успешность запроса
    */
   const requestRecoveryCode = async (loginPhone) => {
@@ -141,6 +141,61 @@ export function useAuth() {
     
     try {
       const result = await authApiService.requestRecoveryCode(loginPhone)
+      
+      if (result.success) {
+        return true
+      } else {
+        error.value = result.error
+        return false
+      }
+    } catch (err) {
+      error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Подтверждение кода восстановления пароля для клиента
+   * @param {string} loginPhone - Телефон для восстановления (без +)
+   * @param {string} code - Код подтверждения
+   * @returns {Promise<boolean>} Успешность подтверждения
+   */
+  const confirmRecoveryCode = async (loginPhone, code) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const result = await authApiService.confirmRecoveryCode(loginPhone, code)
+      
+      if (result.success) {
+        return true
+      } else {
+        error.value = result.error
+        return false
+      }
+    } catch (err) {
+      error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Установка нового пароля после подтверждения кода восстановления
+   * @param {string} loginPhone - Телефон для восстановления (без +)
+   * @param {string} code - Код подтверждения
+   * @param {string} newPassword - Новый пароль
+   * @returns {Promise<boolean>} Успешность установки пароля
+   */
+  const setNewPassword = async (loginPhone, code, newPassword) => {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const result = await authApiService.setNewPassword(loginPhone, code, newPassword)
       
       if (result.success) {
         return true
@@ -228,6 +283,8 @@ export function useAuth() {
     loginWithPassword,
     loginClient,
     requestRecoveryCode,
+    confirmRecoveryCode,
+    setNewPassword,
     loginWithTelegram,
     logout,
     getErrorMessage
