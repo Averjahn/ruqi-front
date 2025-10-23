@@ -7,6 +7,8 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { DefinePlugin } = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const Dotenv = require('dotenv-webpack')
+const TerserPlugin = require('terser-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 
 const yandexMetrika = fs.readFileSync('./config/build/yandexMetrika.html', 'utf8')
 console.log('Webpack API_URL:', process.env.API_URL)
@@ -89,19 +91,56 @@ module.exports = () => ({
   optimization: {
     splitChunks: {
       chunks: 'all',
+      maxInitialRequests: 30,
+      maxAsyncRequests: 30,
       cacheGroups: {
+        // Vue ecosystem
+        vue: {
+          test: /[\\/]node_modules[\\/](vue|@vue|vue-router|vuex)[\\/]/,
+          name: 'vue-vendor',
+          chunks: 'all',
+          priority: 20,
+        },
+        // UI libraries
+        ui: {
+          test: /[\\/]node_modules[\\/](@fortawesome|bootstrap|material-ui)[\\/]/,
+          name: 'ui-vendor',
+          chunks: 'all',
+          priority: 15,
+        },
+        // Other vendors
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
           chunks: 'all',
+          priority: 10,
         },
+        // Common chunks
         common: {
           name: 'common',
           minChunks: 2,
           chunks: 'all',
+          priority: 5,
           enforce: true
         }
       }
-    }
+    },
+    // Enable tree shaking
+    usedExports: true,
+    sideEffects: false,
+    // Minification
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          compress: {
+            drop_console: true, // Remove console.log in production
+            drop_debugger: true,
+          },
+          mangle: true,
+        },
+        extractComments: false,
+      }),
+      new CssMinimizerPlugin(),
+    ],
   }
 })

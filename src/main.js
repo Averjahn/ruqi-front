@@ -1,15 +1,19 @@
 import { createApp } from 'vue'
-import rqComponents from '@/components'
 import axios from '@/plugins/axios'
 import dayjs from '@/plugins/dayjs'
 import App from '@/App.vue'
 import router from '@/router'
 import store from '@/store'
 
-export const createRqApp = (App, Definition) => {
+// Lazy load components to reduce initial bundle size
+const rqComponents = () => import('@/components')
+
+export const createRqApp = async (App, Definition) => {
   const app = createApp(App, Definition)
 
-  rqComponents.forEach((component) => {
+  // Load components asynchronously
+  const components = await rqComponents()
+  components.default.forEach((component) => {
     app.component(component.name, component)
   })
 
@@ -23,4 +27,4 @@ export const createRqApp = (App, Definition) => {
   return app.use(store).use(router)
 }
 
-createRqApp(App).mount('#app')
+createRqApp(App).then(app => app.mount('#app'))
