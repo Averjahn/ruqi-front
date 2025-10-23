@@ -5,7 +5,7 @@ import axios from 'axios'
  */
 class AuthApiService {
   constructor() {
-    this.baseURL = process.env.VUE_APP_API_URL || 'https://dev.ruqi.ru/api'
+    this.baseURL = process.env.VUE_APP_API_URL || 'https://api.stagelkk.ruqi.ru/api'
   }
 
   /**

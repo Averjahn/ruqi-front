@@ -23,7 +23,7 @@ const router = createRouter({
 })
 
 store.commit('auth/checkToken')
-await store.dispatch('user/fetchUser')
+// Инициализация пользователя будет выполнена при необходимости
 
 router.beforeEach((to, from, next) => {
   store.dispatch('app/startLoading')

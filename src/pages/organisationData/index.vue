@@ -31,7 +31,7 @@
         <!-- Warning Block -->
         <div class="organisation-data-page__warning-block">
           <div class="organisation-data-page__warning-icon">
-            <img src="@/assets/icons/Info.svg" alt="Info" />
+            <img src="@/assets/icons/info_blue.svg" alt="Info" />
           </div>
           <div class="organisation-data-page__warning-content">
             <h3 class="organisation-data-page__warning-title">Внимание!</h3>
