@@ -152,10 +152,12 @@ export default {
       
       this.loading = true
       try {
-        const response = await this.$axios.post(
-          'v2/auth/sms/sendcode',
-          { login_phone: clearPhoneWithoutPlus(this.phone) },
-          { errorMessage: 'Ошибка при запросе кода' },
+        const response = await this.$axios.get(
+          'api/v2/auth/recovery/client/request-code',
+          { 
+            params: { login_phone: clearPhoneWithoutPlus(this.phone) },
+            errorMessage: 'Ошибка при запросе кода' 
+          },
         )
         if (response?.data?.success) {
           this.step = 2
