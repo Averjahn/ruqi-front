@@ -247,6 +247,7 @@ export default {
 
   &__btn {
     width: 100%;
+    max-width: none;
     min-height: 48px;
     font-size: 16px;
     font-weight: 500;
