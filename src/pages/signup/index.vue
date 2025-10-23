@@ -185,7 +185,7 @@ export default {
   min-height: 100%;
   width: 100%;
   padding: 24px 16px;
-  background: linear-gradient(90.3deg, #edf2ff -1.79%, #ffffff 99.73%);
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
