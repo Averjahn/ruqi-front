@@ -213,7 +213,7 @@ export default {
   &__header {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
 
     h3 {
@@ -262,7 +262,7 @@ export default {
     border: 1px solid #e9ecef;
     border-radius: 8px;
     padding: 24px;
-    margin: 16px 0;
+    margin: 8px 0;
 
     p {
       margin: 0;
