@@ -33,7 +33,7 @@
             @click="requestCode"
             :disabled="disableHandler || isTimerRunning"
           />
-          <MainButton class="recover-password__btn" type="neutral" text="Назад" @click="back" />
+          <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="back" />
         </div>
       </div>
     </template>
@@ -63,10 +63,15 @@
             >Получить код из СМС</ButtonText
           >
 
-          <Button :loading="loading" :disabled="continueDisabled" class="recover-password__btn" @click="submitCode">
-            Продолжить
-          </Button>
-          <MainButton class="recover-password__btn" type="neutral" text="Назад" @click="back" />
+          <MainButton 
+            type="primary" 
+            text="Продолжить" 
+            :loading="loading" 
+            :disabled="continueDisabled" 
+            class="recover-password__btn" 
+            @click="submitCode" 
+          />
+          <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="back" />
         </div>
       </div>
     </template>
@@ -108,14 +113,14 @@
               </ul>
             </div>
 
-            <Button
+            <MainButton
+              type="primary"
+              text="войти в систему"
               :loading="loading"
               class="recover-password__btn"
               @click="changePassword"
               :disabled="changePasswordDisabled"
-            >
-              войти в систему
-            </Button>
+            />
           </div>
         </Form>
       </div>
@@ -129,12 +134,13 @@ import { formatPhone } from '@/constants/masks'
 import { clearPhoneAlwaysSeven, getAPIError, getStringFromSeconds } from '@/constants/helpers'
 import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
+import ButtonText from '@/components/atoms/ButtonText.vue'
 import useTimer from '@/composables/useSnackbarTimer'
 import { mapActions } from 'vuex'
 
 export default {
   layout: 'empty',
-  components: { OtpInput, MainButton },
+  components: { OtpInput, MainButton, ButtonText },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signinRecover',
@@ -408,6 +414,11 @@ export default {
       border-radius: 0;
       margin-bottom: 0;
       box-shadow: none;
+    }
+    
+    .recover-password__btn {
+      width: 100%;
+      max-width: none;
     }
   }
 }

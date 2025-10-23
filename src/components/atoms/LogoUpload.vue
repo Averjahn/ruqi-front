@@ -358,7 +358,7 @@ export default {
   &__preview-area {
     width: 98px;
     height: 98px;
-    background: #f3f4f6;
+    background: transparent;
     border-radius: 8px;
     display: flex;
     align-items: center;

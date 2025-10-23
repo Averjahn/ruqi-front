@@ -192,12 +192,26 @@
             <label class="organisation-data-page__label">
               ИНН*
             </label>
-            <Input
-              v-model="formData.inn"
-              placeholder="Введите ИНН"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
+            <div class="organisation-data-page__inn-search">
+              <Input
+                v-model="formData.inn"
+                placeholder="Введите ИНН"
+                :rules="[rules.required]"
+                class="organisation-data-page__input"
+                @input="onInnChange"
+              />
+              <MainButton 
+                type="primary-outline" 
+                text="Найти" 
+                :loading="dadataLoading"
+                @click="searchByInn"
+                class="organisation-data-page__search-button"
+                :disabled="!formData.inn || formData.inn.length < 10"
+              />
+            </div>
+            <div v-if="dadataError" class="organisation-data-page__error">
+              {{ dadataError }}
+            </div>
           </div>
         </FieldsRow>
 
@@ -416,6 +430,7 @@ import Form from '@/components/atoms/Form.vue'
 import FieldsRow from '@/components/atoms/FieldsRow.vue'
 import RegistrationSteps from '@/components/molecules/RegistrationSteps.vue'
 import { rules } from '@/constants/validations'
+import dadataApi from '@/services/dadataApi'
 
 export default {
   name: 'OrganisationData',
@@ -437,6 +452,8 @@ export default {
       currentStep: 0,
       showDocumentModal: false,
       currentDocumentFile: null,
+      dadataLoading: false,
+      dadataError: null,
       steps: [
         { id: 1, title: 'Данные об организации', description: 'Укажите основную информацию о вашей организации. Эти данные помогут нам создать ваш профиль, чтобы вы могли размещать вакансии и подработки. Пожалуйста, заполните все обязательные поля внимательно.' },
         { id: 2, title: 'Документы', description: 'Для подтверждения подлинности введенных вами данных, пожалуйста прикрепите скан-фото оригиналов документов' }
@@ -575,6 +592,75 @@ export default {
 
     handleUploadError(errorMessage) {
       console.error('Upload error:', errorMessage)
+    },
+
+    // DaData методы
+    onInnChange() {
+      // Очищаем ошибку при изменении ИНН
+      this.dadataError = null
+    },
+
+    async searchByInn() {
+      if (!this.formData.inn || this.formData.inn.length < 10) {
+        this.dadataError = 'ИНН должен содержать минимум 10 цифр'
+        return
+      }
+
+      this.dadataLoading = true
+      this.dadataError = null
+
+      try {
+        const result = await dadataApi.findParty(this.formData.inn)
+        
+        if (result.success && result.data.suggestions && result.data.suggestions.length > 0) {
+          const organization = result.data.suggestions[0].data
+          this.fillOrganizationData(organization)
+        } else {
+          this.dadataError = 'Организация не найдена'
+        }
+      } catch (error) {
+        this.dadataError = 'Ошибка при поиске организации'
+        console.error('DaData search error:', error)
+      } finally {
+        this.dadataLoading = false
+      }
+    },
+
+    fillOrganizationData(organization) {
+      // Заполняем поля формы данными из DaData
+      this.formData.fullName = organization.name?.full_with_opf || organization.name?.full || ''
+      this.formData.kpp = organization.kpp || ''
+      this.formData.ogrn = organization.ogrn || ''
+      this.formData.okato = organization.address?.data?.okato || ''
+      
+      // Адрес
+      if (organization.address?.data) {
+        const address = organization.address.data
+        const fullAddress = [
+          address.postal_code,
+          address.region_with_type,
+          address.city_with_type,
+          address.street_with_type,
+          address.house_with_type
+        ].filter(Boolean).join(', ')
+        
+        this.formData.legalAddress = fullAddress
+        this.formData.mailingAddress = fullAddress
+      }
+
+      // Банковские реквизиты
+      if (organization.bank) {
+        this.formData.bank = organization.bank.name || ''
+        this.formData.bic = organization.bank.bic || ''
+        this.formData.correspondentAccount = organization.bank.correspondent_account || ''
+      }
+
+      // Статус организации
+      if (organization.type === 'LEGAL') {
+        this.formData.counterpartyType = 'Юридическое лицо'
+      } else if (organization.type === 'INDIVIDUAL') {
+        this.formData.counterpartyType = 'Индивидуальный предприниматель'
+      }
     },
 
     handleOgrnFileUpload(event) {
@@ -1171,6 +1257,28 @@ export default {
     max-height: 70vh;
     object-fit: contain;
     border-radius: 8px;
+  }
+
+  // DaData стили
+  .organisation-data-page__inn-search {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .organisation-data-page__search-button {
+    flex-shrink: 0;
+    min-width: 100px;
+  }
+
+  .organisation-data-page__error {
+    color: #dc2626;
+    font-size: 14px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
   }
 }
 </style>
