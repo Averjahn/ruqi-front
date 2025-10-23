@@ -21,7 +21,7 @@ const serialize = (params) => {
 
 const instance = axios.create({
   // baseURL: process.env.API_URL,
-  baseURL: 'https://api.stagelkk.ruqi.ru/api/', // Updated to staging API
+  baseURL: 'https://api.stagelkk.ruqi.ru/', // Updated to staging API
   paramsSerializer: serialize,
 })
 

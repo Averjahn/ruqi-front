@@ -309,10 +309,10 @@ export default {
 
 .map_container {
   position: fixed;
-  top: 0;
+  top: 60px; /* Отступ для header */
   left: 0;
   right: 0;
-  height: 100%;
+  height: calc(100% - 60px); /* Учитываем высоту header */
   z-index: 47;
   background: white;
 }
@@ -326,7 +326,7 @@ export default {
   width: 100%;
   height: 100%;
   user-select: none;
-  padding-top: 72px;
+  padding-top: 12px; /* Уменьшенный отступ, так как уже есть отступ для header */
 }
 .content_wrapper {
   height: 100%;

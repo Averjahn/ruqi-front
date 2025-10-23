@@ -81,8 +81,10 @@ export default {
   font-weight: 500;
   font-size: 18px;
   line-height: 26px;
-  padding: 10px 16px; // 10px сверху/снизу
-  min-height: 40px;
+  padding: 10px 16px;
+  width: 100%;
+  max-width: 255px;
+  height: 40px;
   transition: all 0.2s ease;
   user-select: none;
   box-sizing: border-box;

@@ -237,7 +237,7 @@ export default {
       
       try {
         // Используем новый эндпоинт для клиентов
-        const response = await this.$axios.get('v2/auth/recovery/client/request-code', {
+        const response = await this.$axios.get('api/v2/auth/recovery/client/request-code', {
           params: { login_phone: phone },
           // errorMessage: 'Ошибка при запросе кода восстановления',
         })

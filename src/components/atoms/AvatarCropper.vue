@@ -14,8 +14,8 @@
         <div class="crop-area">
           <canvas
             ref="canvas"
-            width="600"
-            height="600"
+            width="752"
+            height="400"
             @pointerdown="onPointerDown"
             @pointermove="onPointerMove"
             @pointerup="onPointerUp"
@@ -24,18 +24,30 @@
             @touchmove="onTouchMove"
             @touchend="onTouchEnd"
           />
-        </div>
-
-        <div class="controls">
-          <div class="rotation-controls">
-            <button @click="rotateImage" class="rotate-btn">↻ Повернуть</button>
+          
+          <!-- Кнопки поворота -->
+          <div class="rotation-buttons">
+            <img 
+              class="rotate-icon rotate-left" 
+              src="@/assets/icons/rotate-left.svg" 
+              alt="Повернуть влево" 
+              @click="rotateLeft" 
+              title="Повернуть влево"
+            />
+            <img 
+              class="rotate-icon rotate-right" 
+              src="@/assets/icons/rotate-right.svg" 
+              alt="Повернуть вправо" 
+              @click="rotateRight" 
+              title="Повернуть вправо"
+            />
           </div>
         </div>
       </div>
 
       <template #footer>
-        <button class="cancel-btn" @click="cancel">Отмена</button>
-        <button class="apply-btn" @click="exportAvatar">Готово</button>
+        <MainButton type="primary-outline" text="Отмена" @click="cancel" />
+        <MainButton type="primary" text="Готово" @click="exportAvatar" />
       </template>
     </BaseModal>
   </div>
@@ -44,11 +56,13 @@
 <script>
 import { ref, nextTick, watch, onMounted } from 'vue'
 import BaseModal from './BaseModal.vue'
+import MainButton from './MainButton.vue'
 
 export default {
   name: 'AvatarCropper',
   components: {
-    BaseModal
+    BaseModal,
+    MainButton
   },
   props: {
     file: {
@@ -93,7 +107,7 @@ export default {
 
       // Сначала рисуем полное изображение
       ctx.save()
-      ctx.translate(300 + position.value.x, 300 + position.value.y)
+      ctx.translate(376 + position.value.x, 200 + position.value.y)
       ctx.rotate(rotation.value * Math.PI / 180)
       ctx.scale(scale.value, scale.value)
       ctx.drawImage(image.value, -image.value.width / 2, -image.value.height / 2)
@@ -101,8 +115,8 @@ export default {
 
       // Добавляем темное затемнение с вырезом для прямоугольной области
       const radius = cropRadius.value
-      const cropX = 300 - radius
-      const cropY = 300 - radius
+      const cropX = 376 - radius
+      const cropY = 200 - radius
       const cropSize = radius * 2
       
       ctx.save()
@@ -122,10 +136,10 @@ export default {
       
       // Координаты углов
       const corners = [
-        { x: 300 - radius - halfSquare, y: 300 - radius - halfSquare }, // левый верхний
-        { x: 300 + radius - halfSquare, y: 300 - radius - halfSquare }, // правый верхний
-        { x: 300 + radius - halfSquare, y: 300 + radius - halfSquare }, // правый нижний
-        { x: 300 - radius - halfSquare, y: 300 + radius - halfSquare }  // левый нижний
+        { x: 376 - radius - halfSquare, y: 200 - radius - halfSquare }, // левый верхний
+        { x: 376 + radius - halfSquare, y: 200 - radius - halfSquare }, // правый верхний
+        { x: 376 + radius - halfSquare, y: 200 + radius - halfSquare }, // правый нижний
+        { x: 376 - radius - halfSquare, y: 200 + radius - halfSquare }  // левый нижний
       ]
       
       // Рисуем квадраты
@@ -136,7 +150,7 @@ export default {
       
       // Рисуем синий круг
       ctx.beginPath()
-      ctx.arc(300, 300, radius, 0, Math.PI * 2)
+      ctx.arc(376, 200, radius, 0, Math.PI * 2)
       ctx.strokeStyle = '#3b82f6'
       ctx.lineWidth = 2
       ctx.stroke()
@@ -153,10 +167,10 @@ export default {
       const radius = cropRadius.value
       
       const corners = [
-        { x: 300 - radius - halfSquare, y: 300 - radius - halfSquare }, // левый верхний
-        { x: 300 + radius - halfSquare, y: 300 - radius - halfSquare }, // правый верхний
-        { x: 300 + radius - halfSquare, y: 300 + radius - halfSquare }, // правый нижний
-        { x: 300 - radius - halfSquare, y: 300 + radius - halfSquare }  // левый нижний
+        { x: 376 - radius - halfSquare, y: 200 - radius - halfSquare }, // левый верхний
+        { x: 376 + radius - halfSquare, y: 200 - radius - halfSquare }, // правый верхний
+        { x: 376 + radius - halfSquare, y: 200 + radius - halfSquare }, // правый нижний
+        { x: 376 - radius - halfSquare, y: 200 + radius - halfSquare }  // левый нижний
       ]
       
       let clickedOnSquare = false
@@ -186,8 +200,8 @@ export default {
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
         
         // Определяем направление движения относительно центра
-        const centerX = 300
-        const centerY = 300
+        const centerX = 376
+        const centerY = 200
         const startDistanceFromCenter = Math.sqrt(
           Math.pow(resizeStart.value.x - centerX, 2) + 
           Math.pow(resizeStart.value.y - centerY, 2)
@@ -245,10 +259,16 @@ export default {
       dragging.value = false
     }
 
-    const rotateImage = () => {
+    const rotateLeft = () => {
+      rotation.value -= 90
+      draw()
+    }
+
+    const rotateRight = () => {
       rotation.value += 90
       draw()
     }
+
 
     const exportAvatar = () => {
       const size = 256
@@ -264,8 +284,8 @@ export default {
 
       // Рассчитываем масштаб и сдвиг относительно исходного canvas
       const radius = cropRadius.value
-      const cropX = 300 - radius
-      const cropY = 300 - radius
+      const cropX = 376 - radius
+      const cropY = 200 - radius
       const cropSize = radius * 2
       
       // Рисуем область обрезки с круглой маской
@@ -298,7 +318,8 @@ export default {
       onTouchStart,
       onTouchMove,
       onTouchEnd,
-      rotateImage,
+      rotateLeft,
+      rotateRight,
       exportAvatar,
       cancel
     }
@@ -324,11 +345,11 @@ export default {
   }
 
   .crop-area {
+    position: relative;
     display: flex;
     justify-content: center;
     margin: 0 auto 20px;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
     background: #f9fafb;
 
     canvas {
@@ -340,70 +361,35 @@ export default {
         cursor: grabbing;
       }
     }
-  }
 
-  .controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px 0;
-
-    .rotation-controls {
+    .rotation-buttons {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
       display: flex;
-      gap: 8px;
+      gap: 12px;
+      z-index: 10;
 
-      .rotate-btn {
-        width: 40px;
-        height: 40px;
-        border: 1px solid #d1d5db;
-        background: white;
-        border-radius: 6px;
+      .rotate-icon {
+        width: 32px;
+        height: 32px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        color: #374151;
         transition: all 0.2s ease;
-
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        
         &:hover {
-          background: #f3f4f6;
-          border-color: #9ca3af;
+          transform: scale(1.1);
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+        }
+
+        &:active {
+          transform: scale(0.95);
         }
       }
     }
   }
 }
 
-.cancel-btn,
-.apply-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancel-btn {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-
-  &:hover {
-    background: #e5e7eb;
-  }
-}
-
-.apply-btn {
-  background: #1735f5;
-  color: white;
-  border: none;
-
-  &:hover {
-    background: #1d4ed8;
-  }
-}
 
 @media (max-width: 768px) {
   .cropper-container {

@@ -5,7 +5,7 @@ import axios from 'axios'
  */
 class AuthApiService {
   constructor() {
-    this.baseURL = process.env.VUE_APP_API_URL || 'https://api.stagelkk.ruqi.ru/api'
+    this.baseURL = process.env.VUE_APP_API_URL || 'https://api.stagelkk.ruqi.ru'
   }
 
   /**
@@ -16,7 +16,7 @@ class AuthApiService {
    */
   async requestPhoneCode(phone, userType = 'contractor') {
     try {
-      const response = await axios.post(`${this.baseURL}/auth/phone/request`, {
+      const response = await axios.post(`${this.baseURL}/api/auth/phone/request`, {
         phone: phone,
         user_type: userType
       })
@@ -39,7 +39,7 @@ class AuthApiService {
    */
   async confirmPhoneCode(phone, code, userType = 'contractor') {
     try {
-      const response = await axios.post(`${this.baseURL}/auth/phone/confirm`, {
+      const response = await axios.post(`${this.baseURL}/api/auth/phone/confirm`, {
         phone: phone,
         code: code,
         user_type: userType
@@ -65,11 +65,11 @@ class AuthApiService {
     try {
       let endpoint
       if (userType === 'contractor') {
-        endpoint = `${this.baseURL}/v2/auth/login/contractor`
+        endpoint = `${this.baseURL}/api/v2/auth/login/contractor`
       } else if (userType === 'client') {
-        endpoint = `${this.baseURL}/v2/auth/login/client`
+        endpoint = `${this.baseURL}/api/v2/auth/login/client`
       } else {
-        endpoint = `${this.baseURL}/v2/auth/login`
+        endpoint = `${this.baseURL}/api/v2/auth/login`
       }
       
       const response = await axios.post(endpoint, {
@@ -94,7 +94,7 @@ class AuthApiService {
    */
   async loginClient(login, password) {
     try {
-      const response = await axios.post(`${this.baseURL}/v2/auth/login/client`, {
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/login/client`, {
         phone_or_email: login,
         password: password
       })
@@ -115,7 +115,7 @@ class AuthApiService {
    */
   async requestRecoveryCode(loginPhone) {
     try {
-      const response = await axios.get(`${this.baseURL}/v2/auth/recovery/client/request-code`, {
+      const response = await axios.get(`${this.baseURL}/api/v2/auth/recovery/client/request-code`, {
         params: {
           login_phone: loginPhone
         }
@@ -137,7 +137,7 @@ class AuthApiService {
    */
   async loginWithTelegram(telegramData) {
     try {
-      const response = await axios.post(`${this.baseURL}/v2/auth/telegram`, telegramData)
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/telegram`, telegramData)
       
       return {
         success: true,

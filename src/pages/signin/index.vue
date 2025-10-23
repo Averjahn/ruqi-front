@@ -132,7 +132,7 @@
                 </div>
               </div>
               <MainButton
-                type="primary-outline"
+                type="primary"
                 :text="'Подтвердить звонком'"
                 @click="onSubmitByCall"
                 :disabled="disablePhoneHandler"
@@ -626,7 +626,8 @@ export default {
 
   .signin_button {
     width: 100%;
-    min-height: 48px; // Увеличиваем высоту кнопки для лучшего UX
+    max-width: none;
+    height: 40px;
     font-size: 16px;
     font-weight: 500;
   }
@@ -646,6 +647,11 @@ export default {
     width: 100%;
     flex-direction: column;
     gap: 24px;
+    
+    .main-button {
+      width: 100%;
+      max-width: none;
+    }
   }
   .personal-agreement-checkbox {
     display: flex;
