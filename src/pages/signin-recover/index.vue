@@ -58,10 +58,8 @@
             Отправить код повторно <b>{{ remainingTimeString }}</b>
           </div>
 
-          <ButtonText v-if="!isTimerRunning" @click="requestCodeAgain('telegram')">Отправить код повторно</ButtonText>
-          <ButtonText v-if="!isTimerRunning && initialResponseMethod !== 'sms'" @click="requestCodeAgain('sms')"
-            >Получить код из СМС</ButtonText
-          >
+          <button v-if="!isTimerRunning" @click="requestCodeAgain('telegram')" class="recover-password__text-button">Отправить код повторно</button>
+          <button v-if="!isTimerRunning && initialResponseMethod !== 'sms'" @click="requestCodeAgain('sms')" class="recover-password__text-button">Получить код из СМС</button>
 
           <MainButton 
             type="primary" 
@@ -134,13 +132,12 @@ import { formatPhone } from '@/constants/masks'
 import { clearPhoneAlwaysSeven, getAPIError, getStringFromSeconds } from '@/constants/helpers'
 import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
-import ButtonText from '@/components/atoms/ButtonText.vue'
 import useTimer from '@/composables/useSnackbarTimer'
 import { mapActions } from 'vuex'
 
 export default {
   layout: 'empty',
-  components: { OtpInput, MainButton, ButtonText },
+  components: { OtpInput, MainButton },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signinRecover',
@@ -404,6 +401,21 @@ export default {
     color: #b0baff;
     font-size: 18px;
     line-height: 26px;
+  }
+
+  .recover-password__text-button {
+    background: none;
+    border: none;
+    color: #1735f5;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 0;
+    text-decoration: underline;
+
+    &:hover {
+      color: #0f2cc7;
+    }
   }
   @media (max-width: 1000px) {
     background: white;
