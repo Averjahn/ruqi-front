@@ -133,7 +133,7 @@
               </div>
               <MainButton
                 type="primary"
-                :text="'Подтвердить звонком'"
+                :text="'Подтвердить исходящим звонком'"
                 @click="onSubmitByCall"
                 :disabled="disablePhoneHandler"
                 :loading="loading"
@@ -177,7 +177,7 @@
               class="signin_button"
             />
           </template>
-          <div class="agreements_check">
+          <div v-if="currentTab !== 'by_phone_call'" class="agreements_check">
             <div class="personal-agreement-checkbox">
               <Checkbox v-model="termAgree" class="checkbox" />
               <div class="agreement-check">
