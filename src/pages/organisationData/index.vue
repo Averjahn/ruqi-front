@@ -287,12 +287,10 @@
             <label class="organisation-data-page__label">
               На основании чего*
             </label>
-            <Multiselect
+            <Input
               v-model="formData.basis"
-              :options="bases"
-              placeholder="Выберите значение"
-              :multiple="false"
-              class="organisation-data-page__select"
+              placeholder="Введите основание"
+              class="organisation-data-page__input"
             />
           </div>
         </FieldsRow>
@@ -451,7 +449,6 @@ export default {
       ],
       canGoBack: true,
       canGoNext: true,
-      canFinish: false,
       formData: {
         logo: null,
         counterpartyType: 'Юридическое лицо',
@@ -493,12 +490,6 @@ export default {
         'Юридическое лицо',
         'Индивидуальный предприниматель',
         'Физическое лицо'
-      ],
-      bases: [
-        'Устав',
-        'Доверенность',
-        'Приказ',
-        'Решение учредителей'
       ]
     }
   },
@@ -521,6 +512,28 @@ export default {
       }
       
       return '@/assets/imgs/document.png' // Образец по умолчанию
+    },
+
+    canFinish() {
+      // Проверяем, что все обязательные поля заполнены
+      const hasLogo = !!this.formData.logo
+      const hasInn = !!this.formData.inn && this.formData.inn.length >= 10
+      const hasFullName = !!this.formData.fullName
+      const hasInnCertificate = !!this.formData.innCertificate?.file
+      const hasOgrnCertificate = !!this.formData.ogrnCertificate?.file
+      const hasKppCertificate = !!this.formData.kppCertificate?.file
+      
+      console.log('🔍 Проверка canFinish:', {
+        hasLogo,
+        hasInn,
+        hasFullName,
+        hasInnCertificate,
+        hasOgrnCertificate,
+        hasKppCertificate,
+        canFinish: hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate && hasKppCertificate
+      })
+      
+      return hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate && hasKppCertificate
     }
   },
   watch: {

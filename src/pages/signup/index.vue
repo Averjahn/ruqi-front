@@ -210,23 +210,12 @@ export default {
       return this.phone
     },
     isRegistrationFormValid () {
-      const isValid = !!(
+      return !!(
         this.registrationData.firstname && 
         this.registrationData.lastname && 
         this.registrationData.email && 
         this.registrationData.phone
       )
-      
-      // Временная отладка
-      console.log('🔍 Проверка валидности формы:', {
-        firstname: this.registrationData.firstname,
-        lastname: this.registrationData.lastname,
-        email: this.registrationData.email,
-        phone: this.registrationData.phone,
-        isValid
-      })
-      
-      return isValid
     }
   },
   methods: {

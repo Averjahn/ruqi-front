@@ -297,7 +297,17 @@ export default {
     }
 
     console.log('🎧 Добавляем обработчик клавиш keydown')
+    console.log('🔧 this.handleKeyPress:', typeof this.handleKeyPress)
+    console.log('🔧 document:', document)
+    
+    // Добавляем глобальный обработчик для тестирования
+    const globalKeyHandler = (event) => {
+      console.log('🌍 Глобальный обработчик сработал:', event.key)
+    }
+    document.addEventListener('keydown', globalKeyHandler)
+    
     document.addEventListener('keydown', this.handleKeyPress)
+    console.log('✅ Обработчик добавлен')
     
     // Очищаем обработчик при размонтировании
     this.$once('hook:beforeDestroy', () => {
@@ -329,8 +339,11 @@ export default {
 
     // Временный обработчик клавиши "y" для тестирования
     handleKeyPress (event) {
+      console.log('🎯 handleKeyPress вызван!')
       console.log('🔍 Клавиша нажата:', event.key, 'Код:', event.code)
       console.log('🎯 Текущий debugMode:', this.debugMode)
+      console.log('🎯 event.target:', event.target)
+      console.log('🎯 event.currentTarget:', event.currentTarget)
       
       if (event.key === 'y' || event.key === 'Y') {
         console.log('✅ Клавиша Y обнаружена! Переключаем debugMode')
