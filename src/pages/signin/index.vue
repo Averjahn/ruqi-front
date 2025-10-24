@@ -774,12 +774,30 @@ export default {
   .change_number_btn {
     width: 100%;
     max-width: none;
+    text-align: center;
+
+    .main-button__content {
+      justify-content: center;
+    }
+
+    .main-button__text {
+      text-align: center;
+    }
   }
 
   .call_btn_mobile {
     width: 100%;
     max-width: none;
     display: none; /* Скрыта по умолчанию */
+    text-align: center;
+
+    .main-button__content {
+      justify-content: center;
+    }
+
+    .main-button__text {
+      text-align: center;
+    }
   }
 
   .call_btn {

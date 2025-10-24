@@ -39,6 +39,16 @@
           @click="requestCode"
         />
 
+        <!-- Скрытая кнопка для тестирования (только для разработчиков) -->
+        <button 
+          v-if="isDevelopment"
+          @click="simulateCallSuccess"
+          class="test-button"
+          style="margin-top: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 12px; width: 100%;"
+        >
+          🧪 Тест: Симулировать успешный звонок
+        </button>
+
         <FooterInfo 
           text="Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с указанного вами номера, доступ будет предоставлен автоматически."
         />
@@ -76,82 +86,72 @@
         </div>
       </div>
 
-      <!-- Шаг 2: Форма регистрации -->
+      <!-- Шаг 2: Инструкция о звонке -->
       <div class="signup-page__body" v-if="step === 2">
-        <h4>Завершите регистрацию</h4>
-        
-        <div class="form-row">
-          <Input 
-            class="input" 
-            label="Имя" 
-            v-model="registrationData.firstname"
-            placeholder="Введите имя"
-          />
-          <Input 
-            class="input" 
-            label="Фамилия" 
-            v-model="registrationData.lastname"
-            placeholder="Введите фамилию"
-          />
+        <div class="call_instruction_card">
+          <div class="call_instruction_text">
+            Сделайте бесплатный звонок с номера {{ phone }}, чтобы авторизоваться
+          </div>
+          <div class="phone_display">
+            <img class="phone_icon" src="@/assets/icons/phone_call_filled_lightBlue.svg" />
+            <span class="phone_number">{{ callToPhone || '+7 (999) 999-99-99' }}</span>
+            <img class="copy_icon" src="@/assets/icons/copy_outlined.svg" @click="copyPhoneNumber" />
+          </div>
         </div>
+        
+        <!-- Кнопка "Позвонить" - видна только на мобильных устройствах -->
+        <MainButton
+          type="primary"
+          text="Позвонить"
+          @click="makeCall"
+          :loading="loading"
+          class="signup-page__btn call_btn_mobile"
+        />
+        
+        <MainButton
+          type="primary-outline"
+          :text="!!this.remaining ? `Изменить номер через ${remainingTimeString}` : 'Изменить номер'"
+          @click="changeCallRequestedStatus"
+          :disabled="loading || isTimerRunning"
+          :loading="loading"
+          class="signup-page__btn change_number_btn"
+        />
+      </div>
 
+      <!-- Шаг 3: Создание пароля -->
+      <div class="signup-page__body" v-if="step === 3">
+        <h4>Создайте пароль</h4>
+        
         <Input 
           class="input" 
-          label="Отчество" 
-          v-model="registrationData.middlename"
-          placeholder="Введите отчество (необязательно)"
+          label="Пароль" 
+          v-model="password"
+          type="password"
+          placeholder="Введите пароль"
         />
 
         <Input 
           class="input" 
-          label="Email" 
-          v-model="registrationData.email"
-          type="email"
-          placeholder="example@email.com"
-        />
-
-        <Input 
-          class="input" 
-          label="Дата рождения" 
-          v-model="registrationData.birthday"
-          type="date"
-        />
-
-        <Input 
-          class="input" 
-          label="Гражданство" 
-          v-model="registrationData.citizenship"
-          placeholder="RU"
-        />
-
-        <Input 
-          class="input" 
-          label="Название компании" 
-          v-model="registrationData.company_name"
-          placeholder="ООО Ромашка"
-        />
-
-        <Input 
-          class="input" 
-          label="ИНН компании" 
-          v-model="registrationData.company_inn"
-          placeholder="1234567890"
+          label="Подтвердите пароль" 
+          v-model="confirmPassword"
+          type="password"
+          placeholder="Подтвердите пароль"
         />
 
         <MainButton
           type="primary"
-          text="Завершить регистрацию"
+          text="Создать аккаунт"
           :loading="loading"
-          :disabled="!isRegistrationFormValid"
+          :disabled="!isPasswordValid"
           class="signup-page__btn"
-          @click="submitRegistration"
+          @click="createAccount"
         />
 
         <MainButton 
           type="neutral" 
           text="Назад" 
           class="signup-page__btn signup-page__btn--secondary"
-          @click="step = 1" 
+          @click="step = 2" 
         />
       </div>
     </div>
@@ -161,6 +161,7 @@
 <script>
 import { mapActions } from 'vuex'
 import MainButton from '@/components/atoms/MainButton.vue'
+import Input from '@/components/atoms/Input.vue'
 import { getAPIError, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
@@ -168,7 +169,7 @@ import useTimer from '@/composables/useSnackbarTimer'
 export default {
   name: 'SignUp',
   layout: 'empty',
-  components: { MainButton },
+  components: { MainButton, Input },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signupSms',
@@ -186,17 +187,11 @@ export default {
       termAgree: true,
       phone: '',
       step: 1,
-      registrationData: {
-        firstname: '',
-        lastname: '',
-        middlename: '',
-        phone: '',
-        email: '',
-        birthday: '',
-        citizenship: 'RU',
-        company_name: '',
-        company_inn: ''
-      }
+      isDevelopment: process.env.NODE_ENV === 'development',
+      callToPhone: null,
+      password: '',
+      confirmPassword: '',
+      activationToken: null
     }
   },
   computed: {
@@ -209,17 +204,25 @@ export default {
     formattedPhone () {
       return this.phone
     },
-    isRegistrationFormValid () {
-      return !!(
-        this.registrationData.firstname && 
-        this.registrationData.lastname && 
-        this.registrationData.email && 
-        this.registrationData.phone
-      )
-    }
+    isPasswordValid () {
+      return this.password && this.confirmPassword && this.password === this.confirmPassword
+    },
   },
   methods: {
     ...mapActions('notifications', ['showNotification']),
+
+    // Метод для симуляции успешного звонка (только для разработчиков)
+    simulateCallSuccess() {
+      console.log('🧪 Симулируем успешный звонок в signup')
+      this.step = 2
+      this.callToPhone = '+7 (999) 999-99-99'
+      this.activationToken = 'test_activation_token_' + Date.now() // Тестовый токен
+      this.launchTimer(180)
+      this.showNotification({
+        type: 'success',
+        text: 'ТЕСТ: Симулирован успешный запрос звонка. Переходим к следующему шагу.'
+      })
+    },
 
     onPhone (event) {
       const { formattedValue, cursorPosition } = formatPhone({
@@ -271,38 +274,74 @@ export default {
       this.loading = false
     },
 
-    async submitRegistration () {
-      // Валидация обязательных полей
-      if (!this.registrationData.firstname || !this.registrationData.lastname || 
-          !this.registrationData.email || !this.registrationData.phone) {
+
+    // Методы для экрана звонка
+    makeCall() {
+      console.log('Позвонить на номер:', this.callToPhone)
+      // Переходим к заполнению пароля
+      this.step = 3
+      // В реальном приложении токен активации должен прийти с сервера после звонка
+      this.activationToken = 'real_activation_token_' + Date.now() // Заглушка для реального токена
+      this.showNotification({
+        type: 'success',
+        text: 'Звонок выполнен. Переходим к созданию пароля.'
+      })
+    },
+
+    copyPhoneNumber() {
+      if (this.callToPhone) {
+        navigator.clipboard.writeText(this.callToPhone)
+        this.showNotification({
+          type: 'success',
+          text: 'Номер скопирован в буфер обмена'
+        })
+      }
+    },
+
+    changeCallRequestedStatus() {
+      this.step = 1
+      if (this.authInterval) {
+        clearInterval(this.authInterval)
+      }
+    },
+
+    async createAccount() {
+      if (!this.isPasswordValid) {
         this.showNotification({
           type: 'error',
-          text: 'Пожалуйста, заполните все обязательные поля.',
+          text: 'Пароли не совпадают или не заполнены'
         })
         return
       }
 
       this.loading = true
       try {
-        const response = await this.$axios.post('api/auth/register/client', this.registrationData)
+        // Отправляем данные на эндпоинт установки пароля
+        const response = await this.$axios.post('api/v2/auth/password/client/setup', {
+          activation_token: this.activationToken, // Нужно получить токен активации
+          password: this.password,
+          confirm_password: this.confirmPassword
+        })
         
         if (response?.data?.success) {
           this.showNotification({
             type: 'success',
-            text: 'Регистрация успешно завершена!',
+            text: 'Пароль установлен! Переходим к заполнению данных организации.'
           })
-          // Перенаправляем на страницу входа
-          this.$router.push('/client/signin')
+          
+          // Переходим в organisationData
+          this.$router.push('/client/organisationData')
         } else {
           this.showNotification({
             type: 'error',
-            text: getAPIError(response) || 'Ошибка при регистрации.',
+            text: getAPIError(response) || 'Ошибка при установке пароля'
           })
         }
       } catch (error) {
+        console.error('Ошибка установки пароля:', error)
         this.showNotification({
           type: 'error',
-          text: 'Ошибка при регистрации.',
+          text: 'Ошибка при установке пароля'
         })
       }
       this.loading = false
@@ -464,6 +503,96 @@ export default {
           color: #4e64f2;
         }
       }
+    }
+  }
+
+  // Стили для экрана звонка
+  .call_instruction_card {
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    width: 100%;
+  }
+
+  .call_instruction_text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 26px;
+    text-align: center;
+    color: #263043;
+    max-width: 438px;
+  }
+
+  .phone_display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .phone_icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .phone_number {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 28px;
+    color: #263043;
+  }
+
+  .copy_icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .call_btn_mobile {
+    width: 100%;
+    max-width: none;
+    display: none; /* Скрыта по умолчанию */
+    text-align: center;
+
+    .main-button__content {
+      justify-content: center;
+    }
+
+    .main-button__text {
+      text-align: center;
+    }
+  }
+
+  .change_number_btn {
+    width: 100%;
+    max-width: none;
+    text-align: center;
+
+    .main-button__content {
+      justify-content: center;
+    }
+
+    .main-button__text {
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    /* Показываем кнопку "Позвонить" на мобильных устройствах */
+    .call_btn_mobile {
+      display: block !important;
     }
   }
 }

@@ -113,11 +113,12 @@ class AuthApiService {
    * @param {string} loginPhone - Телефон для восстановления (без +)
    * @returns {Promise<Object>} Ответ API
    */
-  async requestRecoveryCode(loginPhone) {
+  async requestRecoveryCode(loginPhone, verificationBy = 'telegram') {
     try {
       const response = await axios.get(`${this.baseURL}/api/v2/auth/recovery/client/request-code`, {
         params: {
-          login_phone: loginPhone
+          login_phone: loginPhone,
+          verification_by: verificationBy
         }
       })
       

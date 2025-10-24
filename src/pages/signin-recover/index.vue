@@ -246,8 +246,8 @@ export default {
       const phone = clearPhoneWithoutPlus(this.formattedPhone)
       
       try {
-        // Используем новый эндпоинт через useAuth
-        const success = await this.requestRecoveryCode(phone)
+        // Используем новый эндпоинт через useAuth с параметром verification_by
+        const success = await this.requestRecoveryCode(phone, 'telegram')
         
         if (success) {
           this.step = 2
@@ -270,7 +270,31 @@ export default {
     async requestCodeAgain (method) {
       this.verification_by = method
       this.confirmMethod = method
-      this.requestCode()
+      
+      if (this.loading) return
+      this.loading = true
+      const phone = clearPhoneWithoutPlus(this.formattedPhone)
+      
+      try {
+        // Используем новый эндпоинт через useAuth с выбранным методом
+        const success = await this.requestRecoveryCode(phone, method)
+        
+        if (success) {
+          this.launchTimer(180)
+        } else {
+          this.showNotification({ 
+            type: 'error', 
+            text: this.authError?.[0]?.msg || 'Ошибка при запросе кода восстановления' 
+          })
+        }
+      } catch (error) {
+        this.showNotification({ 
+          type: 'error', 
+          text: getAPIError(error) || 'Ошибка при запросе кода восстановления' 
+        })
+      }
+      
+      this.loading = false
     },
 
     onChangedCode (event) {

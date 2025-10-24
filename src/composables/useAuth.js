@@ -135,12 +135,12 @@ export function useAuth() {
    * @param {string} loginPhone - Телефон для восстановления (без +)
    * @returns {Promise<boolean>} Успешность запроса
    */
-  const requestRecoveryCode = async (loginPhone) => {
+  const requestRecoveryCode = async (loginPhone, verificationBy = 'telegram') => {
     loading.value = true
     error.value = null
     
     try {
-      const result = await authApiService.requestRecoveryCode(loginPhone)
+      const result = await authApiService.requestRecoveryCode(loginPhone, verificationBy)
       
       if (result.success) {
         return true
