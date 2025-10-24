@@ -7,6 +7,10 @@ export const getAPIError = (response) => {
   return code + msg
 }
 
+export const getAPIErrorMessage = (response) => {
+  return response?.data?.error?.[0]?.msg || response?.data?.error?.msg || ''
+}
+
 export const getClearPhone = (phone) => {
   return (phone.match(/[0-9]/g) || []).join('')
 }

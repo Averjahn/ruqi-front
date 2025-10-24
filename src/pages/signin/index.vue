@@ -1,5 +1,9 @@
 <template>
   <div class="login_page">
+    <!-- DEBUG: Индикатор режима тестирования -->
+    <div v-if="debugMode" class="debug-indicator">
+      🧪 DEBUG MODE: Нажмите "y" для переключения
+    </div>
     <div class="form_block">
       <div class="logo_block">
         <div class="logo_icons">
@@ -53,28 +57,18 @@
               button-type="button"
             />
             <div class="agreements_check">
-              <div class="personal-agreement-checkbox">
-                <Checkbox v-model="termAgree" class="checkbox" />
-                <div class="agreement-check">
-                  <div>
-                    Я ознакомился (-ась) и согласен (-на) с
-                    <span class="agreement-src" @click="$router.push('/privacy-policy')">
-                      политикой в отношении обработки персональных данных
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="personal-agreement-checkbox">
-                <Checkbox v-model="agree" class="checkbox" />
-                <div class="agreement-check">
-                  <div>
-                    Я ознакомился(-ась) и даю
-                    <span class="agreement-src" @click="$router.push('/personal')">
-                      согласие на обработку моих персональных данных
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <AgreementCheck
+                v-model="termAgree"
+                text="Я ознакомился (-ась) и согласен (-на) с"
+                link-text="политикой в отношении обработки персональных данных"
+                link-route="/privacy-policy"
+              />
+              <AgreementCheck
+                v-model="agree"
+                text="Я ознакомился(-ась) и даю"
+                link-text="согласие на обработку моих персональных данных"
+                link-route="/personal"
+              />
             </div>
           </div>
           <!-- <div class="apps_block">
@@ -139,11 +133,9 @@
                 :loading="loading"
                 class="signin_button"
               />
-              <div class="footer_info">
-                Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для
-                проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с
-                указанного вами номера, доступ будет предоставлен автоматически.
-              </div>
+              <FooterInfo 
+                text="Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с указанного вами номера, доступ будет предоставлен автоматически."
+              />
             </Form>
           </template>
 
@@ -247,7 +239,7 @@ import { mapActions } from 'vuex'
 import SignInBySms from '@/components/molecules/SignInBySms.vue'
 import AuthTabs from '@/components/molecules/AuthTabs.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
-import { getAPIError, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
+import { getAPIError, getAPIErrorMessage, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
@@ -282,6 +274,7 @@ export default {
       currentTab: 'by_phone_call',
       callRequested: false,
       oldMethod: false,
+      debugMode: false, // Временный переключатель для тестирования
       authInterval: null,
       onceToken: null,
       callToPhone: null,
@@ -302,6 +295,15 @@ export default {
     } catch (error) {
       // Ошибка инициализации
     }
+
+    console.log('🎧 Добавляем обработчик клавиш keydown')
+    document.addEventListener('keydown', this.handleKeyPress)
+    
+    // Очищаем обработчик при размонтировании
+    this.$once('hook:beforeDestroy', () => {
+      console.log('🧹 Удаляем обработчик клавиш')
+      document.removeEventListener('keydown', this.handleKeyPress)
+    })
   },
   computed: {
     remainingTimeString () {
@@ -324,6 +326,39 @@ export default {
     ...mapActions('auth', ['signIn', 'auth']),
     ...mapActions('notifications', ['showNotification']),
     ...mapActions('user', ['fetchUser']),
+
+    // Временный обработчик клавиши "y" для тестирования
+    handleKeyPress (event) {
+      console.log('🔍 Клавиша нажата:', event.key, 'Код:', event.code)
+      console.log('🎯 Текущий debugMode:', this.debugMode)
+      
+      if (event.key === 'y' || event.key === 'Y') {
+        console.log('✅ Клавиша Y обнаружена! Переключаем debugMode')
+        this.debugMode = !this.debugMode
+        console.log('🔄 Новый debugMode:', this.debugMode)
+        
+        if (this.debugMode) {
+          console.log('🚀 Активируем режим тестирования')
+          // Симулируем успешный запрос звонка
+          this.callRequested = true
+          this.onceToken = 'debug_token_' + Date.now()
+          this.callToPhone = '+7 (999) 123-45-67'
+          this.launchTimer(180)
+          this.showNotification({
+            type: 'success',
+            text: 'DEBUG: Переключен в режим тестирования. Переходим к вводу кода.'
+          })
+        } else {
+          console.log('⏹️ Отключаем режим тестирования')
+          this.showNotification({
+            type: 'info',
+            text: 'DEBUG: Режим тестирования отключен.'
+          })
+        }
+      } else {
+        console.log('❌ Нажата не та клавиша:', event.key)
+      }
+    },
 
     changeTab (value) {
       this.currentTab = value
@@ -414,9 +449,9 @@ export default {
             this.changeOldAuthMethod()
           }
         } else {
-          this.callRequestErrorMsg = getAPIError(response)
+          this.callRequestErrorMsg = getAPIErrorMessage(response)
           this.showNotification({
-            text: getAPIError(response) || 'Ошибка при запросе номера.',
+            text: getAPIErrorMessage(response) || 'Ошибка при запросе номера.',
           })
         }
       } catch (error) {
@@ -512,7 +547,7 @@ export default {
         this.$router.push('/')
       } else {
         this.showNotification({
-          text: getAPIError(response) || 'Ошибка при попытке авторизоваться',
+          text: getAPIErrorMessage(response) || 'Ошибка при попытке авторизоваться',
         })
       }
       this.loading = false
@@ -638,6 +673,7 @@ export default {
     font-size: 16px;
     font-weight: 400;
     line-height: 22px;
+    color: #4E64F2;
   }
 
   .action_btn_text::after {
@@ -762,6 +798,27 @@ export default {
       font-weight: 600;
       line-height: 20px;
     }
+  }
+
+  .debug-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #ff6b6b;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
   }
 
   @media (max-width: 768px) {

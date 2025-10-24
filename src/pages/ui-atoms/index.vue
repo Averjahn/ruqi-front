@@ -595,6 +595,35 @@
           </div>
           
           <div class="ui-atoms__item">
+            <h4>FooterInfo</h4>
+            <FooterInfo text="Это информационный текст для футера страницы. Компонент автоматически адаптируется по высоте в зависимости от содержимого." />
+            <FooterInfo text="Короткий текст" />
+            <FooterInfo text="Очень длинный текст, который может занимать несколько строк и демонстрирует, как компонент адаптируется по высоте в зависимости от количества текста. Это полезно для различных информационных сообщений на страницах авторизации, регистрации и других формах." />
+          </div>
+          
+          <div class="ui-atoms__item">
+            <h4>AgreementCheck</h4>
+            <AgreementCheck
+              v-model="demoAgreement1"
+              text="Я ознакомился (-ась) и согласен (-на) с"
+              link-text="политикой в отношении обработки персональных данных"
+              link-route="/privacy-policy"
+            />
+            <AgreementCheck
+              v-model="demoAgreement2"
+              text="Я ознакомился(-ась) и даю"
+              link-text="согласие на обработку моих персональных данных"
+              link-route="/personal"
+            />
+            <AgreementCheck
+              v-model="demoAgreement3"
+              text="Согласен с"
+              link-text="условиями использования"
+              link-route="/terms"
+            />
+          </div>
+          
+          <div class="ui-atoms__item">
             <h4>ThinLineLoading</h4>
             <ThinLineLoading :show="true" />
           </div>
@@ -762,6 +791,11 @@ export default {
       },
       checked1: false,
       checked2: true,
+      
+      // AgreementCheck demo data
+      demoAgreement1: false,
+      demoAgreement2: false,
+      demoAgreement3: true,
       
       // Multiselect data
       multiselectEmpty: [],

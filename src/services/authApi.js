@@ -201,6 +201,145 @@ class AuthApiService {
   }
 
   /**
+   * Запрос верификации email для клиента
+   * @param {string} email - Email адрес
+   * @returns {Promise<Object>} Ответ API
+   */
+  async requestEmailVerification(email) {
+    try {
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/email/client/request-verification`, {
+        email: email
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Верификация email клиента по токену
+   * @param {string} token - Токен верификации
+   * @returns {Promise<Object>} Ответ API
+   */
+  async verifyEmail(token) {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/v2/auth/email/client/verify`, {
+        params: {
+          token: token
+        }
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Получение статуса клиентского кабинета
+   * @returns {Promise<Object>} Ответ API
+   */
+  async getClientStatus() {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/v2/auth/client/status`)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Первичная установка пароля для клиента
+   * @param {string} token - Токен для установки пароля
+   * @param {string} password - Новый пароль
+   * @returns {Promise<Object>} Ответ API
+   */
+  async setupPassword(token, password) {
+    try {
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/password/client/setup`, {
+        token: token,
+        password: password
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Регистрация клиента
+   * @param {Object} clientData - Данные клиента для регистрации
+   * @returns {Promise<Object>} Ответ API
+   */
+  async registerClient(clientData) {
+    try {
+      const response = await axios.post(`${this.baseURL}/api/auth/register/client`, clientData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
    * Авторизация через Telegram
    * @param {Object} telegramData - Данные от Telegram
    * @returns {Promise<Object>} Ответ API

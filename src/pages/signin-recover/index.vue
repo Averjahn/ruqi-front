@@ -44,10 +44,9 @@
           <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
           <img class="mb_18" src="@/assets/icons/logo.svg" />
           <h3>Восстановление пароля</h3>
-          <p class="recover-password__description">
-            Мы отправили {{ codeTypeText.type }} с кодом на {{ codeTypeText.target }} <br />
-            {{ formattedPhone }}
-          </p>
+          <FooterInfo 
+            :text="`Мы отправили ${codeTypeText.type} с кодом на ${codeTypeText.target} ${formattedPhone}`"
+          />
         </div>
         <div class="recover-password_body">
           <OtpInput :isValid="isCodeValid" class="mb_16" @onInput="onChangedCode">

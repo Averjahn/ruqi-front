@@ -3,10 +3,9 @@
     <div class="sign_in_by_sms_container">
       <div class="logo_icons">
         <div class="form_header">Введите код из SMS</div>
-        <p class="recover-password__description">
-          Мы отправили SMS с кодом на номер <br />
-          {{ phone }}
-        </p>
+        <FooterInfo 
+          :text="`Мы отправили SMS с кодом на номер ${phone}`"
+        />
       </div>
 
       <OtpInput :isValid="isCodeValid" class="code_input" @onInput="onChangedCode">
