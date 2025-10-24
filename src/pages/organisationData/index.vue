@@ -420,6 +420,7 @@ import FieldsRow from '@/components/atoms/FieldsRow.vue'
 import RegistrationSteps from '@/components/molecules/RegistrationSteps.vue'
 import { rules } from '@/constants/validations'
 import dadataApi from '@/services/dadataApi'
+import authApi from '@/services/authApi'
 
 export default {
   name: 'OrganisationData',
@@ -594,9 +595,46 @@ export default {
       }, 1000)
     },
 
-    handleFinish() {
-      // Переход на главную страницу или следующую страницу
-      this.$router.push('/')
+    async handleFinish() {
+      try {
+        // Подготавливаем данные для регистрации клиента
+        const clientData = {
+          firstname: this.formData.fullNamePerson?.split(' ')[1] || '',
+          lastname: this.formData.fullNamePerson?.split(' ')[0] || '',
+          middlename: this.formData.fullNamePerson?.split(' ')[2] || '',
+          phone: this.formData.phone || '',
+          email: this.formData.email || '',
+          birthday: this.formData.birthday || '',
+          citizenship: this.formData.citizenship || 'RU',
+          company_name: this.formData.fullName || '',
+          company_inn: this.formData.inn || ''
+        }
+
+        console.log('📤 Отправляем данные регистрации:', clientData)
+
+        // Вызываем registerClient из authApi
+        const result = await authApi.registerClient(clientData)
+        
+        if (result.success) {
+          this.showNotification({
+            type: 'success',
+            text: 'Регистрация успешно завершена!',
+          })
+          // Переход на главную страницу
+          this.$router.push('/')
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: result.error?.msg || 'Ошибка при регистрации',
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка регистрации:', error)
+        this.showNotification({
+          type: 'error',
+          text: 'Произошла ошибка при регистрации',
+        })
+      }
     },
 
     handleUploadError(errorMessage) {
