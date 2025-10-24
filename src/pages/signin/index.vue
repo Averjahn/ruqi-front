@@ -6,9 +6,9 @@
           <img src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
           <img class="ruqi_logo_text" src="@/assets/icons/logo.svg" />
         </div>
-        <div class="form_header">Вход в систему</div>
+        <div class="form_header">{{ callRequested ? 'Регистрация' : 'Вход в систему' }}</div>
       </div>
-      <AuthTabs :value="currentTab" :old-method="oldMethod" @change="changeTab" />
+      <AuthTabs v-if="!callRequested" :value="currentTab" :old-method="oldMethod" @change="changeTab" />
 
       <template v-if="currentTab === 'by_password'">
         <Form ref="form" class="content_container">
@@ -131,14 +131,14 @@
               />
               
               <!-- Скрытая кнопка для тестирования (только для разработчиков) -->
-              <button 
+              <!-- <button 
                 v-if="isDevelopment"
                 @click="simulateCallSuccess"
                 class="test-button"
                 style="margin-top: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 12px; width: 100%;"
               >
                 🧪 Тест: Симулировать успешный звонок
-              </button>
+              </button> -->
               
               <FooterInfo 
                 text="Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с указанного вами номера, доступ будет предоставлен автоматически."
@@ -147,33 +147,32 @@
           </template>
 
           <template v-if="callRequested && !oldMethod">
-            <div class="action_view">
-              <div class="action_description">
-                Сделайте бесплатный звонок с номера <span class="phone_no_wrap">{{ phone }}</span
-                >, чтобы авторизоваться
+            <div class="call_instruction_card">
+              <div class="call_instruction_text">
+                Сделайте бесплатный звонок с номера {{ phone }}, чтобы авторизоваться
               </div>
-              <div class="call_phone">
+              <div class="phone_display">
                 <img class="phone_icon" src="@/assets/icons/phone_call_filled_lightBlue.svg" />
-                <span class="phone_no_wrap call_to_phone">{{ callToPhone }}</span>
-                <ButtonIconGhost @click="copyPhoneNumber">
-                  <img src="@/assets/icons/copy_outlined.svg" />
-                </ButtonIconGhost>
+                <span class="phone_number">{{ callToPhone || '+7 (999) 999-99-99' }}</span>
+                <img class="copy_icon" src="@/assets/icons/copy_outlined.svg" @click="copyPhoneNumber" />
               </div>
             </div>
-            <MainButton 
-              type="primary" 
+            <!-- Кнопка "Позвонить" - видна только на мобильных устройствах -->
+            <MainButton
+              type="primary"
               text="Позвонить"
-              @click="makeCall" 
-              :loading="loading" 
-              class="signin_button call_btn" 
+              @click="makeCall"
+              :loading="loading"
+              class="signin_button call_btn_mobile"
             />
+            
             <MainButton
               type="primary-outline"
               :text="!!this.remaining ? `Изменить номер через ${remainingTimeString}` : 'Изменить номер'"
               @click="changeCallRequestedStatus"
               :disabled="loading || isTimerRunning"
               :loading="loading"
-              class="signin_button"
+              class="signin_button change_number_btn"
             />
           </template>
           <div v-if="currentTab !== 'by_phone_call'" class="agreements_check">
@@ -719,24 +718,68 @@ export default {
     font-weight: 400;
     line-height: 28px;
   }
-  .action_view {
+  .call_instruction_card {
     padding: 16px 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    justify-items: center;
+    align-items: center;
     border-radius: 16px;
-    border: 1px solid #0000001a;
-    .call_phone {
-      margin: 0 auto;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      .phone_icon {
-        width: 28px;
-        height: auto;
-      }
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    width: 100%;
+  }
+
+  .call_instruction_text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 26px;
+    text-align: center;
+    color: #263043;
+    max-width: 438px;
+  }
+
+  .phone_display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .phone_icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .phone_number {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 28px;
+    color: #263043;
+  }
+
+  .copy_icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
     }
+  }
+
+  .change_number_btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .call_btn_mobile {
+    width: 100%;
+    max-width: none;
+    display: none; /* Скрыта по умолчанию */
   }
 
   .call_btn {
@@ -785,6 +828,11 @@ export default {
     background: transparent;
     .action_btn_text::after {
       content: '';
+    }
+    
+    /* Показываем кнопку "Позвонить" на мобильных устройствах */
+    .call_btn_mobile {
+      display: block !important;
     }
     .action_description {
       font-size: 16px;
