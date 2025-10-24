@@ -320,7 +320,7 @@ class AuthApiService {
    */
   async registerClient(clientData) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/auth/register/client`, clientData)
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/register/client`, clientData)
       
       // Проверяем успешность ответа от API
       if (response.data.success) {

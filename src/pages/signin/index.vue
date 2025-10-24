@@ -1,9 +1,5 @@
 <template>
   <div class="login_page">
-    <!-- DEBUG: Индикатор режима тестирования -->
-    <div v-if="debugMode" class="debug-indicator">
-      🧪 DEBUG MODE: Нажмите "y" для переключения
-    </div>
     <div class="form_block">
       <div class="logo_block">
         <div class="logo_icons">
@@ -133,6 +129,17 @@
                 :loading="loading"
                 class="signin_button"
               />
+              
+              <!-- Скрытая кнопка для тестирования (только для разработчиков) -->
+              <button 
+                v-if="isDevelopment"
+                @click="simulateCallSuccess"
+                class="test-button"
+                style="margin-top: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 12px; width: 100%;"
+              >
+                🧪 Тест: Симулировать успешный звонок
+              </button>
+              
               <FooterInfo 
                 text="Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с указанного вами номера, доступ будет предоставлен автоматически."
               />
@@ -274,7 +281,6 @@ export default {
       currentTab: 'by_phone_call',
       callRequested: false,
       oldMethod: false,
-      debugMode: false, // Временный переключатель для тестирования
       authInterval: null,
       onceToken: null,
       callToPhone: null,
@@ -282,6 +288,7 @@ export default {
       loginClient: null,
       authLoading: false,
       authError: null,
+      isDevelopment: process.env.NODE_ENV === 'development',
     }
   },
   mounted () {
@@ -296,24 +303,6 @@ export default {
       // Ошибка инициализации
     }
 
-    console.log('🎧 Добавляем обработчик клавиш keydown')
-    console.log('🔧 this.handleKeyPress:', typeof this.handleKeyPress)
-    console.log('🔧 document:', document)
-    
-    // Добавляем глобальный обработчик для тестирования
-    const globalKeyHandler = (event) => {
-      console.log('🌍 Глобальный обработчик сработал:', event.key)
-    }
-    document.addEventListener('keydown', globalKeyHandler)
-    
-    document.addEventListener('keydown', this.handleKeyPress)
-    console.log('✅ Обработчик добавлен')
-    
-    // Очищаем обработчик при размонтировании
-    this.$once('hook:beforeDestroy', () => {
-      console.log('🧹 Удаляем обработчик клавиш')
-      document.removeEventListener('keydown', this.handleKeyPress)
-    })
   },
   computed: {
     remainingTimeString () {
@@ -337,44 +326,22 @@ export default {
     ...mapActions('notifications', ['showNotification']),
     ...mapActions('user', ['fetchUser']),
 
-    // Временный обработчик клавиши "y" для тестирования
-    handleKeyPress (event) {
-      console.log('🎯 handleKeyPress вызван!')
-      console.log('🔍 Клавиша нажата:', event.key, 'Код:', event.code)
-      console.log('🎯 Текущий debugMode:', this.debugMode)
-      console.log('🎯 event.target:', event.target)
-      console.log('🎯 event.currentTarget:', event.currentTarget)
-      
-      if (event.key === 'y' || event.key === 'Y') {
-        console.log('✅ Клавиша Y обнаружена! Переключаем debugMode')
-        this.debugMode = !this.debugMode
-        console.log('🔄 Новый debugMode:', this.debugMode)
-        
-        if (this.debugMode) {
-          console.log('🚀 Активируем режим тестирования')
-          // Симулируем успешный запрос звонка
-          this.callRequested = true
-          this.onceToken = 'debug_token_' + Date.now()
-          this.callToPhone = '+7 (999) 123-45-67'
-          this.launchTimer(180)
-          this.showNotification({
-            type: 'success',
-            text: 'DEBUG: Переключен в режим тестирования. Переходим к вводу кода.'
-          })
-        } else {
-          console.log('⏹️ Отключаем режим тестирования')
-          this.showNotification({
-            type: 'info',
-            text: 'DEBUG: Режим тестирования отключен.'
-          })
-        }
-      } else {
-        console.log('❌ Нажата не та клавиша:', event.key)
-      }
-    },
 
     changeTab (value) {
       this.currentTab = value
+    },
+
+    // Метод для симуляции успешного звонка (только для разработчиков)
+    simulateCallSuccess() {
+      console.log('🧪 Симулируем успешный звонок')
+      this.callRequested = true
+      this.onceToken = 'test_token_' + Date.now()
+      this.callToPhone = this.phone || '+7 (999) 123-45-67'
+      this.launchTimer(180)
+      this.showNotification({
+        type: 'success',
+        text: 'ТЕСТ: Симулирован успешный запрос звонка. Переходим к вводу кода.'
+      })
     },
 
     changeCallRequestedStatus () {
@@ -813,26 +780,6 @@ export default {
     }
   }
 
-  .debug-indicator {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: #ff6b6b;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    z-index: 9999;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
-  }
 
   @media (max-width: 768px) {
     background: transparent;
