@@ -7,7 +7,8 @@
         <h3>Регистрация</h3>
       </div>
 
-      <div class="signup-page__body">
+      <!-- Шаг 1: Ввод телефона -->
+      <div class="signup-page__body" v-if="step === 1">
         <Input 
           class="input" 
           label="Телефон" 
@@ -74,6 +75,85 @@
           </div>
         </div>
       </div>
+
+      <!-- Шаг 2: Форма регистрации -->
+      <div class="signup-page__body" v-if="step === 2">
+        <h4>Завершите регистрацию</h4>
+        
+        <div class="form-row">
+          <Input 
+            class="input" 
+            label="Имя" 
+            v-model="registrationData.firstname"
+            placeholder="Введите имя"
+          />
+          <Input 
+            class="input" 
+            label="Фамилия" 
+            v-model="registrationData.lastname"
+            placeholder="Введите фамилию"
+          />
+        </div>
+
+        <Input 
+          class="input" 
+          label="Отчество" 
+          v-model="registrationData.middlename"
+          placeholder="Введите отчество (необязательно)"
+        />
+
+        <Input 
+          class="input" 
+          label="Email" 
+          v-model="registrationData.email"
+          type="email"
+          placeholder="example@email.com"
+        />
+
+        <Input 
+          class="input" 
+          label="Дата рождения" 
+          v-model="registrationData.birthday"
+          type="date"
+        />
+
+        <Input 
+          class="input" 
+          label="Гражданство" 
+          v-model="registrationData.citizenship"
+          placeholder="RU"
+        />
+
+        <Input 
+          class="input" 
+          label="Название компании" 
+          v-model="registrationData.company_name"
+          placeholder="ООО Ромашка"
+        />
+
+        <Input 
+          class="input" 
+          label="ИНН компании" 
+          v-model="registrationData.company_inn"
+          placeholder="1234567890"
+        />
+
+        <MainButton
+          type="primary"
+          text="Завершить регистрацию"
+          :loading="loading"
+          :disabled="!isRegistrationFormValid"
+          class="signup-page__btn"
+          @click="submitRegistration"
+        />
+
+        <MainButton 
+          type="neutral" 
+          text="Назад" 
+          class="signup-page__btn signup-page__btn--secondary"
+          @click="step = 1" 
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -106,6 +186,17 @@ export default {
       termAgree: true,
       phone: '',
       step: 1,
+      registrationData: {
+        firstname: '',
+        lastname: '',
+        middlename: '',
+        phone: '',
+        email: '',
+        birthday: '',
+        citizenship: 'RU',
+        company_name: '',
+        company_inn: ''
+      }
     }
   },
   computed: {
@@ -117,6 +208,25 @@ export default {
     },
     formattedPhone () {
       return this.phone
+    },
+    isRegistrationFormValid () {
+      const isValid = !!(
+        this.registrationData.firstname && 
+        this.registrationData.lastname && 
+        this.registrationData.email && 
+        this.registrationData.phone
+      )
+      
+      // Временная отладка
+      console.log('🔍 Проверка валидности формы:', {
+        firstname: this.registrationData.firstname,
+        lastname: this.registrationData.lastname,
+        email: this.registrationData.email,
+        phone: this.registrationData.phone,
+        isValid
+      })
+      
+      return isValid
     }
   },
   methods: {
@@ -155,6 +265,8 @@ export default {
           },
         )
         if (response?.data?.success) {
+          // Сохраняем номер телефона для регистрации
+          this.registrationData.phone = clearPhoneWithoutPlus(this.phone)
           this.step = 2
           this.launchTimer(180)
         } else {
@@ -165,6 +277,43 @@ export default {
       } catch (error) {
         this.showNotification({
           text: 'Ошибка при запросе кода.',
+        })
+      }
+      this.loading = false
+    },
+
+    async submitRegistration () {
+      // Валидация обязательных полей
+      if (!this.registrationData.firstname || !this.registrationData.lastname || 
+          !this.registrationData.email || !this.registrationData.phone) {
+        this.showNotification({
+          type: 'error',
+          text: 'Пожалуйста, заполните все обязательные поля.',
+        })
+        return
+      }
+
+      this.loading = true
+      try {
+        const response = await this.$axios.post('api/auth/register/client', this.registrationData)
+        
+        if (response?.data?.success) {
+          this.showNotification({
+            type: 'success',
+            text: 'Регистрация успешно завершена!',
+          })
+          // Перенаправляем на страницу входа
+          this.$router.push('/client/signin')
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: getAPIError(response) || 'Ошибка при регистрации.',
+          })
+        }
+      } catch (error) {
+        this.showNotification({
+          type: 'error',
+          text: 'Ошибка при регистрации.',
         })
       }
       this.loading = false
@@ -240,6 +389,25 @@ export default {
     flex-direction: column;
     gap: 20px;
     width: 100%;
+
+    h4 {
+      color: #263043;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 24px;
+      text-align: center;
+      margin: 0 0 16px 0;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 20px;
+      }
+    }
   }
 
   &__btn {

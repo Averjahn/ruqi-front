@@ -523,6 +523,18 @@ export default {
       return '@/assets/imgs/document.png' // Образец по умолчанию
     }
   },
+  watch: {
+    'formData.logo'(newLogo) {
+      console.log('🖼️ formData.logo изменился:', newLogo)
+      if (newLogo) {
+        console.log('📁 Логотип загружен:', {
+          name: newLogo.name,
+          size: newLogo.size,
+          type: newLogo.type
+        })
+      }
+    }
+  },
   methods: {
     openDocumentModal(documentType = null) {
       this.currentDocumentFile = documentType
@@ -576,6 +588,18 @@ export default {
 
     handleUploadError(errorMessage) {
       console.error('Upload error:', errorMessage)
+    },
+
+    // Отладочный метод для отслеживания изменений logo
+    watchFormDataLogo() {
+      console.log('🖼️ formData.logo изменился:', this.formData.logo)
+      if (this.formData.logo) {
+        console.log('📁 Логотип загружен:', {
+          name: this.formData.logo.name,
+          size: this.formData.logo.size,
+          type: this.formData.logo.type
+        })
+      }
     },
 
     // DaData методы

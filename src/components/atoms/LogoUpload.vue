@@ -101,6 +101,7 @@ export default {
   },
   watch: {
     modelValue(newFile) {
+      console.log('📁 modelValue изменился:', newFile)
       if (newFile) {
         this.createPreview(newFile)
       } else {
@@ -167,19 +168,26 @@ export default {
     },
     
     validateImageDimensions(file) {
+      console.log('🔍 validateImageDimensions для файла:', file.name, file.size, 'байт')
       const img = new Image()
       img.onload = () => {
+        console.log('📐 Размеры изображения:', img.width, 'x', img.height, 'px')
+        console.log('📏 Минимальные требования:', this.minWidth, 'x', this.minHeight, 'px')
+        
         if (img.width < this.minWidth || img.height < this.minHeight) {
+          console.log('❌ Изображение слишком маленькое')
           this.setError(`Минимальный размер изображения: ${this.minWidth}×${this.minHeight}px. Текущий размер: ${img.width}×${img.height}px`)
           return
         }
         
+        console.log('✅ Все проверки пройдены - открываем cropper')
         // Все проверки пройдены - открываем cropper
         this.pendingFile = file
         this.showCropper = true
       }
       
       img.onerror = () => {
+        console.log('❌ Ошибка загрузки изображения')
         this.setError('Не удалось загрузить изображение')
       }
       
@@ -188,8 +196,11 @@ export default {
     
     createPreview(file) {
       this.clearPreview()
-      this.previewUrl = URL.createObjectURL(file)
-      this.fileName = file.name
+      if (file) {
+        this.previewUrl = URL.createObjectURL(file)
+        this.fileName = file.name
+        console.log('🖼️ Создан превью для файла:', file.name, 'Размер:', file.size, 'байт')
+      }
     },
     
     clearPreview() {
@@ -225,9 +236,12 @@ export default {
 
     // Cropper methods
     handleAvatarReady({ blob, dataUrl }) {
+      console.log('🎯 handleAvatarReady вызван с:', { blob, dataUrl })
       // Создаем файл из blob
       const file = new File([blob], this.pendingFile.name, { type: 'image/png' })
+      console.log('📁 Создан файл из blob:', file.name, file.size, 'байт')
       this.$emit('update:modelValue', file)
+      console.log('📤 Эмитирован update:modelValue с файлом:', file.name)
       this.createPreview(file)
       this.closeCropper()
     },
@@ -294,6 +308,11 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    
+    img {
+      width: 40px;
+      height: 40px;
+    }
   }
 
   &__texts {
@@ -378,6 +397,8 @@ export default {
     object-position: center;
     border-radius: 8px;
     display: block;
+    max-width: 98px;
+    max-height: 98px;
   }
 
   &__preview-texts {
@@ -397,31 +418,81 @@ export default {
 
 @media (max-width: 768px) {
   .logo-upload {
+    max-width: 100%;
+    
     &__card {
       padding: 16px;
+      border-radius: 8px;
     }
 
     &__content,
     &__preview-content {
-      flex-direction: column;
+      flex-direction: row; // Иконка слева, текст справа
       gap: 16px;
+      align-items: flex-start; // Выравнивание по верхнему краю
     }
 
     &__upload-area,
     &__preview-area {
-      width: 80px;
-      height: 80px;
-      align-self: center;
+      width: 64px; // Минимальный размер 64x64px
+      height: 64px; // Минимальный размер 64x64px
+      flex-shrink: 0; // Не сжимается
+      border-radius: 8px;
+    }
+
+    &__icon {
+      width: 28px; // Размер иконки камеры
+      height: 28px;
+      
+      img {
+        width: 28px;
+        height: 28px;
+      }
     }
 
     &__texts,
     &__preview-texts {
-      text-align: center;
+      text-align: left; // Текст слева
+      flex: 1; // Занимает оставшееся место
+      min-width: 0; // Позволяет тексту сжиматься
+    }
+
+    &__title {
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    &__hint {
+      font-size: 13px;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      color: #6b7280;
     }
 
     &__upload-link,
     &__remove-link {
-      text-align: center;
+      text-align: left;
+      margin-top: 8px;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    &__upload-link {
+      color: #1735f5;
+      font-weight: 500;
+    }
+
+    &__remove-link {
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    &__preview-image {
+      max-width: 64px;
+      max-height: 64px;
+      border-radius: 8px;
     }
   }
 }
