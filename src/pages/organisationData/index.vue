@@ -524,28 +524,14 @@ export default {
       const hasOgrnCertificate = !!this.formData.ogrnCertificate?.file
       const hasKppCertificate = !!this.formData.kppCertificate?.file
       
-      console.log('🔍 Проверка canFinish:', {
-        hasLogo,
-        hasInn,
-        hasFullName,
-        hasInnCertificate,
-        hasOgrnCertificate,
-        hasKppCertificate,
-        canFinish: hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate && hasKppCertificate
-      })
       
       return hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate && hasKppCertificate
     }
   },
   watch: {
     'formData.logo'(newLogo) {
-      console.log('🖼️ formData.logo изменился:', newLogo)
+      // console.log('🖼️ formData.logo изменился:', newLogo)
       if (newLogo) {
-        console.log('📁 Логотип загружен:', {
-          name: newLogo.name,
-          size: newLogo.size,
-          type: newLogo.type
-        })
       }
     }
   },
@@ -562,12 +548,12 @@ export default {
 
     handleStepChange(stepIndex) {
       this.currentStep = stepIndex
-      console.log('Переход на шаг:', stepIndex + 1)
+      // console.log('Переход на шаг:', stepIndex + 1)
     },
 
     handlePreviousStep(stepIndex) {
       this.currentStep = stepIndex
-      console.log('Предыдущий шаг:', stepIndex + 1)
+      // console.log('Предыдущий шаг:', stepIndex + 1)
     },
 
     async handleNextStep(stepIndex) {
@@ -610,7 +596,7 @@ export default {
           company_inn: this.formData.inn || ''
         }
 
-        console.log('📤 Отправляем данные регистрации:', clientData)
+        // console.log('📤 Отправляем данные регистрации:', clientData)
 
         // Вызываем registerClient из authApi
         const result = await authApi.registerClient(clientData)
@@ -643,13 +629,8 @@ export default {
 
     // Отладочный метод для отслеживания изменений logo
     watchFormDataLogo() {
-      console.log('🖼️ formData.logo изменился:', this.formData.logo)
+      // console.log('🖼️ formData.logo изменился:', this.formData.logo)
       if (this.formData.logo) {
-        console.log('📁 Логотип загружен:', {
-          name: this.formData.logo.name,
-          size: this.formData.logo.size,
-          type: this.formData.logo.type
-        })
       }
     },
 
@@ -661,7 +642,7 @@ export default {
       // Автоматический поиск при достижении 10 или 12 символов
       const innLength = this.formData.inn.length
       if (innLength === 10 || innLength === 12) {
-        console.log('🔍 Автоматический поиск по ИНН:', this.formData.inn)
+        // console.log('🔍 Автоматический поиск по ИНН:', this.formData.inn)
         this.searchByInn()
       }
     },
@@ -676,17 +657,17 @@ export default {
       this.dadataError = null
 
       try {
-        console.log('🔍 Поиск организации по ИНН:', this.formData.inn)
+        // console.log('🔍 Поиск организации по ИНН:', this.formData.inn)
         const result = await dadataApi.findParty(this.formData.inn)
         
-        console.log('📡 Ответ от DaData API:', result)
+        // console.log('📡 Ответ от DaData API:', result)
         
         if (result.success && result.data.suggestions && result.data.suggestions.length > 0) {
           const organization = result.data.suggestions[0].data
-          console.log('🏢 Данные организации:', organization)
+          // console.log('🏢 Данные организации:', organization)
           this.fillOrganizationData(organization)
         } else {
-          console.log('❌ Организация не найдена')
+          // console.log('❌ Организация не найдена')
           this.dadataError = 'Организация не найдена'
         }
       } catch (error) {
@@ -699,8 +680,8 @@ export default {
     },
 
     fillOrganizationData(organization) {
-      console.log('📝 Заполнение формы данными организации...')
-      console.log('🔍 Полная структура данных организации:', organization)
+      // console.log('📝 Заполнение формы данными организации...')
+      // console.log('🔍 Полная структура данных организации:', organization)
       
       // Заполняем поля формы данными из DaData
       this.formData.fullName = organization.name?.full_with_opf || organization.name?.full || ''
@@ -708,18 +689,6 @@ export default {
       this.formData.ogrn = organization.ogrn || ''
       this.formData.okato = organization.address?.data?.okato || ''
       
-      console.log('📋 Основные данные:', {
-        fullName: this.formData.fullName,
-        kpp: this.formData.kpp,
-        ogrn: this.formData.ogrn,
-        okato: this.formData.okato
-      })
-      
-      console.log('🔴 Соответствия полей:')
-      console.log('🔴 Полное наименование:', organization.name?.full_with_opf || organization.name?.full, '→', this.formData.fullName)
-      console.log('🔴 КПП:', organization.kpp, '→', this.formData.kpp)
-      console.log('🔴 ОГРН:', organization.ogrn, '→', this.formData.ogrn)
-      console.log('🔴 ОКАТО:', organization.address?.data?.okato, '→', this.formData.okato)
       
       // Адрес
       if (organization.address?.data) {
@@ -735,10 +704,6 @@ export default {
         this.formData.legalAddress = fullAddress
         this.formData.mailingAddress = fullAddress
         
-        console.log('🏠 Адрес:', {
-          raw: organization.address.data,
-          fullAddress: fullAddress
-        })
       }
 
       // Банковские реквизиты
@@ -747,11 +712,6 @@ export default {
         this.formData.bic = organization.bank.bic || ''
         this.formData.correspondentAccount = organization.bank.correspondent_account || ''
         
-        console.log('🏦 Банковские реквизиты:', {
-          bank: this.formData.bank,
-          bic: this.formData.bic,
-          correspondentAccount: this.formData.correspondentAccount
-        })
       }
 
       // Статус организации
@@ -762,25 +722,25 @@ export default {
       }
 
       // Должность руководителя
-      console.log('🔍 Проверка management:', organization.management)
+      // console.log('🔍 Проверка management:', organization.management)
       if (organization.management?.post) {
         this.formData.position = organization.management.post
-        console.log('👔 Должность руководителя:', organization.management.post)
-        console.log('🔴 Соответствие: management.post → position:', organization.management.post, '→', this.formData.position)
+        // console.log('👔 Должность руководителя:', organization.management.post)
+        // console.log('🔴 Соответствие: management.post → position:', organization.management.post, '→', this.formData.position)
       } else {
-        console.log('❌ management.post не найден:', organization.management)
+        // console.log('❌ management.post не найден:', organization.management)
       }
 
       // ФИО руководителя
       if (organization.management?.name) {
         this.formData.fullNamePerson = organization.management.name
-        console.log('👤 ФИО руководителя:', organization.management.name)
-        console.log('🔴 Соответствие: management.name → fullNamePerson:', organization.management.name, '→', this.formData.fullNamePerson)
+        // console.log('👤 ФИО руководителя:', organization.management.name)
+        // console.log('🔴 Соответствие: management.name → fullNamePerson:', organization.management.name, '→', this.formData.fullNamePerson)
       } else {
-        console.log('❌ management.name не найден:', organization.management)
+        // console.log('❌ management.name не найден:', organization.management)
       }
       
-      console.log('✅ Форма заполнена:', this.formData)
+      // console.log('✅ Форма заполнена:', this.formData)
     },
 
     handleOgrnFileUpload(event) {

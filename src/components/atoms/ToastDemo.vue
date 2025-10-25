@@ -101,7 +101,7 @@ export default {
   components: { Toast },
   methods: {
     handleClose() {
-      console.log('Toast closed')
+      // console.log('Toast closed')
     }
   }
 }

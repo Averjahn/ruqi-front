@@ -24,6 +24,7 @@ import Checkbox from '@/components/atoms/Checkbox'
 import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
 import FooterInfo from '@/components/atoms/FooterInfo.vue'
 import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
+import CodeInput from '@/components/atoms/CodeInput.vue'
 import Icon from '@/components/atoms/icon/Icon'
 import AccountConfirmation from '@/components/molecules/AccountConfirmation.vue'
 
@@ -55,5 +56,6 @@ export default [
   ResendCodeTimer,
   FooterInfo,
   AgreementCheck,
+  CodeInput,
   AccountConfirmation,
 ]

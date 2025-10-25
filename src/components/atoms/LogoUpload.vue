@@ -101,7 +101,7 @@ export default {
   },
   watch: {
     modelValue(newFile) {
-      console.log('📁 modelValue изменился:', newFile)
+      // console.log('📁 modelValue изменился:', newFile)
       if (newFile) {
         this.createPreview(newFile)
       } else {
@@ -168,26 +168,26 @@ export default {
     },
     
     validateImageDimensions(file) {
-      console.log('🔍 validateImageDimensions для файла:', file.name, file.size, 'байт')
+      // console.log('🔍 validateImageDimensions для файла:', file.name, file.size, 'байт')
       const img = new Image()
       img.onload = () => {
-        console.log('📐 Размеры изображения:', img.width, 'x', img.height, 'px')
-        console.log('📏 Минимальные требования:', this.minWidth, 'x', this.minHeight, 'px')
+        // console.log('📐 Размеры изображения:', img.width, 'x', img.height, 'px')
+        // console.log('📏 Минимальные требования:', this.minWidth, 'x', this.minHeight, 'px')
         
         if (img.width < this.minWidth || img.height < this.minHeight) {
-          console.log('❌ Изображение слишком маленькое')
+          // console.log('❌ Изображение слишком маленькое')
           this.setError(`Минимальный размер изображения: ${this.minWidth}×${this.minHeight}px. Текущий размер: ${img.width}×${img.height}px`)
           return
         }
         
-        console.log('✅ Все проверки пройдены - открываем cropper')
+        // console.log('✅ Все проверки пройдены - открываем cropper')
         // Все проверки пройдены - открываем cropper
         this.pendingFile = file
         this.showCropper = true
       }
       
       img.onerror = () => {
-        console.log('❌ Ошибка загрузки изображения')
+        // console.log('❌ Ошибка загрузки изображения')
         this.setError('Не удалось загрузить изображение')
       }
       
@@ -199,7 +199,7 @@ export default {
       if (file) {
         this.previewUrl = URL.createObjectURL(file)
         this.fileName = file.name
-        console.log('🖼️ Создан превью для файла:', file.name, 'Размер:', file.size, 'байт')
+        // console.log('🖼️ Создан превью для файла:', file.name, 'Размер:', file.size, 'байт')
       }
     },
     
@@ -236,12 +236,12 @@ export default {
 
     // Cropper methods
     handleAvatarReady({ blob, dataUrl }) {
-      console.log('🎯 handleAvatarReady вызван с:', { blob, dataUrl })
+      // console.log('🎯 handleAvatarReady вызван с:', { blob, dataUrl })
       // Создаем файл из blob
       const file = new File([blob], this.pendingFile.name, { type: 'image/png' })
-      console.log('📁 Создан файл из blob:', file.name, file.size, 'байт')
+      // console.log('📁 Создан файл из blob:', file.name, file.size, 'байт')
       this.$emit('update:modelValue', file)
-      console.log('📤 Эмитирован update:modelValue с файлом:', file.name)
+      // console.log('📤 Эмитирован update:modelValue с файлом:', file.name)
       this.createPreview(file)
       this.closeCropper()
     },

@@ -1,123 +1,86 @@
 <template>
   <div class="recover-password">
-    <template v-if="step === 1">
-      <div class="recover-password__wrapper">
-        <div class="recover-password_header">
-          <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-          <img class="mb_18" src="@/assets/icons/logo.svg" />
-          <h3>Восстановление пароля</h3>
-        </div>
+    <div class="recover-password__wrapper">
+      <div class="recover-password_header">
+        <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
+        <img class="mb_18" src="@/assets/icons/logo.svg" />
+        <h3>Восстановление пароля</h3>
 
-        <div class="recover-password_body">
-          <Input class="input" label="Телефон" :value="formattedPhone" @input="onPhone" :disabled="isTimerRunning" />
-
-          <ResendCodeTimer 
-            v-if="isTimerRunning"
-            :duration="60" 
-            :auto-start="true"
-            @resend="handleResendCode"
-          />
-
-          <MainButton
-            v-if="isTimerRunning && step === 1"
-            type="primary"
-            text="Ввести код"
-            :loading="loading"
-            class="recover-password__btn"
-            @click="step = 2"
-            :disabled="loading"
-          />
-          <MainButton
-            v-if="!isTimerRunning && step === 1"
-            type="primary"
-            text="Отправить код"
-            :loading="loading"
-            class="recover-password__btn"
-            @click="requestCode"
-            :disabled="disableHandler || isTimerRunning"
-          />
-          <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="back" />
-        </div>
       </div>
-    </template>
 
-    <template v-if="step === 2">
-      <div class="recover-password__wrapper">
-        <div class="recover-password_header">
-          <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-          <img class="mb_18" src="@/assets/icons/logo.svg" />
-          <h3>Восстановление пароля</h3>
-          <FooterInfo 
-            :text="`Мы отправили ${codeTypeText.type} с кодом на ${codeTypeText.target} ${formattedPhone}`"
-          />
-        </div>
-        <div class="recover-password_body">
-          <OtpInput :isValid="isCodeValid" class="mb_16" @onInput="onChangedCode">
-            <template #errorMessage>Неверный код</template>
-          </OtpInput>
+      <!-- Шаг 1: Отправка кода -->
+      <div class="recover-password_body" v-if="step === 1">
+        <Input class="input" label="Телефон" :value="formattedPhone" @input="onPhone" />
 
-          <MainButton 
-            type="primary" 
-            text="Продолжить" 
-            :loading="loading" 
-            :disabled="continueDisabled" 
-            class="recover-password__btn" 
-            @click="submitCode" 
-          />
-          <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="back" />
-        </div>
+        <MainButton
+          type="primary"
+          text="Отправить код"
+          :loading="loading"
+          class="recover-password__btn"
+          @click="requestCode"
+          :disabled="disableHandler"
+        />
+        <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="back" />
       </div>
-    </template>
 
-    <template v-if="step === 3">
-      <div class="recover-password__wrapper">
-        <Form ref="form" class="form">
-          <div class="recover-password_header mb_32">
-            <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-            <img class="mb_18" src="@/assets/icons/logo.svg" />
-            <h3>Придумайте пароль</h3>
-          </div>
-          <div class="recover-password_body">
-            <Input
-              class="input"
-              label="Пароль"
-              type="password"
-              v-model="password"
-              validationType="input"
-              :rules="rulesSets.password"
-            />
+      <!-- Шаг 2: Ввод кода -->
+      <div class="recover-password_body" v-if="step === 2">
+        <CodeInput 
+          label="Код из телеграм"
+          placeholder="Введите код из телеграм"
+          v-model="code"
+        />
 
-            <Input
-              class="input"
-              label="Повторите пароль"
-              type="password"
-              v-model="confirmPassword"
-              validationType="input"
-              :rules="[...rulesSets.password, passwordMatchChecking]"
-            />
+        <ResendCodeTimer 
+          :duration="60" 
+          :auto-start="true"
+          @resend="handleResendCode"
+        />
 
-            <div class="recover-password__requirement">
-              <b>Требования к паролю</b>
-              <ul class="recover-password__requirement-list">
-                <li :class="{ green: passwordCheck.length }">Пароль должен состоять минимум из 8 символов</li>
-                <li :class="{ green: passwordCheck.upperCase }">Обязательно используйте заглавные</li>
-                <li :class="{ green: passwordCheck.lowerCase }">Обязательно используйте строчные буквы</li>
-                <li :class="{ green: passwordCheck.numbers }">Добавьте хотя бы одну цифру</li>
-              </ul>
-            </div>
+        <MainButton 
+          type="primary" 
+          text="Продолжить" 
+          :loading="loading" 
+          :disabled="!code || code.length < 4" 
+          class="recover-password__btn"
+          @click="confirmCode"
+        />
 
-            <MainButton
-              type="primary"
-              text="войти в систему"
-              :loading="loading"
-              class="recover-password__btn"
-              @click="changePassword"
-              :disabled="changePasswordDisabled"
-            />
-          </div>
-        </Form>
+        <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="step = 1" />
       </div>
-    </template>
+
+      <!-- Шаг 3: Ввод пароля -->
+      <div class="recover-password_body" v-if="step === 3">
+        <h4>Создайте новый пароль</h4>
+        
+        <Input 
+          class="input" 
+          label="Пароль" 
+          v-model="password"
+          type="password"
+          placeholder="Введите пароль"
+        />
+
+        <Input 
+          class="input" 
+          label="Подтвердите пароль" 
+          v-model="confirmPassword"
+          type="password"
+          placeholder="Подтвердите пароль"
+        />
+
+        <MainButton
+          type="primary"
+          text="Создать пароль"
+          :loading="loading"
+          :disabled="!isPasswordValid"
+          class="recover-password__btn"
+          @click="changePassword"
+        />
+
+        <MainButton class="recover-password__btn" type="primary-outline" text="Назад" @click="step = 2" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -129,35 +92,19 @@ import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
 import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
 import FooterInfo from '@/components/atoms/FooterInfo.vue'
-import useTimer from '@/composables/useSnackbarTimer'
-import { useAuth } from '@/composables/useAuth'
+import Input from '@/components/atoms/Input.vue'
+import CodeInput from '@/components/atoms/CodeInput.vue'
 import authApi from '@/services/authApi'
 import { mapActions } from 'vuex'
 
 export default {
   layout: 'empty',
-  components: { OtpInput, MainButton, ResendCodeTimer, FooterInfo },
-  setup () {
-    const { launchTimer, isTimerRunning, remaining } = useTimer({
-      timerId: 'signinRecover',
-    })
-    const { requestRecoveryCode, confirmRecoveryCode, setNewPassword, loading: authLoading, error: authError } = useAuth()
-    
-    return {
-      launchTimer,
-      isTimerRunning,
-      remaining,
-      requestRecoveryCode,
-      confirmRecoveryCode,
-      setNewPassword,
-      authLoading,
-      authError,
-    }
-  },
+  components: { OtpInput, MainButton, ResendCodeTimer, FooterInfo, Input, CodeInput },
   data () {
     return {
       step: 1,
       formattedPhone: '+7',
+      code: '',
       rulesSets,
       continueDisabled: true,
       loading: false,
@@ -174,10 +121,9 @@ export default {
     }
   },
   watch: {},
-  async mounted () {},
   computed: {
-    remainingTimeString () {
-      return getStringFromSeconds(this.remaining)
+    isPasswordValid () {
+      return this.password && this.confirmPassword && this.password === this.confirmPassword
     },
     codeTypeText () {
       switch (this.confirmMethod) {
@@ -243,13 +189,13 @@ export default {
       if (this.loading) return
       this.loading = true
       const phone = clearPhoneWithoutPlus(this.formattedPhone)
-      
+
       try {
         // Используем authApi для запроса кода восстановления
         const result = await authApi.requestRecoveryCode(phone)
         
         if (result.success) {
-          console.log('✅ Код отправлен успешно')
+          this.step = 2
         } else {
           this.showNotification({
             type: 'error',
@@ -262,13 +208,42 @@ export default {
           text: getAPIError(error) || 'Ошибка при запросе кода восстановления' 
         })
       } finally {
-        // Запускаем таймер в любом случае
-        console.log('🕐 Запускаем таймер в любом случае')
-        this.launchTimer(60)
-        console.log('🕐 isTimerRunning после launchTimer:', this.isTimerRunning)
         this.loading = false
       }
     },
+
+    async confirmCode() {
+      if (this.loading) return
+      this.loading = true
+      
+      try {
+        // Отправляем запрос на сервер для подтверждения кода
+        const phone = clearPhoneWithoutPlus(this.formattedPhone)
+        const result = await authApi.confirmRecoveryCode(phone, this.code)
+        
+        if (result.success) {
+          // Код подтвержден, переходим на шаг 3
+          this.step = 3
+          this.showNotification({
+            type: 'success',
+            text: 'Код подтвержден. Создайте новый пароль.'
+          })
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Неверный код подтверждения'
+          })
+        }
+      } catch (error) {
+        this.showNotification({
+          type: 'error',
+          text: getAPIError(error) || 'Ошибка при подтверждении кода'
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+
     async requestCodeAgain (method) {
       this.verification_by = method
       this.confirmMethod = method
@@ -282,7 +257,7 @@ export default {
         const result = await authApi.requestRecoveryCode(phone)
         
         if (result.success) {
-          console.log('✅ Код отправлен повторно')
+          // Код отправлен повторно
         } else {
           this.showNotification({
             type: 'error',
@@ -295,17 +270,10 @@ export default {
           text: getAPIError(error) || 'Ошибка при запросе кода восстановления' 
         })
       } finally {
-        // Запускаем таймер в любом случае
-        console.log('🕐 Запускаем таймер повторно в любом случае')
-        this.launchTimer(60)
         this.loading = false
       }
     },
 
-    onChangedCode (event) {
-      this.code = event
-      this.continueDisabled = event.length < 4
-    },
 
     back () {
       this.step === 1 ? this.$router.push('/client/signin') : this.step--
@@ -339,27 +307,44 @@ export default {
     },
 
     async changePassword () {
-      if (this.loading) return
-      if (!this.$refs.form.validate()) return
+      if (!this.isPasswordValid) {
+        this.showNotification({
+          type: 'error',
+          text: 'Пароли не совпадают или не заполнены'
+        })
+        return
+      }
+
       this.loading = true
-      const phone = clearPhoneWithoutPlus(this.formattedPhone)
-      
       try {
-        // Используем новый эндпоинт через useAuth
-        const success = await this.setNewPassword(phone, this.code, this.password)
+        // Используем authApi для установки пароля после восстановления
+        const result = await authApi.submitRecoveryPassword(
+          this.once_token || 'test_token_' + Date.now(),
+          this.password,
+          this.confirmPassword
+        )
         
-        if (success) {
-          this.$router.push('/client/signin')
-      } else {
-          this.showNotification({ 
-            type: 'error', 
-            text: this.authError?.[0]?.msg || 'Ошибка при сохранении нового пароля' 
+        if (result.success) {
+          this.showNotification({
+            type: 'success',
+            text: 'Пароль успешно изменен! Переходим на страницу входа.'
+          })
+          
+          // Переходим на страницу входа
+          setTimeout(() => {
+            this.$router.push('/client/signin')
+          }, 1500)
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Ошибка при установке пароля'
           })
         }
       } catch (error) {
-        this.showNotification({ 
-          type: 'error', 
-          text: getAPIError(error) || 'Ошибка при сохранении нового пароля' 
+        console.error('Ошибка установки пароля:', error)
+        this.showNotification({
+          type: 'error',
+          text: getAPIError(error) || 'Ошибка при установке пароля'
         })
       } finally {
         this.loading = false

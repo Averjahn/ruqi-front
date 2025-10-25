@@ -101,12 +101,12 @@ export default {
   },
   methods: {
     onTimerEnd() {
-      console.log('Таймер подбора завершился')
+      // console.log('Таймер подбора завершился')
       // Здесь можно добавить логику для обработки окончания таймера
       // Например, обновить статус заявки или показать уведомление
     },
     onNotificationAction(action) {
-      console.log('Notification action:', action)
+      // console.log('Notification action:', action)
       this.$emit('notification-action', action)
       // Здесь можно добавить логику для обработки действий уведомлений
     }

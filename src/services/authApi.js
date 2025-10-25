@@ -393,6 +393,38 @@ class AuthApiService {
       }]
     }
   }
+
+  /**
+   * Установка нового пароля после восстановления для клиента
+   * @param {string} onceToken - Токен из процесса восстановления
+   * @param {string} password - Новый пароль
+   * @param {string} confirmPassword - Подтверждение пароля
+   * @returns {Promise<Object>} Ответ API
+   */
+  async submitRecoveryPassword(onceToken, password, confirmPassword) {
+    try {
+      const response = await axios.post(`${this.baseURL}/api/v2/auth/recovery/client/submit-password`, {
+        once_token: onceToken,
+        password: password,
+        confirm_password: confirmPassword
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
 }
 
 // Создаем экземпляр сервиса

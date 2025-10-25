@@ -162,7 +162,7 @@ export default {
   methods: {
     handleAction(action) {
       this.$emit('action', action)
-      console.log('Modal notification action:', action)
+      // console.log('Modal notification action:', action)
     }
   }
 }
