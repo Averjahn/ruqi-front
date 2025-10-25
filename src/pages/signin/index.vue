@@ -53,18 +53,22 @@
               button-type="button"
             />
             <div class="agreements_check">
-              <AgreementCheck
-                v-model="termAgree"
-                text="Я ознакомился (-ась) и согласен (-на) с"
-                link-text="политикой в отношении обработки персональных данных"
-                link-route="/privacy-policy"
-              />
-              <AgreementCheck
-                v-model="agree"
-                text="Я ознакомился(-ась) и даю"
-                link-text="согласие на обработку моих персональных данных"
-                link-route="/personal"
-              />
+              <div class="personal-agreement-checkbox">
+                <Checkbox v-model="termAgree" class="checkbox" />
+                <div class="agreement-check">
+                  <div>
+                    Я ознакомился (-ась) и согласен (-на) с политикой в отношении обработки персональных данных
+                  </div>
+                </div>
+              </div>
+              <div class="personal-agreement-checkbox">
+                <Checkbox v-model="agree" class="checkbox" />
+                <div class="agreement-check">
+                  <div>
+                    Я ознакомился(-ась) и даю согласие на обработку моих персональных данных
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <!-- <div class="apps_block">
@@ -131,14 +135,14 @@
               />
               
               <!-- Скрытая кнопка для тестирования (только для разработчиков) -->
-              <!-- <button 
+              <button 
                 v-if="isDevelopment"
                 @click="simulateCallSuccess"
                 class="test-button"
                 style="margin-top: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 12px; width: 100%;"
               >
-                🧪 Тест: Симулировать успешный звонок
-              </button> -->
+                Симулировать успешный звонок
+              </button>
               
               <FooterInfo 
                 text="Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с указанного вами номера, доступ будет предоставлен автоматически."
@@ -245,6 +249,7 @@ import { mapActions } from 'vuex'
 import SignInBySms from '@/components/molecules/SignInBySms.vue'
 import AuthTabs from '@/components/molecules/AuthTabs.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
+import Checkbox from '@/components/atoms/Checkbox.vue'
 import { getAPIError, getAPIErrorMessage, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
@@ -256,7 +261,7 @@ const tabs = [
 ]
 
 export default {
-  components: { SignInBySms, AuthTabs, MainButton },
+  components: { SignInBySms, AuthTabs, MainButton, Checkbox },
   layout: 'empty',
   data () {
     return {

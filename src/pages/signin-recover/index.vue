@@ -11,9 +11,19 @@
         <div class="recover-password_body">
           <Input class="input" label="Телефон" :value="formattedPhone" @input="onPhone" :disabled="isTimerRunning" />
 
-          <div class="remaining" v-if="isTimerRunning">
-            Отправить код повторно <b>{{ remainingTimeString }}</b>
+          <!-- Отладочная информация -->
+          <div style="margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 4px; font-size: 12px;">
+            <div>isTimerRunning: {{ isTimerRunning }}</div>
+            <div>step: {{ step }}</div>
+            <div>loading: {{ loading }}</div>
           </div>
+
+          <ResendCodeTimer 
+            v-if="isTimerRunning"
+            :duration="60" 
+            :auto-start="true"
+            @resend="handleResendCode"
+          />
 
           <MainButton
             v-if="isTimerRunning && step === 1"
@@ -52,13 +62,6 @@
           <OtpInput :isValid="isCodeValid" class="mb_16" @onInput="onChangedCode">
             <template #errorMessage>Неверный код</template>
           </OtpInput>
-
-          <div class="remaining" v-if="isTimerRunning">
-            Отправить код повторно <b>{{ remainingTimeString }}</b>
-          </div>
-
-          <button v-if="!isTimerRunning" @click="requestCodeAgain('telegram')" class="recover-password__text-button">Отправить код повторно</button>
-          <button v-if="!isTimerRunning && initialResponseMethod !== 'sms'" @click="requestCodeAgain('sms')" class="recover-password__text-button">Получить код из СМС</button>
 
           <MainButton 
             type="primary" 
@@ -128,16 +131,19 @@
 <script>
 import { rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
-import { clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getAPIError, getStringFromSeconds } from '@/constants/helpers'
+import { clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getAPIError, getAPIErrorMessage, getStringFromSeconds } from '@/constants/helpers'
 import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
+import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
+import FooterInfo from '@/components/atoms/FooterInfo.vue'
 import useTimer from '@/composables/useSnackbarTimer'
 import { useAuth } from '@/composables/useAuth'
+import authApi from '@/services/authApi'
 import { mapActions } from 'vuex'
 
 export default {
   layout: 'empty',
-  components: { OtpInput, MainButton },
+  components: { OtpInput, MainButton, ResendCodeTimer, FooterInfo },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signinRecover',
@@ -246,16 +252,15 @@ export default {
       const phone = clearPhoneWithoutPlus(this.formattedPhone)
       
       try {
-        // Используем новый эндпоинт через useAuth с параметром verification_by
-        const success = await this.requestRecoveryCode(phone, 'telegram')
+        // Используем authApi для запроса кода восстановления
+        const result = await authApi.requestRecoveryCode(phone)
         
-        if (success) {
-          this.step = 2
-          this.launchTimer(180)
+        if (result.success) {
+          console.log('✅ Код отправлен успешно')
         } else {
-          this.showNotification({ 
-            type: 'error', 
-            text: this.authError?.[0]?.msg || 'Ошибка при запросе кода восстановления' 
+          this.showNotification({
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Ошибка при запросе кода восстановления'
           })
         }
       } catch (error) {
@@ -263,9 +268,13 @@ export default {
           type: 'error', 
           text: getAPIError(error) || 'Ошибка при запросе кода восстановления' 
         })
+      } finally {
+        // Запускаем таймер в любом случае
+        console.log('🕐 Запускаем таймер в любом случае')
+        this.launchTimer(60)
+        console.log('🕐 isTimerRunning после launchTimer:', this.isTimerRunning)
+        this.loading = false
       }
-      
-      this.loading = false
     },
     async requestCodeAgain (method) {
       this.verification_by = method
@@ -276,15 +285,15 @@ export default {
       const phone = clearPhoneWithoutPlus(this.formattedPhone)
       
       try {
-        // Используем новый эндпоинт через useAuth с выбранным методом
-        const success = await this.requestRecoveryCode(phone, method)
+        // Используем authApi для повторного запроса кода
+        const result = await authApi.requestRecoveryCode(phone)
         
-        if (success) {
-          this.launchTimer(180)
+        if (result.success) {
+          console.log('✅ Код отправлен повторно')
         } else {
-          this.showNotification({ 
-            type: 'error', 
-            text: this.authError?.[0]?.msg || 'Ошибка при запросе кода восстановления' 
+          this.showNotification({
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Ошибка при запросе кода восстановления'
           })
         }
       } catch (error) {
@@ -292,9 +301,12 @@ export default {
           type: 'error', 
           text: getAPIError(error) || 'Ошибка при запросе кода восстановления' 
         })
+      } finally {
+        // Запускаем таймер в любом случае
+        console.log('🕐 Запускаем таймер повторно в любом случае')
+        this.launchTimer(60)
+        this.loading = false
       }
-      
-      this.loading = false
     },
 
     onChangedCode (event) {
@@ -316,8 +328,8 @@ export default {
         const success = await this.confirmRecoveryCode(phone, this.code)
         
         if (success) {
-          this.step = 3
-        } else {
+        this.step = 3
+      } else {
           this.showNotification({
             type: 'error',
             text: this.authError?.[0]?.msg || 'Ошибка при отправке кода подтверждения на сервер',
@@ -345,7 +357,7 @@ export default {
         
         if (success) {
           this.$router.push('/client/signin')
-        } else {
+      } else {
           this.showNotification({ 
             type: 'error', 
             text: this.authError?.[0]?.msg || 'Ошибка при сохранении нового пароля' 
@@ -359,6 +371,11 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+
+    handleResendCode() {
+      // Обработчик для повторной отправки кода через ResendCodeTimer
+      this.requestCodeAgain('telegram')
     },
   },
 }
@@ -420,6 +437,7 @@ export default {
 
   .recover-password__btn {
     width: 100%;
+    max-width: none;
   }
 
   .recover-password__label {

@@ -46,7 +46,7 @@
           class="test-button"
           style="margin-top: 10px; padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 12px; width: 100%;"
         >
-          🧪 Тест: Симулировать успешный звонок
+          Симулировать успешный звонок
         </button>
 
         <FooterInfo 
@@ -65,10 +65,7 @@
             <Checkbox v-model="termAgree" class="checkbox" />
             <div class="agreement-check">
               <div>
-                Я ознакомился(-ась) и согласен(-на) с
-                <span class="agreement-src" @click="$router.push('/privacy-policy')">
-                  политикой в отношении обработки персональных данных
-                </span>
+                Я ознакомился(-ась) и согласен(-на) с политикой в отношении обработки персональных данных
               </div>
             </div>
           </div>
@@ -76,10 +73,7 @@
             <Checkbox v-model="agree" class="checkbox" />
             <div class="agreement-check">
               <div>
-                Я ознакомился(-ась) и даю
-                <span class="agreement-src" @click="$router.push('/personal')">
-                  согласие на обработку моих персональных данных
-                </span>
+                Я ознакомился(-ась) и даю согласие на обработку моих персональных данных
               </div>
             </div>
           </div>
@@ -165,6 +159,7 @@ import Input from '@/components/atoms/Input.vue'
 import { getAPIError, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
+import authApi from '@/services/authApi'
 
 export default {
   name: 'SignUp',
@@ -249,26 +244,23 @@ export default {
       
       this.loading = true
       try {
-        const response = await this.$axios.get(
-          'api/v2/auth/recovery/client/request-code',
-          { 
-            params: { login_phone: clearPhoneWithoutPlus(this.phone) },
-            errorMessage: 'Ошибка при запросе кода' 
-          },
-        )
-        if (response?.data?.success) {
-          // Сохраняем номер телефона для регистрации
-          this.registrationData.phone = clearPhoneWithoutPlus(this.phone)
+        // Используем authApi для запроса кода
+        const phone = clearPhoneWithoutPlus(this.phone)
+        const result = await authApi.requestRecoveryCode(phone)
+        
+        if (result.success) {
           this.step = 2
           this.launchTimer(180)
         } else {
           this.showNotification({
-            text: getAPIError(response) || 'Ошибка при запросе кода.',
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Ошибка при запросе кода'
           })
         }
       } catch (error) {
         this.showNotification({
-          text: 'Ошибка при запросе кода.',
+          type: 'error',
+          text: getAPIError(error) || 'Ошибка при запросе кода'
         })
       }
       this.loading = false

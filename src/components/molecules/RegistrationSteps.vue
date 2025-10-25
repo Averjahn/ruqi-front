@@ -213,6 +213,16 @@ export default {
 // Десктопная версия
 @media (min-width: 769px) {
   .registration-steps {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100vw;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    transform: translateZ(0); // Принудительное создание слоя для лучшей производительности
+    
     &__navigation {
       padding: 24px 96px;
       gap: 0;
