@@ -11,13 +11,6 @@
         <div class="recover-password_body">
           <Input class="input" label="Телефон" :value="formattedPhone" @input="onPhone" :disabled="isTimerRunning" />
 
-          <!-- Отладочная информация -->
-          <div style="margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 4px; font-size: 12px;">
-            <div>isTimerRunning: {{ isTimerRunning }}</div>
-            <div>step: {{ step }}</div>
-            <div>loading: {{ loading }}</div>
-          </div>
-
           <ResendCodeTimer 
             v-if="isTimerRunning"
             :duration="60" 
