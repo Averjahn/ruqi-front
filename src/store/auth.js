@@ -1,15 +1,23 @@
 import axios from '@/plugins/axios'
+import authApi from '@/services/authApi'
 
 export const auth = {
   namespaced: true,
 
   state: {
     isLogged: false,
+    clientStatus: null,
   },
 
   getters: {
     isLogged (state) {
       return state.isLogged
+    },
+    clientStatus (state) {
+      return state.clientStatus
+    },
+    isClient (state) {
+      return state.clientStatus !== null
     },
   },
 
@@ -33,6 +41,25 @@ export const auth = {
       await dispatch('rootActions/logout', null, { root: true })
       axios.setToken(null)
     },
+
+    async checkClientStatus ({ commit, dispatch }) {
+      try {
+        const result = await authApi.getClientStatus()
+        if (result.success) {
+          // Клиент авторизован, обновляем состояние
+          commit('setClientStatus', result.data)
+          return true
+        } else {
+          // Клиент не авторизован или ошибка
+          commit('clearClientStatus')
+          return false
+        }
+      } catch (error) {
+        // Ошибка сети или сервера
+        commit('clearClientStatus')
+        return false
+      }
+    },
   },
 
   mutations: {
@@ -47,6 +74,12 @@ export const auth = {
         axios.setToken(token)
         state.isLogged = true
       }
+    },
+    setClientStatus (state, status) {
+      state.clientStatus = status
+    },
+    clearClientStatus (state) {
+      state.clientStatus = null
     },
   },
 }

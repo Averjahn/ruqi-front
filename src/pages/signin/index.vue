@@ -71,39 +71,7 @@
               </div>
             </div>
           </div>
-          <!-- <div class="apps_block">
-            <div class="title">Установите наше приложение</div>
-
-            <div class="apps_button_block">
-              <a href="https://play.google.com/store/apps/details?id=ruqi.app&pcampaignid=web_share" target="_blank">
-                <div class="app_container">
-                  <img src="@/assets/icons/google_store.svg" />
-                  <div class="app_text">
-                    Скачать в
-                    <div class="app_name">Google Play</div>
-                  </div>
-                </div>
-              </a>
-              <a href="https://www.rustore.ru/catalog/app/ruqi.app" target="_blank">
-                <div class="app_container">
-                  <img src="@/assets/icons/rustore.svg" />
-                  <div class="app_text">
-                    Скачать в
-                    <div class="app_name">RuStore</div>
-                  </div>
-                </div>
-              </a>
-              <a href="https://apps.apple.com/ru/app/ruqi/id6748985382?platform=iphone" target="_blank">
-                <div class="app_container">
-                  <img src="@/assets/icons/app_store.svg" />
-                  <div class="app_text">
-                    Скачать в
-                    <div class="app_store">App Store</div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div> -->
+     
         </Form>
       </template>
       <template v-if="currentTab === 'by_phone_call'">
@@ -193,38 +161,7 @@
               </div>
             </div>
           </div>
-          <!-- <div class="apps_block">
-            <div class="title">Установите наше приложение</div>
-            <div class="apps_button_block">
-              <a href="https://play.google.com/store/apps/details?id=ruqi.app&pcampaignid=web_share" target="_blank">
-                <div class="app_container">
-                  <img src="@/assets/icons/google_store.svg" />
-                  <div class="app_text">
-                    Скачать в
-                    <div class="app_name">Google Play</div>
-                  </div>
-                </div>
-              </a>
-              <a href="https://www.rustore.ru/catalog/app/ruqi.app" target="_blank">
-                <div class="app_container">
-                  <img src="@/assets/icons/rustore.svg" />
-                  <div class="app_text">
-                    Скачать в
-                    <div class="app_name">RuStore</div>
-                  </div>
-                </div>
-              </a>
-              <a href="https://apps.apple.com/ru/app/ruqi/id6748985382?platform=iphone" target="_blank">
-                <div class="app_container">
-                  <img src="@/assets/icons/app_store.svg" />
-                  <div class="app_text">
-                    Скачать в
-                    <div class="app_store">App Store</div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div> -->
+        
         </div>
       </template>
       <template v-if="currentTab === 'by_phone_call' && oldMethod">
@@ -626,9 +563,6 @@ export default {
   .signin_button {
     width: 100%;
     max-width: none;
-    height: 40px;
-    font-size: 16px;
-    font-weight: 500;
   }
   .password_forgot {
     cursor: pointer;
@@ -648,10 +582,6 @@ export default {
     flex-direction: column;
     gap: 24px;
     
-    .main-button {
-      width: 100%;
-      max-width: none;
-    }
   }
   .personal-agreement-checkbox {
     display: flex;
@@ -758,14 +688,6 @@ export default {
     width: 100%;
     max-width: none;
     text-align: center;
-
-    .main-button__content {
-      justify-content: center;
-    }
-
-    .main-button__text {
-      text-align: center;
-    }
   }
 
   .call_btn_mobile {
@@ -773,14 +695,6 @@ export default {
     max-width: none;
     display: none; /* Скрыта по умолчанию */
     text-align: center;
-
-    .main-button__content {
-      justify-content: center;
-    }
-
-    .main-button__text {
-      text-align: center;
-    }
   }
 
   .call_btn {

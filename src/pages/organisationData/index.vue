@@ -180,12 +180,10 @@
             <label class="organisation-data-page__label">
               Вид контрагента*
             </label>
-            <Multiselect
+            <Input
               v-model="formData.counterpartyType"
-              :options="counterpartyTypes"
-              placeholder="Выберите значение"
-              :multiple="false"
-              class="organisation-data-page__select"
+              placeholder="Введите вид контрагента"
+              class="organisation-data-page__input"
             />
           </div>
           <div class="organisation-data-page__field">
@@ -487,11 +485,6 @@ export default {
           preview: null
         }
       },
-      counterpartyTypes: [
-        'Юридическое лицо',
-        'Индивидуальный предприниматель',
-        'Физическое лицо'
-      ]
     }
   },
   computed: {
@@ -1173,6 +1166,7 @@ export default {
     color: #263043;
     margin-bottom: 8px;
   }
+
 
   &__input,
   &__select {

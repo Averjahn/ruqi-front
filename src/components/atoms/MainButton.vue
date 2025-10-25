@@ -78,13 +78,14 @@ export default {
   border-radius: 8px;
   cursor: pointer;
   font-family: 'Source Sans 3', sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 18px;
-  line-height: 26px;
+  line-height: 24px;
+  letter-spacing: 0px;
   padding: 10px 16px;
   width: 100%;
   max-width: 255px;
-  height: 40px;
+  height: 48px;
   transition: all 0.2s ease;
   user-select: none;
   box-sizing: border-box;

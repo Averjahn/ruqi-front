@@ -23,7 +23,14 @@ const router = createRouter({
 })
 
 store.commit('auth/checkToken')
-// Инициализация пользователя будет выполнена при необходимости
+// Проверяем статус клиента при загрузке приложения
+store.dispatch('auth/checkClientStatus').then((isClient) => {
+  if (isClient) {
+    console.log('✅ Клиент авторизован:', store.getters['auth/clientStatus'])
+  } else {
+    console.log('❌ Клиент не авторизован')
+  }
+})
 
 router.beforeEach((to, from, next) => {
   store.dispatch('app/startLoading')

@@ -411,9 +411,6 @@ export default {
   &__btn {
     width: 100%;
     max-width: none;
-    min-height: 48px;
-    font-size: 16px;
-    font-weight: 500;
 
     &--secondary {
       margin-top: 8px;
@@ -535,28 +532,12 @@ export default {
     max-width: none;
     display: none; /* Скрыта по умолчанию */
     text-align: center;
-
-    .main-button__content {
-      justify-content: center;
-    }
-
-    .main-button__text {
-      text-align: center;
-    }
   }
 
   .change_number_btn {
     width: 100%;
     max-width: none;
     text-align: center;
-
-    .main-button__content {
-      justify-content: center;
-    }
-
-    .main-button__text {
-      text-align: center;
-    }
   }
 
   @media (max-width: 768px) {
