@@ -2,8 +2,8 @@
   <div class="recover-password">
     <div class="recover-password__wrapper">
       <div class="recover-password_header">
-        <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-        <img class="mb_18" src="@/assets/icons/logo.svg" />
+        <img src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
+        <img class="logo-text" src="@/assets/icons/logo.svg" />
         <h3>Восстановление пароля</h3>
 
       </div>
@@ -396,6 +396,27 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 8px;
+
+    img:first-child {
+      width: 40px;
+      height: 40px;
+    }
+
+    .logo-text {
+      width: 146px;
+      height: 48px;
+    }
+
+    h3 {
+      color: #212529;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.2;
+      text-align: center;
+      margin: 12px 0 0 0;
+    }
   }
 
   .recover-password_body {

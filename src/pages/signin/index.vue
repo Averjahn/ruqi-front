@@ -492,12 +492,13 @@ export default {
     font-weight: 600;
     line-height: 30px;
     text-align: center;
+    margin-top: 12px;
   }
 
   .logo_block {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
     align-items: center;
   }
   .logo_icons {
@@ -507,7 +508,7 @@ export default {
     align-items: center;
   }
   .ruqi_logo_text {
-    width: auto;
+    width: 146px;
     height: 48px;
   }
 
@@ -563,6 +564,7 @@ export default {
   .signin_button {
     width: 100%;
     max-width: none;
+    font-weight: 500;
   }
   .password_forgot {
     cursor: pointer;

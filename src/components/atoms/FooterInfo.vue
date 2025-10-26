@@ -23,8 +23,11 @@ export default {
   overflow-wrap: break-word;
   padding: 24px;
   background-color: #eff2fd;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 24px;
+  letter-spacing: 0.1px;
   color: #6b7280;
   text-align: left;
   margin: 0 auto;

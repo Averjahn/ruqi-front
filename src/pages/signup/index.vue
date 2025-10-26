@@ -2,8 +2,8 @@
   <div class="signup-page">
     <div class="signup-page__wrapper">
       <div class="signup-page__header">
-        <img class="mb_8" src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-        <img class="mb_18" src="@/assets/icons/logo.svg" />
+        <img src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
+        <img class="logo-text" src="@/assets/icons/logo.svg" />
         <h3>Регистрация</h3>
       </div>
 
@@ -357,16 +357,27 @@ export default {
   &__header {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 
     h3 {
-      color: #263043;
+      color: #212529;
+      font-family: 'Source Sans 3', sans-serif;
       font-size: 24px;
       font-weight: 600;
-      line-height: 30px;
+      line-height: 1.2;
       text-align: center;
-      margin: 0;
+      margin: 12px 0 0 0;
+    }
+
+    img:first-child {
+      width: 40px;
+      height: 40px;
+    }
+
+    .logo-text {
+      width: 146px;
+      height: 48px;
     }
   }
 
@@ -385,7 +396,7 @@ export default {
   &__body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     width: 100%;
 
     h4 {
@@ -413,22 +424,29 @@ export default {
     max-width: none;
 
     &--secondary {
-      margin-top: 8px;
+      background: #e9ecef;
+      border: 1px solid #ced4da;
+      color: #212529;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
     }
   }
 
   &__info {
-    background: #EFF2FD;
-    border: 1px solid #e9ecef;
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
     border-radius: 8px;
-    padding: 24px;
+    padding: 16px 20px;
     margin: 8px 0;
 
     p {
       margin: 0;
+      font-family: 'Source Sans 3', sans-serif;
       font-size: 14px;
-      line-height: 20px;
-      color: #666666;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #6c757d;
     }
   }
 
@@ -440,7 +458,6 @@ export default {
   }
 
   .agreements_check {
-    margin-top: 24px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -457,12 +474,15 @@ export default {
 
     .agreement-check {
       flex: 1;
-      font-size: 14px;
-      line-height: 20px;
-      color: #333333;
+      font-family: 'Source Sans Pro', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 22px;
+      letter-spacing: 0%;
+      color: #212529;
 
       .agreement-src {
-        color: #1735f5;
+        color: #007bff;
         cursor: pointer;
         text-decoration: underline;
 
