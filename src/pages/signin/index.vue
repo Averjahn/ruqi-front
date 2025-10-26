@@ -43,7 +43,7 @@
               text="Войти"
               @click="signinHandler" 
               :loading="loading || this.authLoading" 
-              class="signin_button"
+              class="signin_button get_in_button"
             />
             <MainButton 
               type="neutral" 
@@ -564,6 +564,8 @@ export default {
   .signin_button {
     width: 100%;
     max-width: none;
+  }
+  .get_in_button{
     font-weight: 500;
   }
   .password_forgot {
