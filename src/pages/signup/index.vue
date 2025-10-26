@@ -52,22 +52,18 @@
         />
 
         <div class="agreements_check">
-          <div class="personal-agreement-checkbox">
-            <Checkbox v-model="termAgree" class="checkbox" />
-            <div class="agreement-check">
-              <div>
-                Я ознакомился(-ась) и согласен(-на) с политикой в отношении обработки персональных данных
-              </div>
-            </div>
-          </div>
-          <div class="personal-agreement-checkbox">
-            <Checkbox v-model="agree" class="checkbox" />
-            <div class="agreement-check">
-              <div>
-                Я ознакомился(-ась) и даю согласие на обработку моих персональных данных
-              </div>
-            </div>
-          </div>
+          <AgreementCheck
+            v-model="termAgree"
+            text="Я ознакомился(-ась) и согласен(-на) с"
+            link-text="политикой в отношении обработки персональных данных"
+            link-route="/privacy-policy"
+          />
+          <AgreementCheck
+            v-model="agree"
+            text="Я ознакомился(-ась) и даю согласие на"
+            link-text="обработку моих персональных данных"
+            link-route="/personal"
+          />
         </div>
       </div>
 
@@ -147,6 +143,7 @@
 import { mapActions } from 'vuex'
 import MainButton from '@/components/atoms/MainButton.vue'
 import Input from '@/components/atoms/Input.vue'
+import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
 import { getAPIError, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { formatPhone } from '@/constants/masks'
 import useTimer from '@/composables/useSnackbarTimer'
@@ -155,7 +152,7 @@ import authApi from '@/services/authApi'
 export default {
   name: 'SignUp',
   layout: 'empty',
-  components: { MainButton, Input },
+  components: { MainButton, Input, AgreementCheck },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signupSms',

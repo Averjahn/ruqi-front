@@ -231,7 +231,8 @@ export default {
   &--neutral {
     background-color: #f3f3f3;
     color: #263043;
-    border: 2px solid #f3f3f3;
+    border: none;
+    font-weight: 600;
     
     .main-button__icon {
       filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
@@ -239,7 +240,6 @@ export default {
     
     &:hover:not(.main-button--disabled):not(.main-button--loading) {
       background-color: #dadada;
-      border-color: #dadada;
     }
     
     &:focus:not(.main-button--disabled):not(.main-button--loading) {
@@ -249,7 +249,6 @@ export default {
     
     &:active:not(.main-button--disabled):not(.main-button--loading) {
       background-color: #bebebe;
-      border-color: #bebebe;
       
       .main-button__icon {
         filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);

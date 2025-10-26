@@ -128,47 +128,6 @@
             </div>
           </div>
 
-          <!-- Свидетельство КПП -->
-          <div class="organisation-data-page__document-card">
-            <div class="organisation-data-page__document-header">
-              <h3 class="organisation-data-page__document-title">Свидетельство КПП</h3>
-              <a href="#" class="organisation-data-page__sample-link" @click.prevent="openDocumentModal">Смотреть образец</a>
-            </div>
-            <div v-if="formData.kppCertificate && formData.kppCertificate.file" class="organisation-data-page__uploaded-file">
-              <div class="organisation-data-page__file-thumbnail" @click="openDocumentModal('kppCertificate')">
-                <img 
-                  :src="formData.kppCertificate.preview || formData.kppCertificate.file" 
-                  alt="Document" 
-                  class="organisation-data-page__document-image" 
-                />
-              </div>
-              <div class="organisation-data-page__file-info">
-                <p class="organisation-data-page__file-name">{{ formData.kppCertificate.name }}</p>
-                <p class="organisation-data-page__file-size">{{ formData.kppCertificate.size }}</p>
-                <button class="organisation-data-page__delete-button" @click="removeKppCertificate">
-                  <img src="@/assets/icons/delete.svg" alt="Delete" class="organisation-data-page__delete-icon" />
-                  Удалить
-                </button>
-              </div>
-            </div>
-            <div v-else class="organisation-data-page__upload-area">
-              <div class="organisation-data-page__upload-content">
-                <p class="organisation-data-page__upload-text">Перетащите файлы сюда или</p>
-                <button class="organisation-data-page__upload-button" @click="triggerKppFileInput">
-                  <div class="organisation-data-page__icon-placeholder">📎</div>
-                  загрузите документы
-                </button>
-                <p class="organisation-data-page__upload-hint">Файлы до 5 МВ в форматах PNG, JPG, JPEG</p>
-              </div>
-              <input 
-                type="file" 
-                ref="kppFileInput" 
-                @change="handleKppFileUpload" 
-                accept="image/png,image/jpg,image/jpeg" 
-                style="display: none"
-              />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -180,10 +139,13 @@
             <label class="organisation-data-page__label">
               Вид контрагента*
             </label>
-            <Input
+            <Select
               v-model="formData.counterpartyType"
-              placeholder="Введите вид контрагента"
+              :options="counterpartyTypes"
+              placeholder="Выберите вид контрагента"
               class="organisation-data-page__input"
+              item-value="value"
+              item-text="label"
             />
           </div>
           <div class="organisation-data-page__field">
@@ -410,7 +372,7 @@
 import { mapActions } from 'vuex'
 import MainButton from '@/components/atoms/MainButton.vue'
 import Input from '@/components/atoms/Input.vue'
-import Multiselect from '@/components/atoms/Multiselect.vue'
+import Select from '@/components/atoms/Select.vue'
 import LogoUpload from '@/components/atoms/LogoUpload.vue'
 import Upload from '@/components/atoms/Upload.vue'
 import Form from '@/components/atoms/Form.vue'
@@ -426,7 +388,7 @@ export default {
   components: {
     MainButton,
     Input,
-    Multiselect,
+    Select,
     LogoUpload,
     Upload,
     Form,
@@ -450,7 +412,7 @@ export default {
       canGoNext: true,
       formData: {
         logo: null,
-        counterpartyType: 'Юридическое лицо',
+        counterpartyType: 'legal',
         inn: '1047712345678',
         fullName: 'Общество с ограниченной ответственностью «Солюшен Про Интерпрайсес»',
         kpp: '1047712345678',
@@ -478,13 +440,12 @@ export default {
           size: '',
           preview: null
         },
-        kppCertificate: {
-          file: null,
-          name: '',
-          size: '',
-          preview: null
-        }
       },
+      counterpartyTypes: [
+        { value: 'physical', label: 'Физическое лицо' },
+        { value: 'legal', label: 'Юридическое лицо' }, 
+        { value: 'individual', label: 'Индивидуальный предприниматель' }
+      ]
     }
   },
   computed: {
@@ -515,10 +476,9 @@ export default {
       const hasFullName = !!this.formData.fullName
       const hasInnCertificate = !!this.formData.innCertificate?.file
       const hasOgrnCertificate = !!this.formData.ogrnCertificate?.file
-      const hasKppCertificate = !!this.formData.kppCertificate?.file
       
       
-      return hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate && hasKppCertificate
+      return hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate
     }
   },
   watch: {
@@ -557,7 +517,7 @@ export default {
 
       // Валидация для второго шага (документы)
       if (this.currentStep === 1) {
-        const requiredDocuments = ['innCertificate', 'ogrnCertificate', 'kppCertificate']
+        const requiredDocuments = ['innCertificate', 'ogrnCertificate']
         const missingDocuments = requiredDocuments.filter(doc => !this.formData[doc])
         
         if (missingDocuments.length > 0) {
@@ -631,6 +591,12 @@ export default {
     onInnChange() {
       // Очищаем ошибку при изменении ИНН
       this.dadataError = null
+      
+      // Если ИНН пустой - очищаем все поля
+      if (!this.formData.inn || this.formData.inn.length === 0) {
+        this.clearAllFields()
+        return
+      }
       
       // Автоматический поиск при достижении 10 или 12 символов
       const innLength = this.formData.inn.length
@@ -800,32 +766,23 @@ export default {
       this.$refs.innFileInput.click()
     },
 
-    handleKppFileUpload(event) {
-      const file = event.target.files[0]
-      if (file) {
-        this.formData.kppCertificate = {
-          file: file,
-          name: file.name,
-          size: this.formatFileSize(file.size),
-          preview: URL.createObjectURL(file)
-        }
-      }
-    },
 
-    removeKppCertificate() {
-      if (this.formData.kppCertificate && this.formData.kppCertificate.preview) {
-        URL.revokeObjectURL(this.formData.kppCertificate.preview)
-      }
-      this.formData.kppCertificate = {
-        file: null,
-        name: '',
-        size: '',
-        preview: null
-      }
-    },
-
-    triggerKppFileInput() {
-      this.$refs.kppFileInput.click()
+    clearAllFields() {
+      // Очищаем все поля кроме ИНН
+      this.formData.fullName = ''
+      this.formData.kpp = ''
+      this.formData.ogrn = ''
+      this.formData.okato = ''
+      this.formData.fullNamePerson = ''
+      this.formData.position = ''
+      this.formData.basis = ''
+      this.formData.mailingAddress = ''
+      this.formData.legalAddress = ''
+      this.formData.settlementAccount = ''
+      this.formData.correspondentAccount = ''
+      this.formData.bic = ''
+      this.formData.bank = ''
+      this.formData.counterpartyType = ''
     }
   }
 }
@@ -980,14 +937,13 @@ export default {
   }
 
   &__upload-area {
-    border: 2px dashed #d1d5db;
+    border: 1.5px dashed #d1d5db;
     border-radius: 12px;
-    padding: 32px;
     text-align: center;
     background: #f9fafb;
     width: 100%;
     max-width: 624px;
-    height: 146px;
+    height: 116px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1004,8 +960,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
     width: 100%;
+    height: 71px;
   }
 
   &__upload-text {
@@ -1018,11 +975,12 @@ export default {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 8px 0 4px 0;
     background: none;
     border: none;
     color: #1735f5;
     font-size: 14px;
+    font-weight: 400;
     cursor: pointer;
     text-decoration: none;
 
@@ -1038,8 +996,9 @@ export default {
 
   &__upload-button .organisation-data-page__icon-placeholder {
     font-size: 14px;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
+    margin: 9px 0 5px 0;
   }
 
   &__upload-hint {
@@ -1163,7 +1122,7 @@ export default {
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: #263043;
+    color: #6b7280;
     margin-bottom: 8px;
   }
 
@@ -1229,6 +1188,7 @@ export default {
     &__label {
       font-size: 14px;
       margin-bottom: 6px;
+      color: #6b7280;
     }
 
     &__input,
@@ -1239,7 +1199,7 @@ export default {
     &__upload-area {
       width: 100%;
       height: auto;
-      min-height: 200px;
+      min-height: 116px;
       max-width: none;
     }
 

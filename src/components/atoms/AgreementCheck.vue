@@ -67,12 +67,12 @@ export default {
   }
 
   &__link {
-    color: #4E64F2;
+    color: #1735F5;
     cursor: pointer;
     text-decoration: underline;
     
     &:hover {
-      text-decoration: none;
+      text-decoration: underline;
     }
   }
 }

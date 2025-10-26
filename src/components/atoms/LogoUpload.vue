@@ -15,7 +15,7 @@
         ref="fileInput"
         class="logo-upload__input"
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/jpg"
         @change="onFileChange"
       />
       
@@ -27,9 +27,9 @@
         </div>
         <div class="logo-upload__texts">
           <div class="logo-upload__title">Загрузите логотип компании</div>
-          <div class="logo-upload__hint">Рекомендуем использовать изображение размером не менее {{ minWidth }} x {{ minHeight }} пикселей в формате PNG или GIF.</div>
+          <div class="logo-upload__hint">Рекомендуем использовать изображение размером не менее {{ minWidth }} x {{ minHeight }} пикселей в формате PNG или JPG.</div>
           <div class="logo-upload__hint">Анимированные картинки загружать нельзя.</div>
-          <div class="logo-upload__hint">Размер файла – не более {{ formatFileSize(maxSize) }}.</div>
+          <div class="logo-upload__hint">Размер файла – не более 4MB.</div>
           <button class="logo-upload__upload-link" type="button" @click.stop="openDialog">
             Загрузить
           </button>
@@ -151,15 +151,17 @@ export default {
     handleFile(file) {
       this.clearError()
       
-      // Проверка типа файла
-      if (!file.type.startsWith('image/')) {
-        this.setError('Пожалуйста, выберите изображение')
+      // Проверка типа файла - только PNG и JPG
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg']
+      if (!allowedTypes.includes(file.type)) {
+        this.setError('Пожалуйста, выберите изображение в формате PNG или JPG')
         return
       }
       
-      // Проверка размера файла
-      if (file.size > this.maxSize) {
-        this.setError(`Размер файла превышает ${this.formatFileSize(this.maxSize)}`)
+      // Проверка размера файла (4MB = 4 * 1024 * 1024 байт)
+      const maxSizeBytes = 4 * 1024 * 1024
+      if (file.size > maxSizeBytes) {
+        this.setError(`Размер файла превышает 4MB. Текущий размер: ${this.formatFileSize(file.size)}`)
         return
       }
       
@@ -292,8 +294,8 @@ export default {
   }
 
   &__upload-area {
-    width: 98px;
-    height: 98px;
+    width: 120px;
+    height: 120px;
     background: #f3f4f6;
     border-radius: 8px;
     display: flex;
@@ -375,8 +377,8 @@ export default {
   }
 
   &__preview-area {
-    width: 98px;
-    height: 98px;
+    width: 120px;
+    height: 120px;
     background: #f3f4f6;
     border-radius: 8px;
     display: flex;
@@ -397,8 +399,8 @@ export default {
     object-position: center;
     border-radius: 8px;
     display: block;
-    max-width: 98px;
-    max-height: 98px;
+    max-width: 120px;
+    max-height: 120px;
   }
 
   &__preview-texts {

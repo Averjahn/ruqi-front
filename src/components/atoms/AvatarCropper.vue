@@ -25,6 +25,27 @@
             @touchend="onTouchEnd"
           />
           
+          <!-- SVG элементы для обрезки -->
+          <svg class="crop-overlay" width="752" height="400" style="position: absolute; top: 0; left: 0; pointer-events: none;">
+            <!-- Темное затемнение с вырезом -->
+            <defs>
+              <mask id="crop-mask">
+                <rect width="752" height="400" fill="white"/>
+                <rect :x="376 - (cropRadius || 150)" :y="200 - (cropRadius || 150)" :width="(cropRadius || 150) * 2" :height="(cropRadius || 150) * 2" fill="black"/>
+              </mask>
+            </defs>
+            <rect width="752" height="400" fill="rgba(0, 0, 0, 0.6)" mask="url(#crop-mask)"/>
+            
+            <!-- Синий круг -->
+            <circle cx="376" cy="200" :r="cropRadius || 150" fill="none" stroke="#3b82f6" stroke-width="2"/>
+            
+            <!-- 4 синих квадрата по углам -->
+            <rect :x="376 - (cropRadius || 150) - 6" :y="200 - (cropRadius || 150) - 6" width="12" height="12" fill="#3b82f6"/>
+            <rect :x="376 + (cropRadius || 150) - 6" :y="200 - (cropRadius || 150) - 6" width="12" height="12" fill="#3b82f6"/>
+            <rect :x="376 + (cropRadius || 150) - 6" :y="200 + (cropRadius || 150) - 6" width="12" height="12" fill="#3b82f6"/>
+            <rect :x="376 - (cropRadius || 150) - 6" :y="200 + (cropRadius || 150) - 6" width="12" height="12" fill="#3b82f6"/>
+          </svg>
+          
           <!-- Кнопки поворота -->
           <div class="rotation-buttons">
             <img 
@@ -105,55 +126,13 @@ export default {
       const ctx = canvas.value.getContext('2d')
       ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
 
-      // Сначала рисуем полное изображение
+      // Рисуем только изображение, все остальное теперь в SVG
       ctx.save()
       ctx.translate(376 + position.value.x, 200 + position.value.y)
       ctx.rotate(rotation.value * Math.PI / 180)
       ctx.scale(scale.value, scale.value)
       ctx.drawImage(image.value, -image.value.width / 2, -image.value.height / 2)
       ctx.restore()
-
-      // Добавляем темное затемнение с вырезом для прямоугольной области
-      const radius = cropRadius.value
-      const cropX = 376 - radius
-      const cropY = 200 - radius
-      const cropSize = radius * 2
-      
-      ctx.save()
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
-      
-      // Создаем путь с вырезом для прямоугольной области
-      ctx.beginPath()
-      ctx.rect(0, 0, canvas.value.width, canvas.value.height)
-      ctx.rect(cropX, cropY, cropSize, cropSize)
-      ctx.fill('evenodd')
-      ctx.restore()
-
-
-      // Рисуем 4 синих квадрата по углам
-      const squareSize = 12
-      const halfSquare = squareSize / 2
-      
-      // Координаты углов
-      const corners = [
-        { x: 376 - radius - halfSquare, y: 200 - radius - halfSquare }, // левый верхний
-        { x: 376 + radius - halfSquare, y: 200 - radius - halfSquare }, // правый верхний
-        { x: 376 + radius - halfSquare, y: 200 + radius - halfSquare }, // правый нижний
-        { x: 376 - radius - halfSquare, y: 200 + radius - halfSquare }  // левый нижний
-      ]
-      
-      // Рисуем квадраты
-      ctx.fillStyle = '#3b82f6'
-      corners.forEach(corner => {
-        ctx.fillRect(corner.x, corner.y, squareSize, squareSize)
-      })
-      
-      // Рисуем синий круг
-      ctx.beginPath()
-      ctx.arc(376, 200, radius, 0, Math.PI * 2)
-      ctx.strokeStyle = '#3b82f6'
-      ctx.lineWidth = 2
-      ctx.stroke()
     }
 
     const onPointerDown = (e) => {
@@ -360,6 +339,12 @@ export default {
       &:active {
         cursor: grabbing;
       }
+    }
+
+    .crop-overlay {
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 1;
     }
 
     .rotation-buttons {
