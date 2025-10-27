@@ -455,7 +455,7 @@ export default {
       color: #212529;
       font-family: 'Source Sans 3', sans-serif;
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 600;
     }
   }
 
