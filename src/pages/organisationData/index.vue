@@ -554,7 +554,7 @@ export default {
           firstname: firstname || user?.firstname || '',
           lastname: lastname || user?.lastname || '',
           middlename: middlename || user?.middlename || '',
-          phone: phone,
+          phone: phone || '79123456789',
           email: user?.email || 'test@example.com',
           birthday: user?.birthday || '1990-01-15',
           citizenship: user?.citizenship || 'RU',
