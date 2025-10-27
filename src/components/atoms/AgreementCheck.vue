@@ -2,12 +2,10 @@
   <div class="agreement-check">
     <Checkbox v-model="localValue" class="checkbox" />
     <div class="agreement-check__text">
-      <div>
-        {{ text }}
-        <span class="agreement-check__link" @click="handleLinkClick">
-          {{ linkText }}
-        </span>
-      </div>
+      {{ text }}
+      <span class="agreement-check__link" @click="handleLinkClick">
+        {{ linkText }}
+      </span>
     </div>
   </div>
 </template>
@@ -59,11 +57,16 @@ export default {
   gap: 8px;
   margin-bottom: 12px;
 
+  .checkbox {
+    flex-shrink: 0;
+  }
+
   &__text {
     font-size: 14px;
     line-height: 20px;
     color: #374151;
     flex: 1;
+    word-wrap: break-word;
   }
 
   &__link {

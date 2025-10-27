@@ -230,30 +230,31 @@
           />
         </div>
 
-        <!-- Row 6: Должность + На основании чего -->
-        <FieldsRow>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              Должность*
-            </label>
-            <Input
-              v-model="formData.position"
-              placeholder="Введите должность"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              На основании чего*
-            </label>
-            <Input
-              v-model="formData.basis"
-              placeholder="Введите основание"
-              class="organisation-data-page__input"
-            />
-          </div>
-        </FieldsRow>
+        <!-- Row 6: Должность -->
+        <div class="organisation-data-page__field organisation-data-page__field--full">
+          <label class="organisation-data-page__label">
+            Должность*
+          </label>
+          <Input
+            v-model="formData.position"
+            placeholder="Введите должность"
+            :rules="[rules.required]"
+            class="organisation-data-page__input"
+          />
+        </div>
+
+        <!-- Row 7: На основании чего -->
+        <div class="organisation-data-page__field organisation-data-page__field--full">
+          <label class="organisation-data-page__label">
+            На основании чего*
+          </label>
+          <Input
+            v-model="formData.basis"
+            placeholder="Введите основание"
+            :rules="[rules.required]"
+            class="organisation-data-page__input"
+          />
+        </div>
 
         <!-- Row 8: Почтовый адрес -->
         <div class="organisation-data-page__field organisation-data-page__field--full">
