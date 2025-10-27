@@ -580,18 +580,17 @@ export default {
     flex-direction: row;
     align-items: flex-start;
     .checkbox {
-      padding: 6px 0;
+      padding: 0;
     }
   }
   .agreement-check {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     font-size: 16px;
     font-weight: 400;
     line-height: 22px;
     text-align: left;
-    vertical-align: middle;
     .agreement-src {
       cursor: pointer;
       color: #0082de;
