@@ -25,8 +25,7 @@
         <img class="icon" src="@/assets/icons/cross.svg" />
       </ButtonIconGhost>
       <ButtonIconGhost v-if="type === 'password'" @click="togglePassword">
-        <img v-if="currentType === 'text'" class="icon" src="@/assets/icons/eye_close.svg" />
-        <img v-if="currentType === 'password'" class="icon" src="@/assets/icons/eye_open.svg" />
+        <img class="icon" src="@/assets/icons/input/Eye.svg" />
       </ButtonIconGhost>
       <slot name="right" />
       <ThinLineLoading class="progress_wrap" :show="loading" />
