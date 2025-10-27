@@ -547,14 +547,23 @@ export default {
         const middlename = fullNameParts[2] || ''
         
         // Получаем телефон из localStorage или store
-        const phone = localStorage.getItem('registration_phone') || user?.phone || ''
+        const savedPhone = localStorage.getItem('registration_phone') || user?.phone || ''
+        
+        // Генерируем случайный номер телефона, если не сохранен
+        const generateRandomPhone = () => {
+          const prefix = '79' // Российский префикс
+          const randomPart = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')
+          return prefix + randomPart
+        }
+        
+        const phone = savedPhone || generateRandomPhone()
         
         // Подготавливаем данные для регистрации клиента
         const clientData = {
           firstname: firstname || user?.firstname || '',
           lastname: lastname || user?.lastname || '',
           middlename: middlename || user?.middlename || '',
-          phone: phone || '79123456789',
+          phone: phone,
           email: user?.email || 'test@example.com',
           birthday: user?.birthday || '1990-01-15',
           citizenship: user?.citizenship || 'RU',
@@ -1115,7 +1124,6 @@ export default {
   &__fields-row-three {
     display: flex;
     gap: 16px;
-    margin-bottom: 24px;
 
     .organisation-data-page__field {
       flex: 1;
