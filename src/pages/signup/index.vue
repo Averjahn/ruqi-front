@@ -225,6 +225,17 @@ export default {
         const result = await authApi.requestRecoveryCode(phone)
         
         if (result.success) {
+          // Сохраняем телефон и тестовые данные в store
+          this.$store.commit('user/setRegistrationData', { 
+            phone,
+            firstname: 'Иван',
+            lastname: 'Петров',
+            middlename: 'Сергеевич',
+            email: 'test@example.com',
+            birthday: '1990-01-15',
+            citizenship: 'RU'
+          })
+          
           this.step = 2
           this.launchTimer(180)
         } else {

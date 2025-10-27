@@ -537,15 +537,18 @@ export default {
 
     async handleFinish() {
       try {
+        // Получаем данные пользователя из store
+        const user = this.$store.getters['user/user']
+        
         // Подготавливаем данные для регистрации клиента
         const clientData = {
-          firstname: this.formData.fullNamePerson?.split(' ')[1] || '',
-          lastname: this.formData.fullNamePerson?.split(' ')[0] || '',
-          middlename: this.formData.fullNamePerson?.split(' ')[2] || '',
-          phone: this.formData.phone || '',
-          email: this.formData.email || '',
-          birthday: this.formData.birthday || '',
-          citizenship: this.formData.citizenship || 'RU',
+          firstname: user?.firstname || '',
+          lastname: user?.lastname || '',
+          middlename: user?.middlename || '',
+          phone: user?.phone || '',
+          email: user?.email || '',
+          birthday: user?.birthday || '',
+          citizenship: user?.citizenship || 'RU',
           company_name: this.formData.fullName || '',
           company_inn: this.formData.inn || ''
         }

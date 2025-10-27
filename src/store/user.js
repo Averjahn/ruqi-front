@@ -8,6 +8,14 @@ export const user = {
     user: {
       settings: {},
       visibility_sections: [],
+      // Дополнительные поля для registration
+      firstname: null,
+      lastname: null,
+      middlename: null,
+      phone: null,
+      email: null,
+      birthday: null,
+      citizenship: 'RU',
     },
     notificationsCount: {
       all: 0,
@@ -87,6 +95,18 @@ export const user = {
       state.user = {
         ...state.user,
         ...JSON.parse(JSON.stringify(payload)),
+      }
+    },
+    setRegistrationData (state, payload) {
+      state.user = {
+        ...state.user,
+        firstname: payload.firstname || state.user.firstname,
+        lastname: payload.lastname || state.user.lastname,
+        middlename: payload.middlename || state.user.middlename,
+        phone: payload.phone || state.user.phone,
+        email: payload.email || state.user.email,
+        birthday: payload.birthday || state.user.birthday,
+        citizenship: payload.citizenship || state.user.citizenship,
       }
     },
     setNotificationsCount (state, notificationsCount) {
