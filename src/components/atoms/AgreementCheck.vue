@@ -44,7 +44,8 @@ export default {
   },
   methods: {
     handleLinkClick() {
-      this.$router.push(this.linkRoute)
+      // Ссылки пока не ведут никуда
+      // this.$router.push(this.linkRoute)
     }
   }
 }

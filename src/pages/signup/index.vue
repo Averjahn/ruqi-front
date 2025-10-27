@@ -294,6 +294,18 @@ export default {
 
       this.loading = true
       try {
+        // Сохраняем телефон в store (берем последнее значение из инпута)
+        const phone = clearPhoneWithoutPlus(this.phone)
+        this.$store.commit('user/setRegistrationData', { 
+          phone,
+          firstname: 'Иван',
+          lastname: 'Петров',
+          middlename: 'Сергеевич',
+          email: 'test@example.com',
+          birthday: '1990-01-15',
+          citizenship: 'RU'
+        })
+        
         // Отправляем данные на эндпоинт установки пароля
         const response = await this.$axios.post('api/v2/auth/password/client/setup', {
           activation_token: this.activationToken, // Нужно получить токен активации

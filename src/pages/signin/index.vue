@@ -325,6 +325,18 @@ export default {
           },
         )
         if (response?.data?.success) {
+          // Сохраняем телефон в store
+          const phone = clearPhoneWithoutPlus(this.phone)
+          this.$store.commit('user/setRegistrationData', { 
+            phone,
+            firstname: 'Иван',
+            lastname: 'Петров',
+            middlename: 'Сергеевич',
+            email: 'test@example.com',
+            birthday: '1990-01-15',
+            citizenship: 'RU'
+          })
+          
           this.callRequested = true
           this.onceToken = response?.data?.data?.once_token
           if (response?.data?.data?.code_sended?.method === 'waitcall') {
