@@ -540,14 +540,20 @@ export default {
         // Получаем данные пользователя из store
         const user = this.$store.getters['user/user']
         
+        // Парсим ФИО из формы
+        const fullNameParts = this.formData.fullNamePerson?.split(' ') || []
+        const lastname = fullNameParts[0] || ''
+        const firstname = fullNameParts[1] || ''
+        const middlename = fullNameParts[2] || ''
+        
         // Подготавливаем данные для регистрации клиента
         const clientData = {
-          firstname: user?.firstname || '',
-          lastname: user?.lastname || '',
-          middlename: user?.middlename || '',
+          firstname: firstname || user?.firstname || '',
+          lastname: lastname || user?.lastname || '',
+          middlename: middlename || user?.middlename || '',
           phone: user?.phone || '',
-          email: user?.email || '',
-          birthday: user?.birthday || '',
+          email: user?.email || 'test@example.com',
+          birthday: user?.birthday || '1990-01-15',
           citizenship: user?.citizenship || 'RU',
           company_name: this.formData.fullName || '',
           company_inn: this.formData.inn || ''

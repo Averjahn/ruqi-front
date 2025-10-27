@@ -509,6 +509,13 @@ export default {
   }
 }
 
+@media (max-height: 900px) {
+  .cropper-container .crop-area {
+    justify-content: flex-start;
+    padding-top: 30px;
+  }
+}
+
 @media (max-width: 768px) {
   .cropper-container {
     .instructions {
