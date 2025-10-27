@@ -546,12 +546,15 @@ export default {
         const firstname = fullNameParts[1] || ''
         const middlename = fullNameParts[2] || ''
         
+        // Получаем телефон из localStorage или store
+        const phone = localStorage.getItem('registration_phone') || user?.phone || ''
+        
         // Подготавливаем данные для регистрации клиента
         const clientData = {
           firstname: firstname || user?.firstname || '',
           lastname: lastname || user?.lastname || '',
           middlename: middlename || user?.middlename || '',
-          phone: user?.phone || '',
+          phone: phone,
           email: user?.email || 'test@example.com',
           birthday: user?.birthday || '1990-01-15',
           citizenship: user?.citizenship || 'RU',

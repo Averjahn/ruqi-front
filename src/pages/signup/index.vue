@@ -236,6 +236,9 @@ export default {
             citizenship: 'RU'
           })
           
+          // Сохраняем телефон в localStorage
+          localStorage.setItem('registration_phone', phone)
+          
           this.step = 2
           this.launchTimer(180)
         } else {
@@ -305,6 +308,9 @@ export default {
           birthday: '1990-01-15',
           citizenship: 'RU'
         })
+        
+        // Сохраняем телефон в localStorage
+        localStorage.setItem('registration_phone', phone)
         
         // Отправляем данные на эндпоинт установки пароля
         const response = await this.$axios.post('api/v2/auth/password/client/setup', {
