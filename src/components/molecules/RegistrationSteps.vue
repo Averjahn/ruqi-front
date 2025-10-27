@@ -223,24 +223,68 @@ export default {
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     transform: translateZ(0); // Принудительное создание слоя для лучшей производительности
     
+    &__progress {
+      padding: 3px 8px;
+      
+      &-item {
+        min-height: 6px;
+      }
+      
+      &-bar {
+        height: 6px;
+      }
+    }
+    
     &__navigation {
-      padding: 24px 96px;
-      gap: 0;
+      padding: 12px 48px;
+      gap: 12px;
       justify-content: space-between;
     }
     
     &__button {
-      width: 200px;
-      height: 48px;
-      font-size: 18px;
+      width: 160px;
+      height: 42px;
+      font-size: 16px;
       font-weight: 600;
-      padding: 12px 24px;
+      padding: 10px 20px;
       flex: none;
     }
     
     &__step-counter {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 400;
+    }
+  }
+}
+
+@media (max-height: 900px) and (min-width: 769px) {
+  .registration-steps {
+    &__progress {
+      padding: 2px 6px;
+      
+      &-item {
+        min-height: 5px;
+      }
+      
+      &-bar {
+        height: 5px;
+      }
+    }
+    
+    &__navigation {
+      padding: 10px 32px;
+      gap: 10px;
+    }
+    
+    &__button {
+      width: 140px;
+      height: 38px;
+      font-size: 14px;
+      padding: 8px 16px;
+    }
+    
+    &__step-counter {
+      font-size: 13px;
     }
   }
 }

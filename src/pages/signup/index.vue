@@ -422,7 +422,7 @@ export default {
 
     &--secondary {
       background: #e9ecef;
-      border: 1px solid #ced4da;
+      border: none;
       color: #212529;
       font-family: 'Source Sans 3', sans-serif;
       font-size: 16px;
