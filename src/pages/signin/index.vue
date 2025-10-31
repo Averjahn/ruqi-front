@@ -6,7 +6,7 @@
           <img src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
           <img class="ruqi_logo_text" src="@/assets/icons/logo.svg" />
         </div>
-        <div class="form_header">{{ callRequested ? 'Регистрация' : 'Вход в систему' }}</div>
+        <div class="form_header">{{ callRequested ? 'Восстановление пароля' : 'Вход в систему' }}</div>
       </div>
       <AuthTabs v-if="!callRequested" :value="currentTab" :old-method="oldMethod" @change="changeTab" />
 
@@ -51,6 +51,13 @@
               @click="goToRegistration" 
               class="signin_button signin_button--registration"
               button-type="button"
+            />
+            <MainButton
+              v-if="isDevelopment"
+              type="primary-outline"
+              text="Следующий шаг (временно)"
+              @click="goToNextSteps"
+              class="signin_button"
             />
             <div class="agreements_check">
               <AgreementCheck
@@ -150,18 +157,29 @@
         
         </div>
       </template>
-      <template v-if="currentTab === 'by_phone_call' && oldMethod">
-        <SignInBySms :phone="phone" @goBack="changeCallRequestedStatus" @changeOldMethod="changeOldAuthMethod" />
+      
+      <!-- Временная кнопка в режиме разработки для состояния до запроса звонка -->
+      <template v-if="currentTab === 'by_phone_call' && !callRequested">
+        <div class="content_container">
+          <MainButton
+            v-if="isDevelopment"
+            type="primary-outline"
+            text="Следующий шаг (временно)"
+            @click="goToNextSteps"
+            class="signin_button"
+          />
+        </div>
       </template>
+      
     </div>
   </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
-import SignInBySms from '@/components/molecules/SignInBySms.vue'
 import AuthTabs from '@/components/molecules/AuthTabs.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
+import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
 import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
 import { getAPIError, getAPIErrorMessage, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
@@ -175,13 +193,14 @@ const tabs = [
 ]
 
 export default {
-  components: { SignInBySms, AuthTabs, MainButton, Checkbox, AgreementCheck },
+  components: { AuthTabs, MainButton, ResendCodeTimer, Checkbox, AgreementCheck },
   layout: 'empty',
   data () {
     return {
       rules,
       rulesSets,
       loading: false,
+      smsCode: '',
       agree: true,
       termAgree: true,
       login: {
@@ -294,11 +313,7 @@ export default {
         this.launchTimer(180)
         this.authInterval = setInterval(this.authCallCheck, 5000)
       }
-      this.tabs.forEach((tab) => {
-        if (tab.value === 'by_phone_call') {
-          tab.text = this.oldMethod ? 'Вход по смс' : 'Вход по звонку'
-        }
-      })
+     
     },
 
     async onSubmitByCall (event) {
@@ -344,7 +359,8 @@ export default {
             this.launchTimer(180)
             this.authInterval = setInterval(this.authCallCheck, 5000)
           } else {
-            this.changeOldAuthMethod()
+          this.changeOldAuthMethod()
+          this.launchTimer(180)
           }
         } else {
           this.callRequestErrorMsg = getAPIErrorMessage(response)
@@ -462,6 +478,68 @@ export default {
     makeCall () {
       const telUrl = `tel:${this.callToPhone}`
       window.location.href = telUrl
+    },
+
+    goToNextSteps () {
+      // Временный переход по шагам внутри страницы signin
+      if (this.currentTab === 'by_phone_call') {
+        if (!this.callRequested) {
+          // Шаг 1 -> Шаг 2: показать экран с инструкцией звонка
+          this.callRequested = true
+          // Переходим сразу на ввод кода (как в макете)
+          this.oldMethod = true
+          this.launchTimer(180)
+          return
+        }
+        if (this.callRequested && this.oldMethod) {
+          // Имитация успешной авторизации после ввода кода
+          this.$router.push('/')
+          return
+        }
+        // Иначе завершаем
+        this.$router.push('/')
+        return
+      }
+      // Для вкладки по паролю — имитируем успешный вход
+      this.$router.push('/')
+    },
+
+    async sendCodeAgain () {
+      if (this.loading) return
+      this.loading = true
+      try {
+        const response = await this.$axios.get(
+          'api/v2/auth/recovery/client/request-code',
+          { 
+            params: { login_phone: clearPhoneWithoutPlus(this.phone) },
+            errorMessage: 'Ошибка при запросе смс кода' 
+          },
+        )
+        if (response?.data?.success) {
+          this.launchTimer(180)
+          this.showNotification({ type: 'success', text: 'Код отправлен повторно' })
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async submitSmsCode () {
+      if (this.loading) return
+      this.loading = true
+      try {
+        const response = await this.$axios.post(
+          'v2/auth/login/contractor',
+          { phone_or_email: clearPhoneWithoutPlus(this.phone), code: this.smsCode },
+          { errorMessage: 'Ошибка при отправке смс кода' },
+        )
+        if (response?.data?.success) {
+          await this.auth(response.data.data?.token)
+          this.$router.push('/')
+        }
+      } finally {
+        this.loading = false
+      }
     },
   },
 }
