@@ -9,39 +9,35 @@
 
       <!-- Шаг 1: Ввод телефона -->
       <div class="signup-page__body" v-if="step === 1">
-        <Input 
-          class="input" 
-          label="Телефон" 
-          :value="formattedPhone" 
-          @input="onPhone" 
-          :disabled="isTimerRunning"
-          placeholder="+7 (999) 000-00-00"
-        />
-
-        <div class="remaining" v-if="isTimerRunning">
-          Отправить код повторно <b>{{ remainingTimeString }}</b>
-        </div>
+        <Form ref="phoneForm" class="content_container">
+          <div class="input_group">
+            <div class="input_block">
+              <div class="label">Телефон</div>
+              <Input
+                v-model="phone"
+                name="phone"
+                class="form_input"
+                clearable
+                @input="onPhone"
+                @keyup.enter="requestCode"
+                :rules="[rules.required, ...rulesSets.phone]"
+                placeholder="+7 (999) 000-00-00"
+              />
+            </div>
+          </div>
+        </Form>
 
         <MainButton
-          v-if="isTimerRunning"
           type="primary"
-          text="Подтвердить исходящим звонком"
+          text="Отправить код"
           :loading="loading"
-          class="signup-page__btn"
-          @click="step = 2"
-        />
-        <MainButton
-          v-if="!isTimerRunning"
-          type="primary"
-          text="Подтвердить исходящим звонком"
-          :loading="loading"
+          :disabled="disableHandler"
           class="signup-page__btn"
           @click="requestCode"
         />
 
-
         <FooterInfo 
-          text="Введите свой номер телефона для быстрой и безопасной авторизации. Мы отправим его в систему для проверки, после чего вы получите номер, на который нужно будет позвонить. Если звонок поступит с указанного вами номера, доступ будет предоставлен автоматически."
+          text="Введите свой номер телефона для быстрой и безопасной регистрации. Мы отправим код подтверждения в Telegram для завершения регистрации."
         />
 
         <MainButton 
@@ -67,57 +63,74 @@
         </div>
       </div>
 
-      <!-- Шаг 2: Инструкция о звонке -->
+      <!-- Шаг 2: Ввод кода из Telegram -->
       <div class="signup-page__body" v-if="step === 2">
-        <div class="call_instruction_card">
-          <div class="call_instruction_text">
-            Сделайте бесплатный звонок с номера {{ phone }}, чтобы авторизоваться
-          </div>
-          <div class="phone_display">
-            <img class="phone_icon" src="@/assets/icons/phone_call_filled_lightBlue.svg" />
-            <span class="phone_number">{{ callToPhone || '+7 (999) 999-99-99' }}</span>
-            <img class="copy_icon" src="@/assets/icons/copy_outlined.svg" @click="copyPhoneNumber" />
-          </div>
+        <div class="content_container">
+          <CodeInput
+            label="Код из телеграм"
+            placeholder="Введите код из телеграм"
+            v-model="code"
+          />
+
+          <ResendCodeTimer
+            :duration="180"
+            :auto-start="true"
+            @resend="sendCodeAgain"
+          />
+
+          <MainButton
+            type="primary"
+            text="Продолжить"
+            @click="verifyCode"
+            :disabled="!code || code.length < 4 || loading"
+            :loading="loading"
+            class="signup-page__btn"
+          />
+
+          <MainButton
+            type="primary-outline"
+            text="Назад"
+            @click="changeCallRequestedStatus"
+            :disabled="loading"
+            class="signup-page__btn"
+          />
         </div>
-        
-        <!-- Кнопка "Позвонить" - видна только на мобильных устройствах -->
-        <MainButton
-          type="primary"
-          text="Позвонить"
-          @click="makeCall"
-          :loading="loading"
-          class="signup-page__btn call_btn_mobile"
-        />
-        
-        <MainButton
-          type="primary-outline"
-          :text="!!this.remaining ? `Изменить номер через ${remainingTimeString}` : 'Изменить номер'"
-          @click="changeCallRequestedStatus"
-          :disabled="loading || isTimerRunning"
-          :loading="loading"
-          class="signup-page__btn change_number_btn"
-        />
       </div>
 
       <!-- Шаг 3: Создание пароля -->
       <div class="signup-page__body" v-if="step === 3">
         <h4>Создайте пароль</h4>
         
-        <Input 
-          class="input" 
-          label="Пароль" 
-          v-model="password"
-          type="password"
-          placeholder="Введите пароль"
-        />
-
-        <Input 
-          class="input" 
-          label="Подтвердите пароль" 
-          v-model="confirmPassword"
-          type="password"
-          placeholder="Подтвердите пароль"
-        />
+        <Form ref="passwordForm" class="content_container">
+          <div class="input_group">
+            <div class="input_block">
+              <div class="label">Пароль</div>
+              <Input
+                v-model="password"
+                name="password"
+                class="form_input"
+                type="password"
+                clearable
+                :rules="passwordRules"
+                @keyup.enter="createAccount"
+                placeholder="Введите пароль"
+              />
+            </div>
+            <div class="input_block">
+              <div class="label">Подтвердите пароль</div>
+              <Input
+                v-model="confirmPassword"
+                name="confirmPassword"
+                class="form_input"
+                type="password"
+                clearable
+                :rules="confirmPasswordRules"
+                @keyup.enter="createAccount"
+                placeholder="Подтвердите пароль"
+              />
+            </div>
+          </div>
+        </Form>
 
         <MainButton
           type="primary"
@@ -143,16 +156,20 @@
 import { mapActions } from 'vuex'
 import MainButton from '@/components/atoms/MainButton.vue'
 import Input from '@/components/atoms/Input.vue'
+import Form from '@/components/atoms/Form.vue'
 import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
+import CodeInput from '@/components/atoms/CodeInput.vue'
+import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
 import { getAPIError, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { formatPhone } from '@/constants/masks'
+import { rules, rulesSets } from '@/constants/validations'
 import useTimer from '@/composables/useSnackbarTimer'
 import authApi from '@/services/authApi'
 
 export default {
   name: 'SignUp',
   layout: 'empty',
-  components: { MainButton, Input, AgreementCheck },
+  components: { MainButton, Input, Form, AgreementCheck, CodeInput, ResendCodeTimer },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signupSms',
@@ -165,6 +182,8 @@ export default {
   },
   data () {
     return {
+      rules,
+      rulesSets,
       loading: false,
       agree: true,
       termAgree: true,
@@ -174,7 +193,11 @@ export default {
       callToPhone: null,
       password: '',
       confirmPassword: '',
-      activationToken: null
+      onceToken: null,
+      code: '',
+      authToken: null,
+      userId: null,
+      passwordRules: [(v) => !!v || 'Заполните поле']
     }
   },
   computed: {
@@ -190,6 +213,12 @@ export default {
     isPasswordValid () {
       return this.password && this.confirmPassword && this.password === this.confirmPassword
     },
+    confirmPasswordRules () {
+      return [
+        (v) => !!v || 'Подтвердите пароль',
+        (v) => v === this.password || 'Пароли не совпадают'
+      ]
+    }
   },
   methods: {
     ...mapActions('notifications', ['showNotification']),
@@ -210,6 +239,10 @@ export default {
     },
 
     async requestCode () {
+      if (this.$refs.phoneForm && !this.$refs.phoneForm.validate()) {
+        return
+      }
+      
       if (!this.agree || !this.termAgree) {
         this.showNotification({
           type: 'error',
@@ -220,27 +253,60 @@ export default {
       
       this.loading = true
       try {
-        // Используем authApi для запроса кода
+        // Отправляем номер телефона на регистрацию
         const phone = clearPhoneWithoutPlus(this.phone)
-        const result = await authApi.requestRecoveryCode(phone)
+        const result = await authApi.registerClient(phone)
         
         if (result.success) {
-          // Сохраняем телефон и тестовые данные в store
-          this.$store.commit('user/setRegistrationData', { 
-            phone,
-            firstname: 'Иван',
-            lastname: 'Петров',
-            middlename: 'Сергеевич',
-            email: 'test@example.com',
-            birthday: '1990-01-15',
-            citizenship: 'RU'
-          })
-          
           // Сохраняем телефон в localStorage
           localStorage.setItem('registration_phone', phone)
           
+          // Сохраняем once_token для подтверждения кода
+          this.onceToken = result.data?.once_token
+          
+          if (!this.onceToken) {
+            this.showNotification({
+              type: 'error',
+              text: 'Не получен токен для подтверждения кода'
+            })
+            return
+          }
+          
+          // Переходим к вводу кода из Telegram
           this.step = 2
-          this.launchTimer(180)
+          this.showNotification({
+            type: 'success',
+            text: 'Код отправлен в Telegram'
+          })
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Ошибка при отправке номера телефона'
+          })
+        }
+      } catch (error) {
+        this.showNotification({
+          type: 'error',
+          text: getAPIError(error) || 'Ошибка при отправке номера телефона'
+        })
+      }
+      this.loading = false
+    },
+
+
+    async sendCodeAgain() {
+      if (this.loading) return
+      this.loading = true
+      try {
+        const phone = clearPhoneWithoutPlus(this.phone)
+        const result = await authApi.registerClient(phone)
+        
+        if (result.success) {
+          this.onceToken = result.data?.once_token
+          this.showNotification({
+            type: 'success',
+            text: 'Код отправлен повторно'
+          })
         } else {
           this.showNotification({
             type: 'error',
@@ -256,17 +322,59 @@ export default {
       this.loading = false
     },
 
+    async verifyCode() {
+      if (!this.code || this.code.length !== 4) {
+        this.showNotification({
+          type: 'error',
+          text: 'Введите код из 4 цифр'
+        })
+        return
+      }
 
-    // Методы для экрана звонка
-    makeCall() {
-      // Переходим к заполнению пароля
-      this.step = 3
-      // В реальном приложении токен активации должен прийти с сервера после звонка
-      this.activationToken = 'real_activation_token_' + Date.now() // Заглушка для реального токена
-      this.showNotification({
-        type: 'success',
-        text: 'Звонок выполнен. Переходим к созданию пароля.'
-      })
+      if (!this.onceToken) {
+        this.showNotification({
+          type: 'error',
+          text: 'Токен подтверждения не найден. Пожалуйста, начните регистрацию заново.'
+        })
+        return
+      }
+
+      this.loading = true
+      try {
+        const result = await authApi.verifyCode(this.onceToken, this.code)
+        
+        if (result.success) {
+          // Сохраняем authToken и user_id
+          this.authToken = result.data?.authToken
+          this.userId = result.data?.user_id
+          
+          if (!this.authToken) {
+            this.showNotification({
+              type: 'error',
+              text: 'Токен авторизации не получен'
+            })
+            return
+          }
+
+          // Переходим к установке пароля
+          this.step = 3
+          this.showNotification({
+            type: 'success',
+            text: result.data?.message || 'Регистрация завершена успешно. Теперь создайте пароль.'
+          })
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: result.error?.[0]?.msg || 'Неверный код подтверждения'
+          })
+        }
+      } catch (error) {
+        this.showNotification({
+          type: 'error',
+          text: getAPIError(error) || 'Ошибка при подтверждении кода'
+        })
+      }
+      this.loading = false
     },
 
     copyPhoneNumber() {
@@ -280,13 +388,22 @@ export default {
     },
 
     changeCallRequestedStatus() {
+      if (this.isTimerRunning) {
+        return
+      }
       this.step = 1
+      this.code = ''
+      this.onceToken = null
       if (this.authInterval) {
         clearInterval(this.authInterval)
       }
     },
 
     async createAccount() {
+      if (this.$refs.passwordForm && !this.$refs.passwordForm.validate()) {
+        return
+      }
+
       if (!this.isPasswordValid) {
         this.showNotification({
           type: 'error',
@@ -295,31 +412,37 @@ export default {
         return
       }
 
+      if (!this.authToken) {
+        this.showNotification({
+          type: 'error',
+          text: 'Токен авторизации не найден. Пожалуйста, начните регистрацию заново.'
+        })
+        return
+      }
+
       this.loading = true
       try {
-        // Сохраняем телефон в store (берем последнее значение из инпута)
-        const phone = clearPhoneWithoutPlus(this.phone)
-        this.$store.commit('user/setRegistrationData', { 
-          phone,
-          firstname: 'Иван',
-          lastname: 'Петров',
-          middlename: 'Сергеевич',
-          email: 'test@example.com',
-          birthday: '1990-01-15',
-          citizenship: 'RU'
-        })
+        // Устанавливаем пароль с Bearer токеном
+        const result = await authApi.setupClientPassword(
+          this.authToken,
+          this.password,
+          this.confirmPassword
+        )
         
-        // Сохраняем телефон в localStorage
-        localStorage.setItem('registration_phone', phone)
-        
-        // Отправляем данные на эндпоинт установки пароля
-        const response = await this.$axios.post('api/v2/auth/password/client/setup', {
-          activation_token: this.activationToken, // Нужно получить токен активации
-          password: this.password,
-          confirm_password: this.confirmPassword
-        })
-        
-        if (response?.data?.success) {
+        if (result.success) {
+          // Сохраняем телефон в store и localStorage
+          const phone = clearPhoneWithoutPlus(this.phone)
+          this.$store.commit('user/setRegistrationData', { 
+            phone,
+            firstname: 'Иван',
+            lastname: 'Петров',
+            middlename: 'Сергеевич',
+            email: 'test@example.com',
+            birthday: '1990-01-15',
+            citizenship: 'RU'
+          })
+          localStorage.setItem('registration_phone', phone)
+          
           this.showNotification({
             type: 'success',
             text: 'Пароль установлен! Переходим к заполнению данных организации.'
@@ -330,14 +453,14 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: getAPIError(response) || 'Ошибка при установке пароля'
+            text: result.error?.[0]?.msg || 'Ошибка при установке пароля'
           })
         }
       } catch (error) {
         console.error('Ошибка установки пароля:', error)
         this.showNotification({
           type: 'error',
-          text: 'Ошибка при установке пароля'
+          text: getAPIError(error) || 'Ошибка при установке пароля'
         })
       }
       this.loading = false
@@ -481,6 +604,40 @@ export default {
     font-size: 14px;
     color: #666666;
     margin: 8px 0;
+  }
+
+
+  .content_container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .input_group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+  }
+
+  .input_block {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .label {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #666666;
+  }
+
+  .form_input {
+    width: 100%;
   }
 
   .agreements_check {

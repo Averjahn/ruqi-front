@@ -57,7 +57,6 @@ export default {
 <style lang="scss" scoped>
 .code-input {
   width: 100%;
-  margin-bottom: 16px;
 
   &__label {
     display: block;

@@ -1,11 +1,11 @@
-import axios from 'axios'
+import axios from '@/plugins/axios'
 
 /**
  * Сервис для работы с API авторизации
  */
 class AuthApiService {
   constructor() {
-    this.baseURL = process.env.VUE_APP_API_URL || 'https://api.stagelkk.ruqi.ru'
+    // baseURL уже настроен в plugins/axios.js
   }
 
   /**
@@ -16,7 +16,7 @@ class AuthApiService {
    */
   async requestPhoneCode(phone, userType = 'contractor') {
     try {
-      const response = await axios.post(`${this.baseURL}/api/auth/phone/request`, {
+      const response = await axios.post('/api/auth/phone/request', {
         phone: phone,
         user_type: userType
       })
@@ -39,7 +39,7 @@ class AuthApiService {
    */
   async confirmPhoneCode(phone, code, userType = 'contractor') {
     try {
-      const response = await axios.post(`${this.baseURL}/api/auth/phone/confirm`, {
+      const response = await axios.post('/api/auth/phone/confirm', {
         phone: phone,
         code: code,
         user_type: userType
@@ -65,11 +65,11 @@ class AuthApiService {
     try {
       let endpoint
       if (userType === 'contractor') {
-        endpoint = `${this.baseURL}/api/v2/auth/login/contractor`
+        endpoint = '/api/v2/auth/login/contractor'
       } else if (userType === 'client') {
-        endpoint = `${this.baseURL}/api/v2/auth/login/client`
+        endpoint = '/api/v2/auth/login/client'
       } else {
-        endpoint = `${this.baseURL}/api/v2/auth/login`
+        endpoint = '/api/v2/auth/login'
       }
       
       const response = await axios.post(endpoint, {
@@ -115,7 +115,7 @@ class AuthApiService {
    */
   async requestRecoveryCode(loginPhone) {
     try {
-      const response = await axios.get(`${this.baseURL}/api/v2/auth/recovery/client/request-code`, {
+      const response = await axios.get('/api/v2/auth/recovery/client/request-code', {
         params: {
           login_phone: loginPhone
         }
@@ -146,7 +146,7 @@ class AuthApiService {
    */
   async confirmRecoveryCode(loginPhone, code) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/recovery/client/confirm-code`, {
+      const response = await axios.post('/api/v2/auth/recovery/client/confirm-code', {
         login_phone: loginPhone,
         code: code
       })
@@ -177,7 +177,7 @@ class AuthApiService {
    */
   async setNewPassword(loginPhone, code, newPassword) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/recovery/client/set-password`, {
+      const response = await axios.post('/api/v2/auth/recovery/client/set-password', {
         login_phone: loginPhone,
         code: code,
         new_password: newPassword
@@ -207,7 +207,7 @@ class AuthApiService {
    */
   async requestEmailVerification(email) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/email/client/request-verification`, {
+      const response = await axios.post('/api/v2/auth/email/client/request-verification', {
         email: email
       })
       
@@ -235,7 +235,7 @@ class AuthApiService {
    */
   async verifyEmail(token) {
     try {
-      const response = await axios.get(`${this.baseURL}/api/v2/auth/email/client/verify`, {
+      const response = await axios.get('/api/v2/auth/email/client/verify', {
         params: {
           token: token
         }
@@ -264,7 +264,7 @@ class AuthApiService {
    */
   async getClientStatus() {
     try {
-      const response = await axios.get(`${this.baseURL}/api/v2/auth/client/status`)
+      const response = await axios.get('/api/v2/auth/client/status')
       
       // Проверяем успешность ответа от API
       if (response.data.success) {
@@ -291,7 +291,7 @@ class AuthApiService {
    */
   async setupPassword(token, password) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/password/client/setup`, {
+      const response = await axios.post('/api/v2/auth/password/client/setup', {
         token: token,
         password: password
       })
@@ -314,13 +314,108 @@ class AuthApiService {
   }
 
   /**
-   * Регистрация клиента
-   * @param {Object} clientData - Данные клиента для регистрации
+   * Регистрация клиента - отправка номера телефона
+   * @param {string} phone - Номер телефона
+   * @returns {Promise<Object>} Ответ API с once_token
+   */
+  async registerClient(phone) {
+    try {
+      const response = await axios.post('/api/v2/auth/register/client', {
+        phone: phone
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Подтверждение кода из Telegram при регистрации клиента
+   * @param {string} onceToken - Токен одноразового использования
+   * @param {string} code - Код из Telegram
+   * @returns {Promise<Object>} Ответ API с user_id и authToken
+   */
+  async verifyCode(onceToken, code) {
+    try {
+      const response = await axios.post('/api/v2/auth/register/client/verify-code', {
+        once_token: onceToken,
+        code: code
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Установка пароля при регистрации клиента (с Bearer токеном)
+   * @param {string} authToken - Токен авторизации
+   * @param {string} password - Пароль
+   * @param {string} passwordConfirmation - Подтверждение пароля
    * @returns {Promise<Object>} Ответ API
    */
-  async registerClient(clientData) {
+  async setupClientPassword(authToken, password, passwordConfirmation) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/register/client`, clientData)
+      const response = await axios.post('/api/v2/auth/register/client/setup-password', {
+        password: password,
+        password_confirmation: passwordConfirmation
+      }, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Верификация клиента
+   * @param {number} userId - ID пользователя
+   * @returns {Promise<Object>} Ответ API
+   */
+  async verifyClient(userId) {
+    try {
+      const response = await axios.post('/api/v2/auth/client/verify', {
+        user_id: userId
+      })
       
       // Проверяем успешность ответа от API
       if (response.data.success) {
@@ -346,7 +441,7 @@ class AuthApiService {
    */
   async loginWithTelegram(telegramData) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/telegram`, telegramData)
+      const response = await axios.post('/api/v2/auth/telegram', telegramData)
       
       return {
         success: true,
@@ -403,7 +498,7 @@ class AuthApiService {
    */
   async submitRecoveryPassword(onceToken, password, confirmPassword) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/recovery/client/submit-password`, {
+      const response = await axios.post('/api/v2/auth/recovery/client/submit-password', {
         once_token: onceToken,
         password: password,
         confirm_password: confirmPassword

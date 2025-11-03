@@ -76,8 +76,4 @@ export default {
 .resend-text-button--blue { color: #1735f5; }
 .resend-text-button--light-blue { color: #b0baff; }
 .resend-text-button--disabled { cursor: default; opacity: .7; }
-
-.resend-text-button:not(.resend-text-button--disabled):hover {
-  background: #f2f8ff;
-}
 </style>

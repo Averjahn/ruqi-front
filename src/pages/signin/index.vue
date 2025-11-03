@@ -112,33 +112,36 @@
           </template>
 
           <template v-if="callRequested && !oldMethod">
-            <div class="call_instruction_card">
-              <div class="call_instruction_text">
-                Сделайте бесплатный звонок с номера {{ phone }}, чтобы авторизоваться
-              </div>
-              <div class="phone_display">
-                <img class="phone_icon" src="@/assets/icons/phone_call_filled_lightBlue.svg" />
-                <span class="phone_number">{{ callToPhone || '+7 (999) 999-99-99' }}</span>
-                <img class="copy_icon" src="@/assets/icons/copy_outlined.svg" @click="copyPhoneNumber" />
-              </div>
+            <div class="content_container">
+              <CodeInput
+                label="Код из телеграм"
+                placeholder="Введите код из телеграм"
+                v-model="smsCode"
+              />
+
+              <ResendCodeTimer
+                :duration="60"
+                :auto-start="true"
+                @resend="sendCodeAgain"
+              />
+
+              <MainButton
+                type="primary"
+                text="Продолжить"
+                @click="submitSmsCode"
+                :disabled="!smsCode || smsCode.length < 4 || loading"
+                :loading="loading"
+                class="signin_button"
+              />
+
+              <MainButton
+                type="primary-outline"
+                text="Назад"
+                @click="changeCallRequestedStatus"
+                :disabled="loading"
+                class="signin_button"
+              />
             </div>
-            <!-- Кнопка "Позвонить" - видна только на мобильных устройствах -->
-            <MainButton
-              type="primary"
-              text="Позвонить"
-              @click="makeCall"
-              :loading="loading"
-              class="signin_button call_btn_mobile"
-            />
-            
-            <MainButton
-              type="primary-outline"
-              :text="!!this.remaining ? `Изменить номер через ${remainingTimeString}` : 'Изменить номер'"
-              @click="changeCallRequestedStatus"
-              :disabled="loading || isTimerRunning"
-              :loading="loading"
-              class="signin_button change_number_btn"
-            />
           </template>
           <div v-if="currentTab !== 'by_phone_call'" class="agreements_check">
             <AgreementCheck
@@ -180,12 +183,12 @@ import { mapActions } from 'vuex'
 import AuthTabs from '@/components/molecules/AuthTabs.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
 import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
+import CodeInput from '@/components/atoms/CodeInput.vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
 import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
 import { getAPIError, getAPIErrorMessage, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
-import useTimer from '@/composables/useSnackbarTimer'
 import { useAuth } from '@/composables/useAuth'
 const tabs = [
   { text: 'Вход по паролю', value: 'by_password' },
@@ -193,7 +196,7 @@ const tabs = [
 ]
 
 export default {
-  components: { AuthTabs, MainButton, ResendCodeTimer, Checkbox, AgreementCheck },
+  components: { AuthTabs, MainButton, ResendCodeTimer, CodeInput, Checkbox, AgreementCheck },
   layout: 'empty',
   data () {
     return {
@@ -242,9 +245,6 @@ export default {
 
   },
   computed: {
-    remainingTimeString () {
-      return getStringFromSeconds(this.remaining)
-    },
     disableHandler () {
       return !this.login.phone_or_email || !this.login.password
     },
@@ -310,7 +310,6 @@ export default {
     changeOldAuthMethod () {
       this.oldMethod = !this.oldMethod
       if (!this.oldMethod) {
-        this.launchTimer(180)
         this.authInterval = setInterval(this.authCallCheck, 5000)
       }
      
@@ -355,12 +354,11 @@ export default {
           this.callRequested = true
           this.onceToken = response?.data?.data?.once_token
           if (response?.data?.data?.code_sended?.method === 'waitcall') {
+            this.oldMethod = false // Для отображения экрана ввода кода
             this.callToPhone = replace8to7inPhone(response?.data?.data?.code_sended?.callto)
-            this.launchTimer(180)
             this.authInterval = setInterval(this.authCallCheck, 5000)
           } else {
-          this.changeOldAuthMethod()
-          this.launchTimer(180)
+            this.oldMethod = false // Для отображения экрана ввода кода из телеграм
           }
         } else {
           this.callRequestErrorMsg = getAPIErrorMessage(response)
@@ -484,11 +482,10 @@ export default {
       // Временный переход по шагам внутри страницы signin
       if (this.currentTab === 'by_phone_call') {
         if (!this.callRequested) {
-          // Шаг 1 -> Шаг 2: показать экран с инструкцией звонка
+          // Шаг 1 -> Шаг 2: показать экран ввода кода из телеграм
           this.callRequested = true
-          // Переходим сразу на ввод кода (как в макете)
-          this.oldMethod = true
-          this.launchTimer(180)
+          // Для показа экрана ввода кода
+          this.oldMethod = false
           return
         }
         if (this.callRequested && this.oldMethod) {
@@ -512,11 +509,10 @@ export default {
           'api/v2/auth/recovery/client/request-code',
           { 
             params: { login_phone: clearPhoneWithoutPlus(this.phone) },
-            errorMessage: 'Ошибка при запросе смс кода' 
+            errorMessage: 'Ошибка при запросе кода' 
           },
         )
         if (response?.data?.success) {
-          this.launchTimer(180)
           this.showNotification({ type: 'success', text: 'Код отправлен повторно' })
         }
       } finally {
