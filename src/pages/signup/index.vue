@@ -47,6 +47,14 @@
           @click="goToSignIn" 
         />
 
+        <MainButton
+          v-if="isDevelopment"
+          type="primary-outline"
+          text="Следующий шаг (временно)"
+          @click="goToNextStep"
+          class="signup-page__btn"
+        />
+
         <div class="agreements_check">
           <AgreementCheck
             v-model="termAgree"
@@ -92,6 +100,14 @@
             text="Назад"
             @click="changeCallRequestedStatus"
             :disabled="loading"
+            class="signup-page__btn"
+          />
+
+          <MainButton
+            v-if="isDevelopment"
+            type="primary-outline"
+            text="Следующий шаг (временно)"
+            @click="goToNextStep"
             class="signup-page__btn"
           />
         </div>
@@ -146,6 +162,14 @@
           text="Назад" 
           class="signup-page__btn signup-page__btn--secondary"
           @click="step = 2" 
+        />
+
+        <MainButton
+          v-if="isDevelopment"
+          type="primary-outline"
+          text="Следующий шаг (временно)"
+          @click="goToNextStep"
+          class="signup-page__btn"
         />
       </div>
     </div>
@@ -468,6 +492,35 @@ export default {
 
     goToSignIn () {
       this.$router.push('/client/signin')
+    },
+
+    goToNextStep () {
+      // Временный переход по шагам внутри страницы signup
+      if (this.step === 1) {
+        // Шаг 1 -> Шаг 2: переход к вводу кода
+        // Имитируем успешную отправку кода
+        this.code = '1234' // Заполняем временный код
+        this.onceToken = 'temp_once_token'
+        this.step = 2
+        return
+      }
+      if (this.step === 2) {
+        // Шаг 2 -> Шаг 3: переход к созданию пароля
+        // Имитируем успешную верификацию кода
+        this.authToken = 'temp_auth_token'
+        this.userId = 123
+        this.step = 3
+        return
+      }
+      if (this.step === 3) {
+        // Шаг 3 -> завершение регистрации
+        // Имитируем успешную установку пароля
+        this.password = 'TestPassword123!'
+        this.confirmPassword = 'TestPassword123!'
+        // Переход на страницу данных организации
+        this.$router.push('/client/organisationData')
+        return
+      }
     },
   },
 }
