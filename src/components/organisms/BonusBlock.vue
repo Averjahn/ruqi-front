@@ -5,7 +5,7 @@
     </Popup>
     <div class="stat_card stat_card_blue">
       <div class="header">
-        <div class="icon"><img src="@/assets/icons/wallet.svg" /></div>
+        <div class="icon"><img src="@/assets/icons/profile/wallet.svg" /></div>
         <div class="text">Баланс</div>
       </div>
       <div class="footer">

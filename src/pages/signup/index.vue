@@ -1,30 +1,27 @@
 <template>
   <div class="signup-page">
     <div class="signup-page__wrapper">
-      <div class="signup-page__header">
-        <img src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-        <img class="logo-text" src="@/assets/icons/logo.svg" />
-        <h3>Регистрация</h3>
-      </div>
+      <AuthLogoHeader title="Регистрация" />
 
       <!-- Шаг 1: Ввод телефона -->
       <div class="signup-page__body" v-if="step === 1">
         <Form ref="phoneForm" class="content_container">
-          <div class="input_group">
-            <div class="input_block">
-              <div class="label">Телефон</div>
-              <Input
-                v-model="phone"
-                name="phone"
-                class="form_input"
-                clearable
-                @input="onPhone"
-                @keyup.enter="requestCode"
-                :rules="[rules.required, ...rulesSets.phone]"
-                placeholder="+7 (999) 000-00-00"
-              />
-            </div>
-          </div>
+          <InputGroup>
+            <InputBlock>
+              <FormField label="Телефон">
+                <Input
+                  v-model="phone"
+                  name="phone"
+                  class="form_input"
+                  clearable
+                  @input="onPhone"
+                  @keyup.enter="requestCode"
+                  :rules="[rules.required, ...rulesSets.phone]"
+                  placeholder="+7 (999) 000-00-00"
+                />
+              </FormField>
+            </InputBlock>
+          </InputGroup>
         </Form>
 
         <MainButton
@@ -118,34 +115,36 @@
         <h4>Создайте пароль</h4>
         
         <Form ref="passwordForm" class="content_container">
-          <div class="input_group">
-            <div class="input_block">
-              <div class="label">Пароль</div>
-              <Input
-                v-model="password"
-                name="password"
-                class="form_input"
-                type="password"
-                clearable
-                :rules="passwordRules"
-                @keyup.enter="createAccount"
-                placeholder="Введите пароль"
-              />
-            </div>
-            <div class="input_block">
-              <div class="label">Подтвердите пароль</div>
-              <Input
-                v-model="confirmPassword"
-                name="confirmPassword"
-                class="form_input"
-                type="password"
-                clearable
-                :rules="confirmPasswordRules"
-                @keyup.enter="createAccount"
-                placeholder="Подтвердите пароль"
-              />
-            </div>
-          </div>
+          <InputGroup>
+            <InputBlock>
+              <FormField label="Пароль">
+                <Input
+                  v-model="password"
+                  name="password"
+                  class="form_input"
+                  type="password"
+                  clearable
+                  :rules="passwordRules"
+                  @keyup.enter="createAccount"
+                  placeholder="Введите пароль"
+                />
+              </FormField>
+            </InputBlock>
+            <InputBlock>
+              <FormField label="Подтвердите пароль">
+                <Input
+                  v-model="confirmPassword"
+                  name="confirmPassword"
+                  class="form_input"
+                  type="password"
+                  clearable
+                  :rules="confirmPasswordRules"
+                  @keyup.enter="createAccount"
+                  placeholder="Подтвердите пароль"
+                />
+              </FormField>
+            </InputBlock>
+          </InputGroup>
         </Form>
 
         <MainButton
@@ -184,6 +183,11 @@ import Form from '@/components/atoms/Form.vue'
 import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
 import CodeInput from '@/components/atoms/CodeInput.vue'
 import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
+import AuthLogoHeader from '@/components/molecules/AuthLogoHeader.vue'
+import InputGroup from '@/components/molecules/InputGroup.vue'
+import InputBlock from '@/components/atoms/InputBlock.vue'
+import FormField from '@/components/atoms/FormField.vue'
+import FooterInfo from '@/components/atoms/FooterInfo.vue'
 import { getAPIError, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { formatPhone } from '@/constants/masks'
 import { rules, rulesSets } from '@/constants/validations'
@@ -193,7 +197,7 @@ import authApi from '@/services/authApi'
 export default {
   name: 'SignUp',
   layout: 'empty',
-  components: { MainButton, Input, Form, AgreementCheck, CodeInput, ResendCodeTimer },
+  components: { MainButton, Input, Form, AgreementCheck, CodeInput, ResendCodeTimer, AuthLogoHeader, InputGroup, InputBlock, FormField, FooterInfo },
   setup () {
     const { launchTimer, isTimerRunning, remaining } = useTimer({
       timerId: 'signupSms',

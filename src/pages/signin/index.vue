@@ -1,42 +1,38 @@
 <template>
   <div class="login_page">
     <div class="form_block">
-      <div class="logo_block">
-        <div class="logo_icons">
-          <img src="@/assets/icons/ruqi_dark_blue_rounded.svg" />
-          <img class="ruqi_logo_text" src="@/assets/icons/logo.svg" />
-        </div>
-        <div class="form_header">{{ callRequested ? 'Восстановление пароля' : 'Вход в систему' }}</div>
-      </div>
+      <AuthLogoHeader :title="callRequested ? 'Восстановление пароля' : 'Вход в систему'" />
       <AuthTabs v-if="!callRequested" :value="currentTab" :old-method="oldMethod" @change="changeTab" />
 
       <template v-if="currentTab === 'by_password'">
         <Form ref="form" class="content_container">
-          <div class="input_group">
-            <div class="input_block">
-              <div class="label">Email или номер телефона</div>
-              <Input
-                v-model="login.phone_or_email"
-                name="phone_or_email"
-                @keyup.enter="signinHandler"
-                class="form_input"
-                clearable
-                :rules="inputRules"
-              />
-            </div>
-            <div class="input_block">
-              <div class="label">Пароль</div>
-              <Input
-                v-model="login.password"
-                name="password"
-                class="form_input"
-                type="password"
-                :rules="passwordRules"
-                @keyup.enter="signinHandler"
-              />
-            </div>
-            <ButtonText class="password_forgot" type="s" @click="forgot()">Забыли пароль?</ButtonText>
-          </div>
+          <InputGroup>
+            <InputBlock>
+              <FormField label="Email или номер телефона">
+                <Input
+                  v-model="login.phone_or_email"
+                  name="phone_or_email"
+                  @keyup.enter="signinHandler"
+                  class="form_input"
+                  clearable
+                  :rules="inputRules"
+                />
+              </FormField>
+            </InputBlock>
+            <InputBlock>
+              <FormField label="Пароль">
+                <Input
+                  v-model="login.password"
+                  name="password"
+                  class="form_input"
+                  type="password"
+                  :rules="passwordRules"
+                  @keyup.enter="signinHandler"
+                />
+              </FormField>
+            </InputBlock>
+            <a class="password_forgot" @click="forgot()">Забыли пароль?</a>
+          </InputGroup>
           <div class="action_group">
             <MainButton 
               type="primary" 
@@ -81,21 +77,22 @@
         <div class="content_container">
           <template v-if="!callRequested">
             <Form ref="call" @submit.prevent="onSubmitByCall" class="content_container">
-              <div class="input_group">
-                <div class="input_block">
-                  <div class="label">Телефон</div>
-                  <Input
-                    v-model="phone"
-                    :errorText="callRequestErrorMsg"
-                    name="phone"
-                    class="form_input"
-                    clearable
-                    @input="onPhone"
-                    @keyup.enter="onSubmitByCall"
-                    :rules="[rules.required, ...rulesSets.phone]"
-                  />
-                </div>
-              </div>
+              <InputGroup>
+                <InputBlock>
+                  <FormField label="Телефон">
+                    <Input
+                      v-model="phone"
+                      :errorText="callRequestErrorMsg"
+                      name="phone"
+                      class="form_input"
+                      clearable
+                      @input="onPhone"
+                      @keyup.enter="onSubmitByCall"
+                      :rules="[rules.required, ...rulesSets.phone]"
+                    />
+                  </FormField>
+                </InputBlock>
+              </InputGroup>
               <MainButton
                 type="primary"
                 :text="'Подтвердить исходящим звонком'"
@@ -181,11 +178,17 @@
 <script>
 import { mapActions } from 'vuex'
 import AuthTabs from '@/components/molecules/AuthTabs.vue'
+import AuthLogoHeader from '@/components/molecules/AuthLogoHeader.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
+import Input from '@/components/atoms/Input.vue'
 import ResendCodeTimer from '@/components/atoms/ResendCodeTimer.vue'
 import CodeInput from '@/components/atoms/CodeInput.vue'
 import Checkbox from '@/components/atoms/Checkbox.vue'
 import AgreementCheck from '@/components/atoms/AgreementCheck.vue'
+import InputGroup from '@/components/molecules/InputGroup.vue'
+import InputBlock from '@/components/atoms/InputBlock.vue'
+import FormField from '@/components/atoms/FormField.vue'
+import FooterInfo from '@/components/atoms/FooterInfo.vue'
 import { getAPIError, getAPIErrorMessage, replace8to7inPhone, clearPhoneAlwaysSeven, clearPhoneWithoutPlus, getStringFromSeconds } from '@/constants/helpers'
 import { rules, rulesSets } from '@/constants/validations'
 import { formatPhone } from '@/constants/masks'
@@ -196,7 +199,7 @@ const tabs = [
 ]
 
 export default {
-  components: { AuthTabs, MainButton, ResendCodeTimer, CodeInput, Checkbox, AgreementCheck },
+  components: { AuthTabs, AuthLogoHeader, MainButton, Input, ResendCodeTimer, CodeInput, Checkbox, AgreementCheck, InputGroup, InputBlock, FormField, FooterInfo },
   layout: 'empty',
   data () {
     return {

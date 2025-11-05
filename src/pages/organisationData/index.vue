@@ -1,4 +1,5 @@
 <template>
+  <div class="organisation-data-page-wrapper">
   <div class="organisation-data-page">
     <!-- Header -->
     <div class="organisation-data-page__header">
@@ -9,73 +10,34 @@
 
     <div class="organisation-data-page__wrapper">
       <!-- Content Header -->
-      <div class="organisation-data-page__content-header">
-        <h1 class="organisation-data-page__title">{{ currentStepTitle }}</h1>
-        <p class="organisation-data-page__description">
-          {{ currentStepDescription }}
-        </p>
-      </div>
-
-      <!-- Step 1: Logo Upload Section -->
-      <div v-if="currentStep === 0" class="organisation-data-page__logo-section">
-        <LogoUpload 
-          v-model="formData.logo"
-          :min-width="98"
-          :min-height="98"
-          @error="handleUploadError"
-        />
-      </div>
+      <ContentHeader 
+        :title="currentStepTitle" 
+        :description="currentStepDescription"
+      />
 
       <!-- Step 2: Documents Upload Section -->
       <div v-if="currentStep === 1" class="organisation-data-page__documents-section">
         <!-- Warning Block -->
-        <div class="organisation-data-page__warning-block">
-          <div class="organisation-data-page__warning-icon">
-            <img src="@/assets/icons/info_blue.svg" alt="Info" />
-          </div>
-          <div class="organisation-data-page__warning-content">
-            <h3 class="organisation-data-page__warning-title">Внимание!</h3>
-            <p class="organisation-data-page__warning-text">
-              На фотографии должны быть отчётливо видны серия, номер, основные данные. 
-              В поле зрения не должны попадать пальцы и посторонние предметы.
-            </p>
-          </div>
-        </div>
+        <WarningBlock 
+          title="Внимание!"
+          text="На фотографии должны быть отчётливо видны серия, номер, основные данные. В поле зрения не должны попадать пальцы и посторонние предметы."
+          :icon="require('@/assets/icons/info_blue.svg')"
+        />
 
         <!-- Document Upload Areas -->
         <div class="organisation-data-page__documents-list">
           <!-- Свидетельство ИНН -->
-          <div class="organisation-data-page__document-card">
-            <div class="organisation-data-page__document-header">
-              <h3 class="organisation-data-page__document-title">Свидетельство ИНН</h3>
-              <a href="#" class="organisation-data-page__sample-link" @click.prevent="openDocumentModal">Смотреть образец</a>
-            </div>
-            <div v-if="formData.innCertificate && formData.innCertificate.file" class="organisation-data-page__uploaded-file">
-              <div class="organisation-data-page__file-thumbnail" @click="openDocumentModal('innCertificate')">
-                <img 
-                  :src="formData.innCertificate.preview || formData.innCertificate.file" 
-                  alt="Document" 
-                  class="organisation-data-page__document-image" 
-                />
-              </div>
-              <div class="organisation-data-page__file-info">
-                <p class="organisation-data-page__file-name">{{ formData.innCertificate.name }}</p>
-                <p class="organisation-data-page__file-size">{{ formData.innCertificate.size }}</p>
-                <button class="organisation-data-page__delete-button" @click="removeInnCertificate">
-                  <img src="@/assets/icons/delete.svg" alt="Delete" class="organisation-data-page__delete-icon" />
-                  Удалить
-                </button>
-              </div>
-            </div>
-            <div v-else class="organisation-data-page__upload-area">
-              <div class="organisation-data-page__upload-content">
-                <p class="organisation-data-page__upload-text">Перетащите файлы сюда или</p>
-                <button class="organisation-data-page__upload-button" @click="triggerInnFileInput">
-                  <div class="organisation-data-page__icon-placeholder">📎</div>
-                  загрузите документы
-                </button>
-                <p class="organisation-data-page__upload-hint">Файлы до 5 МВ в форматах PNG, JPG, JPEG</p>
-              </div>
+          <DocumentUploadCard
+            title="Свидетельство ИНН"
+            :file="formData.innCertificate"
+            sample-link-text="Смотреть образец"
+            hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG"
+            input-ref="innFileInput"
+            @view-sample="openDocumentModal"
+            @view-file="openDocumentModal('innCertificate')"
+            @remove="removeInnCertificate"
+            @upload="triggerInnFileInput"
+          />
               <input 
                 type="file" 
                 ref="innFileInput" 
@@ -83,41 +45,19 @@
                 accept="image/png,image/jpg,image/jpeg" 
                 style="display: none"
               />
-            </div>
-          </div>
 
           <!-- Свидетельство ОГРН -->
-          <div class="organisation-data-page__document-card">
-            <div class="organisation-data-page__document-header">
-              <h3 class="organisation-data-page__document-title">Свидетельство ОГРН</h3>
-              <a href="#" class="organisation-data-page__sample-link" @click.prevent="openDocumentModal">Смотреть образец</a>
-            </div>
-            <div v-if="formData.ogrnCertificate && formData.ogrnCertificate.file" class="organisation-data-page__uploaded-file">
-              <div class="organisation-data-page__file-thumbnail" @click="openDocumentModal('ogrnCertificate')">
-                <img 
-                  :src="formData.ogrnCertificate.preview || formData.ogrnCertificate.file" 
-                  alt="Document" 
-                  class="organisation-data-page__document-image" 
-                />
-              </div>
-              <div class="organisation-data-page__file-info">
-                <p class="organisation-data-page__file-name">{{ formData.ogrnCertificate.name }}</p>
-                <p class="organisation-data-page__file-size">{{ formData.ogrnCertificate.size }}</p>
-                <button class="organisation-data-page__delete-button" @click="removeOgrnCertificate">
-                  <img src="@/assets/icons/delete.svg" alt="Delete" class="organisation-data-page__delete-icon" />
-                  Удалить
-                </button>
-              </div>
-            </div>
-            <div v-else class="organisation-data-page__upload-area">
-              <div class="organisation-data-page__upload-content">
-                <p class="organisation-data-page__upload-text">Перетащите файлы сюда или</p>
-                <button class="organisation-data-page__upload-button" @click="triggerOgrnFileInput">
-                  <div class="organisation-data-page__icon-placeholder">📎</div>
-                  загрузите документы
-                </button>
-                <p class="organisation-data-page__upload-hint">Файлы до 5 МВ в форматах PNG, JPG, JPEG</p>
-              </div>
+          <DocumentUploadCard
+            title="Свидетельство ОГРН"
+            :file="formData.ogrnCertificate"
+            sample-link-text="Смотреть образец"
+            hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG"
+            input-ref="ogrnFileInput"
+            @view-sample="openDocumentModal"
+            @view-file="openDocumentModal('ogrnCertificate')"
+            @remove="removeOgrnCertificate"
+            @upload="triggerOgrnFileInput"
+          />
               <input 
                 type="file" 
                 ref="ogrnFileInput" 
@@ -125,217 +65,18 @@
                 accept="image/png,image/jpg,image/jpeg" 
                 style="display: none"
               />
-            </div>
-          </div>
-
         </div>
       </div>
 
         <!-- Form (Step 1 only) -->
-        <Form v-if="currentStep === 0" ref="form" class="organisation-data-page__form">
-        <!-- Row 1: Вид контрагента + ИНН -->
-        <FieldsRow>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              Вид контрагента*
-            </label>
-            <Select
-              v-model="formData.counterpartyType"
-              :options="counterpartyTypes"
-              placeholder="Выберите вид контрагента"
-              class="organisation-data-page__input"
-              item-value="value"
-              item-text="label"
-            />
-          </div>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              ИНН*
-            </label>
-            <div class="organisation-data-page__inn-search">
-              <Input
-                v-model="formData.inn"
-                placeholder="Введите ИНН"
-                :rules="[rules.required]"
-                class="organisation-data-page__input"
-                @input="onInnChange"
-              />
-            </div>
-            <div v-if="dadataError" class="organisation-data-page__error">
-              {{ dadataError }}
-            </div>
-          </div>
-        </FieldsRow>
-
-        <!-- Row 2: Полное наименование организации -->
-        <div class="organisation-data-page__field organisation-data-page__field--full">
-          <label class="organisation-data-page__label">
-            Полное наименование организации*
-          </label>
-          <Input
-            v-model="formData.fullName"
-            placeholder="Введите полное наименование"
-            :rules="[rules.required]"
-            class="organisation-data-page__input"
-          />
-        </div>
-
-        <!-- Row 3: КПП + ОГРН + ОКАТО -->
-        <div class="organisation-data-page__fields-row-three">
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              КПП*
-            </label>
-            <Input
-              v-model="formData.kpp"
-              placeholder="Введите КПП"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              ОГРН*
-            </label>
-            <Input
-              v-model="formData.ogrn"
-              placeholder="Введите ОГРН"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              ОКАТО*
-            </label>
-            <Input
-              v-model="formData.okato"
-              placeholder="Введите ОКАТО"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-        </div>
-
-        <!-- Row 4: ФИО -->
-        <div class="organisation-data-page__field organisation-data-page__field--full">
-          <label class="organisation-data-page__label">
-            ФИО*
-          </label>
-          <Input
-            v-model="formData.fullNamePerson"
-            placeholder="Введите ФИО"
-            :rules="[rules.required]"
-            class="organisation-data-page__input"
-          />
-        </div>
-
-        <!-- Row 6: Должность -->
-        <div class="organisation-data-page__field organisation-data-page__field--full">
-          <label class="organisation-data-page__label">
-            Должность*
-          </label>
-          <Input
-            v-model="formData.position"
-            placeholder="Введите должность"
-            :rules="[rules.required]"
-            class="organisation-data-page__input"
-          />
-        </div>
-
-        <!-- Row 7: На основании чего -->
-        <div class="organisation-data-page__field organisation-data-page__field--full">
-          <label class="organisation-data-page__label">
-            На основании чего*
-          </label>
-          <Input
-            v-model="formData.basis"
-            placeholder="Введите основание"
-            :rules="[rules.required]"
-            class="organisation-data-page__input"
-          />
-        </div>
-
-        <!-- Row 8: Почтовый адрес -->
-        <div class="organisation-data-page__field organisation-data-page__field--full">
-          <label class="organisation-data-page__label">
-            Почтовый адрес*
-          </label>
-          <Input
-            v-model="formData.mailingAddress"
-            placeholder="Введите почтовый адрес"
-            :rules="[rules.required]"
-            class="organisation-data-page__input"
-          />
-        </div>
-
-        <!-- Row 9: Юридический адрес -->
-        <div class="organisation-data-page__field organisation-data-page__field--full">
-          <label class="organisation-data-page__label">
-            Юридический адрес*
-          </label>
-          <Input
-            v-model="formData.legalAddress"
-            placeholder="Введите юридический адрес"
-            :rules="[rules.required]"
-            class="organisation-data-page__input"
-          />
-        </div>
-
-        <!-- Row 10: Расчётный счёт + Корреспондентский счёт -->
-        <FieldsRow>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              Расчётный счёт*
-            </label>
-            <Input
-              v-model="formData.settlementAccount"
-              placeholder="Введите расчётный счёт"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              Корреспондентский счёт*
-            </label>
-            <Input
-              v-model="formData.correspondentAccount"
-              placeholder="Введите корреспондентский счёт"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-        </FieldsRow>
-
-        <!-- Row 11: БИК + Банк -->
-        <FieldsRow>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              БИК*
-            </label>
-            <Input
-              v-model="formData.bic"
-              placeholder="Введите БИК"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-          <div class="organisation-data-page__field">
-            <label class="organisation-data-page__label">
-              Банк*
-            </label>
-            <Input
-              v-model="formData.bank"
-              placeholder="Введите банк"
-              :rules="[rules.required]"
-              class="organisation-data-page__input"
-            />
-          </div>
-        </FieldsRow>
-        </Form>
-      </div>
-
+        <OrganisationDataForm
+          v-if="currentStep === 0"
+          ref="form"
+          v-model="formData"
+          :counterparty-types="counterpartyTypes"
+          @data-filled="handleDataFilled"
+          @upload-error="handleUploadError"
+        />
     </div>
 
     <!-- Footer Navigation -->
@@ -352,59 +93,42 @@
     />
 
     <!-- Document Modal -->
-    <teleport to="body">
-      <div v-if="showDocumentModal" class="organisation-data-page__modal-overlay" @click="closeDocumentModal">
-        <div class="organisation-data-page__modal" @click.stop>
-          <div class="organisation-data-page__modal-header">
-            <h3 class="organisation-data-page__modal-title">Образец документа</h3>
-            <button class="organisation-data-page__modal-close" @click="closeDocumentModal">
-              <img src="@/assets/icons/cross_white.svg" alt="Close" class="organisation-data-page__modal-close-icon" />
-            </button>
+    <DocumentModal
+      v-model="showDocumentModal"
+      title="Образец документа"
+      :image="currentDocumentImage"
+    />
           </div>
-          <div class="organisation-data-page__modal-content">
-            <img :src="currentDocumentImage" alt="Document Sample" class="organisation-data-page__modal-image" />
           </div>
-        </div>
-      </div>
-    </teleport>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
-import MainButton from '@/components/atoms/MainButton.vue'
-import Input from '@/components/atoms/Input.vue'
-import Select from '@/components/atoms/Select.vue'
-import LogoUpload from '@/components/atoms/LogoUpload.vue'
-import Upload from '@/components/atoms/Upload.vue'
-import Form from '@/components/atoms/Form.vue'
-import FieldsRow from '@/components/atoms/FieldsRow.vue'
 import RegistrationSteps from '@/components/molecules/RegistrationSteps.vue'
-import { rules } from '@/constants/validations'
-import dadataApi from '@/services/dadataApi'
+import ContentHeader from '@/components/atoms/ContentHeader.vue'
+import WarningBlock from '@/components/atoms/WarningBlock.vue'
+import DocumentUploadCard from '@/components/molecules/DocumentUploadCard.vue'
+import DocumentModal from '@/components/organisms/DocumentModal.vue'
+import OrganisationDataForm from '@/components/organisms/OrganisationDataForm.vue'
 import authApi from '@/services/authApi'
 
 export default {
   name: 'OrganisationData',
   layout: 'empty',
   components: {
-    MainButton,
-    Input,
-    Select,
-    LogoUpload,
-    Upload,
-    Form,
-    FieldsRow,
-    RegistrationSteps
+    RegistrationSteps,
+    ContentHeader,
+    WarningBlock,
+    DocumentUploadCard,
+    DocumentModal,
+    OrganisationDataForm
   },
   data() {
     return {
       loading: false,
-      rules,
       currentStep: 0,
       showDocumentModal: false,
       currentDocumentFile: null,
-      dadataLoading: false,
-      dadataError: null,
       steps: [
         { id: 1, title: 'Данные об организации', description: 'Укажите основную информацию о вашей организации. Эти данные помогут нам создать ваш профиль, чтобы вы могли размещать вакансии и подработки. Пожалуйста, заполните все обязательные поля внимательно.' },
         { id: 2, title: 'Документы', description: 'Для подтверждения подлинности введенных вами данных, пожалуйста прикрепите скан-фото оригиналов документов' }
@@ -609,119 +333,10 @@ export default {
       }
     },
 
-    // DaData методы
-    onInnChange() {
-      // Очищаем ошибку при изменении ИНН
-      this.dadataError = null
-      
-      // Если ИНН пустой - очищаем все поля
-      if (!this.formData.inn || this.formData.inn.length === 0) {
-        this.clearAllFields()
-        return
-      }
-      
-      // Автоматический поиск при достижении 10 или 12 символов
-      const innLength = this.formData.inn.length
-      if (innLength === 10 || innLength === 12) {
-        // console.log('🔍 Автоматический поиск по ИНН:', this.formData.inn)
-        this.searchByInn()
-      }
-    },
-
-    async searchByInn() {
-      if (!this.formData.inn || this.formData.inn.length < 10) {
-        this.dadataError = 'ИНН должен содержать минимум 10 цифр'
-        return
-      }
-
-      this.dadataLoading = true
-      this.dadataError = null
-
-      try {
-        // console.log('🔍 Поиск организации по ИНН:', this.formData.inn)
-        const result = await dadataApi.findParty(this.formData.inn)
-        
-        // console.log('📡 Ответ от DaData API:', result)
-        
-        if (result.success && result.data.suggestions && result.data.suggestions.length > 0) {
-          const organization = result.data.suggestions[0].data
-          // console.log('🏢 Данные организации:', organization)
-          this.fillOrganizationData(organization)
-        } else {
-          // console.log('❌ Организация не найдена')
-          this.dadataError = 'Организация не найдена'
-        }
-      } catch (error) {
-        console.error('💥 Ошибка при поиске организации:', error)
-        this.dadataError = 'Ошибка при поиске организации'
-        console.error('DaData search error:', error)
-      } finally {
-        this.dadataLoading = false
-      }
-    },
-
-    fillOrganizationData(organization) {
-      // console.log('📝 Заполнение формы данными организации...')
-      // console.log('🔍 Полная структура данных организации:', organization)
-      
-      // Заполняем поля формы данными из DaData
-      this.formData.fullName = organization.name?.full_with_opf || organization.name?.full || ''
-      this.formData.kpp = organization.kpp || ''
-      this.formData.ogrn = organization.ogrn || ''
-      this.formData.okato = organization.address?.data?.okato || ''
-      
-      
-      // Адрес
-      if (organization.address?.data) {
-        const address = organization.address.data
-        const fullAddress = [
-          address.postal_code,
-          address.region_with_type,
-          address.city_with_type,
-          address.street_with_type,
-          address.house_with_type
-        ].filter(Boolean).join(', ')
-        
-        this.formData.legalAddress = fullAddress
-        this.formData.mailingAddress = fullAddress
-        
-      }
-
-      // Банковские реквизиты
-      if (organization.bank) {
-        this.formData.bank = organization.bank.name || ''
-        this.formData.bic = organization.bank.bic || ''
-        this.formData.correspondentAccount = organization.bank.correspondent_account || ''
-        
-      }
-
-      // Статус организации
-      if (organization.type === 'LEGAL') {
-        this.formData.counterpartyType = 'Юридическое лицо'
-      } else if (organization.type === 'INDIVIDUAL') {
-        this.formData.counterpartyType = 'Индивидуальный предприниматель'
-      }
-
-      // Должность руководителя
-      // console.log('🔍 Проверка management:', organization.management)
-      if (organization.management?.post) {
-        this.formData.position = organization.management.post
-        // console.log('👔 Должность руководителя:', organization.management.post)
-        // console.log('🔴 Соответствие: management.post → position:', organization.management.post, '→', this.formData.position)
-      } else {
-        // console.log('❌ management.post не найден:', organization.management)
-      }
-
-      // ФИО руководителя
-      if (organization.management?.name) {
-        this.formData.fullNamePerson = organization.management.name
-        // console.log('👤 ФИО руководителя:', organization.management.name)
-        // console.log('🔴 Соответствие: management.name → fullNamePerson:', organization.management.name, '→', this.formData.fullNamePerson)
-      } else {
-        // console.log('❌ management.name не найден:', organization.management)
-      }
-      
-      // console.log('✅ Форма заполнена:', this.formData)
+    // Обработчик заполнения данных из DaData
+    handleDataFilled(organization) {
+      // Данные уже заполнены в компоненте формы
+      // Этот метод можно использовать для дополнительной логики
     },
 
     handleOgrnFileUpload(event) {
@@ -786,25 +401,6 @@ export default {
 
     triggerInnFileInput() {
       this.$refs.innFileInput.click()
-    },
-
-
-    clearAllFields() {
-      // Очищаем все поля кроме ИНН
-      this.formData.fullName = ''
-      this.formData.kpp = ''
-      this.formData.ogrn = ''
-      this.formData.okato = ''
-      this.formData.fullNamePerson = ''
-      this.formData.position = ''
-      this.formData.basis = ''
-      this.formData.mailingAddress = ''
-      this.formData.legalAddress = ''
-      this.formData.settlementAccount = ''
-      this.formData.correspondentAccount = ''
-      this.formData.bic = ''
-      this.formData.bank = ''
-      this.formData.counterpartyType = ''
     }
   }
 }
