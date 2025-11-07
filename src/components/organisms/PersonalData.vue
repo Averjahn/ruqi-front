@@ -11,7 +11,7 @@
           @click.prevent="handleEdit"
         >
           <img 
-            src="@/assets/icons/document_edit.svg" 
+            src="@/assets/icons/profile/Edit.svg" 
             alt="Edit" 
             class="personal-data__edit-icon"
           />
@@ -154,10 +154,12 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 20px;
+  font-family: 'Source Sans Pro', 'Source Sans 3', 'Source Sans', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 125%; // 20px (16px * 1.25)
+  letter-spacing: 0%;
+  vertical-align: middle;
   color: #1735F5;
   text-decoration: none;
   cursor: pointer;

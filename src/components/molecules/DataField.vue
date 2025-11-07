@@ -106,10 +106,11 @@ export default {
   }
 
   &__value {
-    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 600;
+    font-family: 'Source Sans Pro', 'Source Sans 3', 'Source Sans', sans-serif;
+    font-weight: 400;
     font-size: 16px;
-    line-height: 24px;
+    line-height: 22px;
+    letter-spacing: 0%;
     color: #263043;
   }
 
@@ -146,10 +147,12 @@ export default {
   }
 
   &__action-link {
-    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-family: 'Source Sans Pro', 'Source Sans 3', 'Source Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    line-height: 20px;
+    line-height: 22px;
+    letter-spacing: 0.1px;
+    vertical-align: middle;
     color: #1735F5;
     text-decoration: none;
     cursor: pointer;

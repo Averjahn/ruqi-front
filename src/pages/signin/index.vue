@@ -48,13 +48,13 @@
               class="signin_button signin_button--registration"
               button-type="button"
             />
-            <MainButton
+            <!-- <MainButton
               v-if="isDevelopment"
               type="primary-outline"
               text="Следующий шаг (временно)"
               @click="goToNextSteps"
               class="signin_button"
-            />
+            /> -->
             <div class="agreements_check">
               <AgreementCheck
                 v-model="termAgree"
@@ -159,7 +159,7 @@
       </template>
       
       <!-- Временная кнопка в режиме разработки для состояния до запроса звонка -->
-      <template v-if="currentTab === 'by_phone_call' && !callRequested">
+      <!-- <template v-if="currentTab === 'by_phone_call' && !callRequested">
         <div class="content_container">
           <MainButton
             v-if="isDevelopment"
@@ -169,7 +169,7 @@
             class="signin_button"
           />
         </div>
-      </template>
+      </template> -->
       
     </div>
   </div>

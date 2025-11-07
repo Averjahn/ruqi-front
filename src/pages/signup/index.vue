@@ -44,13 +44,13 @@
           @click="goToSignIn" 
         />
 
-        <MainButton
+        <!-- <MainButton
           v-if="isDevelopment"
           type="primary-outline"
           text="Следующий шаг (временно)"
           @click="goToNextStep"
           class="signup-page__btn"
-        />
+        /> -->
 
         <div class="agreements_check">
           <AgreementCheck
@@ -100,13 +100,13 @@
             class="signup-page__btn"
           />
 
-          <MainButton
+          <!-- <MainButton
             v-if="isDevelopment"
             type="primary-outline"
             text="Следующий шаг (временно)"
             @click="goToNextStep"
             class="signup-page__btn"
-          />
+          /> -->
         </div>
       </div>
 
@@ -125,7 +125,9 @@
                   type="password"
                   clearable
                   :rules="passwordRules"
+                  :errorText="passwordError"
                   @keyup.enter="createAccount"
+                  @input="onPasswordInput"
                   placeholder="Введите пароль"
                 />
               </FormField>
@@ -163,13 +165,13 @@
           @click="step = 2" 
         />
 
-        <MainButton
+        <!-- <MainButton
           v-if="isDevelopment"
           type="primary-outline"
           text="Следующий шаг (временно)"
           @click="goToNextStep"
           class="signup-page__btn"
-        />
+        /> -->
       </div>
     </div>
   </div>
@@ -225,7 +227,8 @@ export default {
       code: '',
       authToken: null,
       userId: null,
-      passwordRules: [(v) => !!v || 'Заполните поле']
+      passwordRules: [(v) => !!v || 'Заполните поле'],
+      passwordError: null
     }
   },
   computed: {
@@ -427,6 +430,31 @@ export default {
       }
     },
 
+    onPasswordInput() {
+      // Очищаем ошибку при изменении пароля
+      this.passwordError = null
+    },
+
+    /**
+     * Извлекает первое предложение из сообщения об ошибке до точки включительно
+     * @param {string} msg - Полное сообщение об ошибке
+     * @returns {string} Первое предложение до точки включительно
+     */
+    extractFirstSentence(msg) {
+      if (!msg) return null
+      
+      // Находим первую точку в сообщении
+      const firstDotIndex = msg.indexOf('.')
+      
+      if (firstDotIndex === -1) {
+        // Если точки нет, возвращаем всё сообщение
+        return msg
+      }
+      
+      // Возвращаем первое предложение до точки включительно
+      return msg.substring(0, firstDotIndex + 1)
+    },
+
     async createAccount() {
       if (this.$refs.passwordForm && !this.$refs.passwordForm.validate()) {
         return
@@ -447,6 +475,9 @@ export default {
         })
         return
       }
+
+      // Очищаем предыдущую ошибку
+      this.passwordError = null
 
       this.loading = true
       try {
@@ -479,17 +510,69 @@ export default {
           // Переходим в organisationData
           this.$router.push('/client/organisationData')
         } else {
-          this.showNotification({
-            type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при установке пароля'
-          })
+          // Обрабатываем ошибку: извлекаем первое предложение до точки
+          // result.error может быть объектом {code: 980042, msg: "..."} или массивом [{code: 980042, msg: "..."}]
+          let errorMsg = null
+          
+          if (result.error) {
+            if (Array.isArray(result.error) && result.error.length > 0) {
+              // Если это массив, берем первое сообщение
+              errorMsg = result.error[0].msg
+            } else if (result.error.msg) {
+              // Если это объект, берем msg напрямую
+              errorMsg = result.error.msg
+            }
+          }
+          
+          if (errorMsg) {
+            this.passwordError = this.extractFirstSentence(errorMsg)
+          } else {
+            this.showNotification({
+              type: 'error',
+              text: 'Ошибка при установке пароля'
+            })
+          }
         }
       } catch (error) {
         console.error('Ошибка установки пароля:', error)
-        this.showNotification({
-          type: 'error',
-          text: getAPIError(error) || 'Ошибка при установке пароля'
-        })
+        
+        // Обрабатываем ошибку из catch блока
+        // Ошибка может быть в разных форматах:
+        // 1. error.response.data.error.msg (объект)
+        // 2. error.response.data.error[0].msg (массив)
+        // 3. error.response.data.msg (прямо в data)
+        // 4. error.response.data.error (может быть объектом или массивом)
+        let errorMsg = null
+        
+        if (error?.response?.data) {
+          const errorData = error.response.data
+          
+          // Проверяем, есть ли ошибка в формате {code: 980042, msg: "..."}
+          if (errorData.msg) {
+            errorMsg = errorData.msg
+          } else if (errorData.error) {
+            // error может быть объектом или массивом
+            if (Array.isArray(errorData.error) && errorData.error.length > 0) {
+              errorMsg = errorData.error[0].msg
+            } else if (errorData.error.msg) {
+              errorMsg = errorData.error.msg
+            }
+          }
+        }
+        
+        // Если не нашли сообщение, используем getAPIError
+        if (!errorMsg) {
+          errorMsg = getAPIError(error?.response) || getAPIError(error)
+        }
+        
+        if (errorMsg) {
+          this.passwordError = this.extractFirstSentence(errorMsg)
+        } else {
+          this.showNotification({
+            type: 'error',
+            text: 'Ошибка при установке пароля'
+          })
+        }
       }
       this.loading = false
     },

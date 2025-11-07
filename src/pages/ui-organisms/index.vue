@@ -31,7 +31,6 @@
           </div>
         </div>
       </Sidebar>
-
       <!-- App Header - Fixed to top right of sidebar -->
       <AppHeader 
         :show-notifications="true"
