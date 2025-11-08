@@ -3,7 +3,7 @@
     <label class="data-field__label">{{ label }}</label>
     <div class="data-field__content">
       <div class="data-field__value-wrapper">
-        <span class="data-field__value">{{ value || placeholder }}</span>
+        <span class="data-field__value">{{ value }}</span>
         <span v-if="status" class="data-field__status" :class="`data-field__status--${status.type}`">
           <img 
             v-if="status.icon" 

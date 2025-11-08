@@ -181,7 +181,7 @@
               },
               emailStatus: {
                 type: 'unconfirmed',
-                icon: require('@/assets/icons/cross.svg'),
+                icon: require('@/assets/icons/profile/input-status-red.svg'),
                 text: 'Подтвердите email'
               }
             }"

@@ -60,8 +60,7 @@ export default {
 
 <style lang="scss" scoped>
 .manager-card {
-  width: 100%;
-  min-width: 290px;
+  width: 290px;
   height: 130px;
   display: flex;
   align-items: flex-start;
@@ -71,15 +70,15 @@ export default {
   box-sizing: border-box;
 
   &__avatar {
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
   }
 
   &__content {
-    margin-left: 24px;
+    margin-left: 8px;
     display: flex;
     flex-direction: column;
     gap: 2px;

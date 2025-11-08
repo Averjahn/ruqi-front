@@ -70,7 +70,6 @@ export default {
 <style lang="scss" scoped>
 .profile-menu {
   width: 290px;
-  height: 320px;
   background: #ffffff;
   border-radius: 8px;
   padding: 8px;

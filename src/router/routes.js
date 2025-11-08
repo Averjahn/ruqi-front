@@ -20,7 +20,7 @@ export const routes = [
   { path: '/ui-new', component: i('/ui-new/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/atoms', component: i('/ui-new/atoms/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/molecules', component: i('/ui-new/molecules/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
-  { path: '/ui-new/organisms', component: i('/ui-new/organisms/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-new/profile', component: i('/ui-new/profile/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/promo', component: i('/promo/index.vue'), meta },
   { path: '/promo/invite-friend', component: i('/promo/inviteFriend.vue'), meta },
   { path: '/promo/grades', component: i('/promo/grades.vue'), meta },

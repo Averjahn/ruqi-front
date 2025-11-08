@@ -41,10 +41,10 @@
       </div>
       
       <div class="ui-new__nav-item">
-        <h2>Organisms</h2>
-        <p>Сложные блоки интерфейса</p>
-        <Button type="contained" color="blue" @click="$router.push('/ui-new/organisms')">
-          Перейти к Organisms
+        <h2>Profile</h2>
+        <p>Страница профиля пользователя</p>
+        <Button type="contained" color="blue" @click="$router.push('/ui-new/profile')">
+          Перейти к Profile
         </Button>
       </div>
     </div>
