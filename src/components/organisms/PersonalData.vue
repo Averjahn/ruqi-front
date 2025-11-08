@@ -88,20 +88,22 @@
         <h2 class="personal-data__title">Контакты</h2>
       </div>
       <div class="personal-data__fields">
-        <DataField 
-          label="Телефон"
-          :value="contacts.phone"
-          placeholder="Введите телефон"
-          :status="contacts.phoneStatus"
-          :action="{ type: 'icon', icon: require('@/assets/icons/arrow_send_right.svg') }"
-          @action-click="handlePhoneClick"
-        />
+        <div class="personal-data__clickable-field" @click="handlePhoneClick">
+          <DataField 
+            label="Телефон"
+            :value="contacts.phone"
+            placeholder="Введите телефон"
+            :status="contacts.phoneStatus"
+            :action="{ type: 'icon', icon: require('@/assets/icons/profile/arrow-icon.svg') }"
+            @action-click="handlePhoneClick"
+          />
+        </div>
         <DataField 
           label="Адрес электронной почты"
           :value="contacts.email"
           placeholder="Введите email"
           :status="contacts.emailStatus"
-          :action="{ type: 'icon', icon: require('@/assets/icons/arrow_send_right.svg') }"
+          :action="{ type: 'icon', icon: require('@/assets/icons/profile/arrow-icon.svg') }"
           @action-click="handleEmailClick"
         />
         <DataField 
@@ -113,16 +115,35 @@
         />
       </div>
     </div>
+    
+    <!-- Phone Edit Modal -->
+    <ChangePhoneModal 
+      v-model="isPhoneModalOpen"
+      :initial-phone="contacts.phone || '+7 900 000-00-00'"
+      @get-code="handleGetCode"
+    />
+    
+    <!-- Confirm Code Modal -->
+    <ConfirmCodeModal
+      v-model="isConfirmCodeModalOpen"
+      :phone="pendingPhone"
+      @confirm="handleConfirmCode"
+      @resend="handleResendCode"
+    />
   </div>
 </template>
 
 <script>
 import DataField from '@/components/molecules/DataField.vue'
+import ChangePhoneModal from '@/components/organisms/ChangePhoneModal.vue'
+import ConfirmCodeModal from '@/components/organisms/ConfirmCodeModal.vue'
 
 export default {
   name: 'PersonalData',
   components: {
-    DataField
+    DataField,
+    ChangePhoneModal,
+    ConfirmCodeModal
   },
   props: {
     personalData: {
@@ -148,7 +169,7 @@ export default {
       default: true
     }
   },
-  emits: ['edit', 'phone-click', 'email-click', 'telegram-link', 'save', 'cancel'],
+  emits: ['edit', 'phone-click', 'phone-get-code', 'phone-confirm-code', 'phone-resend-code', 'email-click', 'telegram-link', 'save', 'cancel'],
   data() {
     return {
       isEditing: false,
@@ -156,7 +177,10 @@ export default {
         lastName: '',
         firstName: '',
         middleName: ''
-      }
+      },
+      isPhoneModalOpen: false,
+      isConfirmCodeModalOpen: false,
+      pendingPhone: ''
     }
   },
   watch: {
@@ -197,7 +221,21 @@ export default {
       this.$emit('save', { ...this.editedData })
     },
     handlePhoneClick() {
+      this.isPhoneModalOpen = true
       this.$emit('phone-click')
+    },
+    handleGetCode(phone) {
+      this.pendingPhone = phone
+      this.isPhoneModalOpen = false
+      this.isConfirmCodeModalOpen = true
+      this.$emit('phone-get-code', phone)
+    },
+    handleConfirmCode(code) {
+      this.isConfirmCodeModalOpen = false
+      this.$emit('phone-confirm-code', { phone: this.pendingPhone, code })
+    },
+    handleResendCode() {
+      this.$emit('phone-resend-code', this.pendingPhone)
     },
     handleEmailClick() {
       this.$emit('email-click')
@@ -372,6 +410,14 @@ export default {
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+}
+
+.personal-data__clickable-field {
+  cursor: pointer;
+  
+  :deep(.data-field__content) {
+    cursor: pointer;
   }
 }
 </style>

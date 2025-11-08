@@ -11,7 +11,7 @@
       <div class="manager-card__contacts">
         <div class="manager-card__contact-item">
           <img 
-            :src="require('@/assets/icons/profile/Профиль/Call.svg')" 
+            :src="require('@/assets/icons/profile/Call.svg')" 
             alt="Phone" 
             class="manager-card__contact-icon"
           />
@@ -19,7 +19,7 @@
         </div>
         <div class="manager-card__contact-item">
           <img 
-            :src="require('@/assets/icons/profile/Профиль/Mail.svg')" 
+            :src="require('@/assets/icons/profile/Mail.svg')" 
             alt="Email" 
             class="manager-card__contact-icon"
           />

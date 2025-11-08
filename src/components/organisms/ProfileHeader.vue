@@ -41,8 +41,10 @@ export default {
 .profile-header {
   display: flex;
   align-items: center;
-  height: 112px;
   width: 100%;
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
 
   &__avatar {
     width: 64px;

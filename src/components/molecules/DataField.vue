@@ -164,10 +164,11 @@ export default {
   }
 
   &__action-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     transition: opacity 0.2s ease;
+    flex-shrink: 0;
 
     &:hover {
       opacity: 0.7;

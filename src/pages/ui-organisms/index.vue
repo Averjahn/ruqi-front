@@ -808,7 +808,7 @@ export default {
       
       sidebarMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: true },
-        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/note.svg'), active: false },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false },
         { id: 5, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false },

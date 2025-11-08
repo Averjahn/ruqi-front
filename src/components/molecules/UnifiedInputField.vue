@@ -10,11 +10,6 @@
   >
     <div v-if="label" class="field_label_global">{{ label }}</div>
     <div class="input_section" @click="onClick">
-      <!-- Флаг России для телефона -->
-      <div v-if="type === 'phone'" class="country_flag">
-        <img src="@/assets/icons/flag_ru.svg" alt="Russia" class="flag_icon" />
-      </div>
-      
       <!-- Поле ввода -->
       <div class="input_wrap">
         <input

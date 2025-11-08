@@ -41,17 +41,17 @@ export default {
         },
         {
           id: 'acts',
-          icon: require('@/assets/icons/profile/Профиль/tabs/Acts.svg'),
+          icon: require('@/assets/icons/profile/document.svg'),
           text: 'Акты'
         },
         {
           id: 'docs-executors',
-          icon: require('@/assets/icons/profile/Профиль/tabs/Docs-executors.svg'),
+          icon: require('@/assets/icons/profile/document.svg'),
           text: 'Договора с исполнителями'
         },
         {
           id: 'signature',
-          icon: require('@/assets/icons/profile/Профиль/tabs/Signature.svg'),
+          icon: require('@/assets/icons/profile/document.svg'),
           text: 'Электронная подпись'
         }
       ]
