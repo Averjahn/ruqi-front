@@ -160,7 +160,7 @@ export default {
     ...mapActions('notifications', ['showNotification']),
 
     checkUserPreferences () {
-      if (!this.isFilterView) this.$router.push({ path: '/welcome-prompt' })
+      if (!this.isFilterView) this.$router.push({ path: '/ui-new/profile' })
     },
 
     async loadObjects () {

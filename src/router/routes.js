@@ -75,7 +75,7 @@ export const routes = [
     meta: { ...meta, requiresAuth: false, props: { hideMobileBottomBar: true } },
   },
   { path: '/support', component: i('/support/index.vue'), meta: { layout: 'DefaultLayout' } },
-  { path: '/welcome-prompt', component: i('/main/welcomePrompt.vue'), meta: { layout: 'RegistrationLayout' } },
+  { path: '/welcome-prompt', redirect: '/ui-new/profile' },
   { path: '/faq-article/:id', component: i('/faqArticle/_id.vue'), meta: { layout: 'DefaultLayout' } },
   { path: '/getfriend', component: LandingRegistration, meta: { layout: 'DefaultLayout' } },
   { path: '/landing-registration', component: LandingRegistration, meta: { layout: 'DefaultLayout' } },
