@@ -265,7 +265,15 @@ export default {
     return {
       rules,
       dadataLoading: false,
-      dadataError: null
+      dadataError: null,
+      searchTimeout: null,
+      currentSearchInn: null
+    }
+  },
+  beforeUnmount() {
+    // Очищаем таймер при размонтировании компонента
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout)
     }
   },
   methods: {
@@ -280,25 +288,51 @@ export default {
       // Обновляем поле ИНН
       this.updateField('inn', value)
       
+      // Очищаем предыдущий таймер, если он есть
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout)
+        this.searchTimeout = null
+      }
+      
       // Очищаем ошибку при изменении ИНН
       this.dadataError = null
       
       // Если ИНН пустой - очищаем все поля
       if (!value || value.length === 0) {
         this.clearAllFields()
+        this.currentSearchInn = null
         return
       }
       
-      // Автоматический поиск при достижении 10 или 12 символов
+      // Автоматический поиск при достижении 10 или 12 символов с debounce
       const innLength = value.length
       if (innLength === 10 || innLength === 12) {
-        this.searchByInn()
+        // Сохраняем текущий ИНН для проверки после загрузки
+        this.currentSearchInn = value
+        
+        // Добавляем задержку перед поиском, чтобы пользователь успел закончить ввод
+        this.searchTimeout = setTimeout(() => {
+          // Проверяем, что ИНН не изменился за время ожидания
+          if (this.currentSearchInn === value) {
+            this.searchByInn(value)
+          }
+        }, 500) // Задержка 500ms
+      } else {
+        this.currentSearchInn = null
       }
     },
 
-    async searchByInn() {
-      if (!this.modelValue.inn || this.modelValue.inn.length < 10) {
+    async searchByInn(inn = null) {
+      const innToSearch = inn || this.modelValue.inn
+      
+      if (!innToSearch || innToSearch.length < 10) {
         this.dadataError = 'ИНН должен содержать минимум 10 цифр'
+        return
+      }
+
+      // Проверяем, что ИНН не изменился во время загрузки
+      if (this.currentSearchInn && this.currentSearchInn !== innToSearch) {
+        // ИНН изменился, не показываем ошибку
         return
       }
 
@@ -306,18 +340,32 @@ export default {
       this.dadataError = null
 
       try {
-        const result = await dadataApi.findParty(this.modelValue.inn)
+        const result = await dadataApi.findParty(innToSearch)
+        
+        // Проверяем, что ИНН не изменился после получения ответа
+        if (this.currentSearchInn && this.currentSearchInn !== innToSearch) {
+          // ИНН изменился, игнорируем результат
+          return
+        }
         
         if (result.success && result.data.suggestions && result.data.suggestions.length > 0) {
           const organization = result.data.suggestions[0].data
           this.fillOrganizationData(organization)
           this.$emit('data-filled', organization)
+          // Очищаем ошибку, если данные успешно загружены
+          this.dadataError = null
         } else {
-          this.dadataError = 'Организация не найдена'
+          // Показываем ошибку только если ИНН не изменился
+          if (!this.currentSearchInn || this.currentSearchInn === innToSearch) {
+            this.dadataError = 'Организация не найдена'
+          }
         }
       } catch (error) {
         console.error('Ошибка при поиске организации:', error)
-        this.dadataError = 'Ошибка при поиске организации'
+        // Показываем ошибку только если ИНН не изменился
+        if (!this.currentSearchInn || this.currentSearchInn === innToSearch) {
+          this.dadataError = 'Ошибка при поиске организации'
+        }
       } finally {
         this.dadataLoading = false
       }
