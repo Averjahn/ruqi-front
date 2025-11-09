@@ -225,6 +225,8 @@ export default {
       code: '',
       authToken: null,
       userId: null,
+      clientUuid: null,
+      accountUuid: null,
       passwordRules: [(v) => !!v || 'Заполните поле']
     }
   },
@@ -289,8 +291,10 @@ export default {
           // Сохраняем телефон в localStorage
           localStorage.setItem('registration_phone', phone)
           
-          // Сохраняем once_token для подтверждения кода
+          // Сохраняем once_token, client_uuid, account_uuid согласно документации
           this.onceToken = result.data?.once_token
+          this.clientUuid = result.data?.client_uuid
+          this.accountUuid = result.data?.account_uuid
           
           if (!this.onceToken) {
             this.showNotification({
@@ -302,14 +306,16 @@ export default {
           
           // Переходим к вводу кода из Telegram
           this.step = 2
+          const method = result.data?.code_sended?.method || 'telegram'
+          const target = result.data?.code_sended?.target || phone
           this.showNotification({
             type: 'success',
-            text: 'Код отправлен в Telegram'
+            text: `Код отправлен через ${method === 'telegram' ? 'Telegram' : 'SMS'} на ${target}`
           })
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при отправке номера телефона'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при отправке номера телефона'
           })
         }
       } catch (error) {
@@ -330,7 +336,10 @@ export default {
         const result = await authApi.registerClient(phone)
         
         if (result.success) {
+          // Сохраняем once_token, client_uuid, account_uuid согласно документации
           this.onceToken = result.data?.once_token
+          this.clientUuid = result.data?.client_uuid
+          this.accountUuid = result.data?.account_uuid
           this.showNotification({
             type: 'success',
             text: 'Код отправлен повторно'
@@ -338,7 +347,7 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при запросе кода'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при запросе кода'
           })
         }
       } catch (error) {
@@ -372,9 +381,10 @@ export default {
         const result = await authApi.verifyCode(this.onceToken, this.code)
         
         if (result.success) {
-          // Сохраняем authToken и user_id
+          // Согласно документации, регистрация возвращает authToken (не token)
           this.authToken = result.data?.authToken
-          this.userId = result.data?.user_id
+          this.clientUuid = result.data?.client_uuid
+          this.accountUuid = result.data?.account_uuid
           
           if (!this.authToken) {
             this.showNotification({
@@ -393,7 +403,7 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Неверный код подтверждения'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Неверный код подтверждения'
           })
         }
       } catch (error) {

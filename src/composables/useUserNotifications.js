@@ -2,6 +2,7 @@ import axios from '@/plugins/axios'
 import { ref } from 'vue'
 import router from '@/router'
 import { USER_NOTIFICATIONS } from '@/constants/constants'
+import testNotificationsData from '@/test-notifications.json'
 
 export default function useUserNotifications () {
   const params = ref({
@@ -13,6 +14,14 @@ export default function useUserNotifications () {
   const loading = ref(false)
   const totalPages = ref(0)
   const userNotifications = ref([])
+  const allTestNotifications = ref(testNotificationsData?.data || [])
+  
+  // Отладочный вывод для проверки загрузки данных
+  if (allTestNotifications.value.length === 0) {
+    console.warn('Test notifications data is empty!', testNotificationsData)
+  } else {
+    console.log('Test notifications loaded:', allTestNotifications.value.length, 'items')
+  }
 
   const sendReadStatus = async (notification_ids) => {
     const response = await axios.put(
@@ -72,28 +81,81 @@ export default function useUserNotifications () {
       params.value.page = 1
       userNotifications.value = []
     }
-    const response = await axios.get('v2/user/notification/list', {
-      params: params.value,
-      errorMessage: 'Ошибка при получении списка уведомлений',
-    })
-    if (response?.data?.success) {
-      totalPages.value = response?.data?.meta?.last_page
-      userNotifications.value = [...userNotifications.value, ...response.data?.data]
-      busy.value = response.data.meta?.current_page >= response.data.meta?.last_page
+    try {
+      const response = await axios.get('v2/user/notification/list', {
+        params: params.value,
+        errorMessage: 'Ошибка при получении списка уведомлений',
+      })
+      if (response?.data?.success && response?.data?.data?.length > 0) {
+        totalPages.value = response?.data?.meta?.last_page
+        userNotifications.value = [...userNotifications.value, ...response.data?.data]
+        busy.value = response.data.meta?.current_page >= response.data.meta?.last_page
+        loading.value = false
+        return
+      }
+    } catch (error) {
+      console.log('API error, using test data:', error)
     }
+    
+    // Используем тестовые данные из JSON файла (если API не вернул данные или произошла ошибка)
+    const testData = allTestNotifications.value || []
+    
+    if (testData.length === 0) {
+      console.error('No test notifications data available!')
+      loading.value = false
+      return
+    }
+    
+    const perPage = params.value.per_page || 5
+    const currentPage = params.value.page || 1
+    const startIndex = (currentPage - 1) * perPage
+    const endIndex = startIndex + perPage
+    const pageData = testData.slice(startIndex, endIndex)
+    
+    if (concat) {
+      userNotifications.value = [...userNotifications.value, ...pageData]
+    } else {
+      userNotifications.value = pageData
+    }
+    
+    // Вычисляем общее количество страниц
+    totalPages.value = Math.ceil(testData.length / perPage) || 1
+    busy.value = currentPage >= totalPages.value
     loading.value = false
   }
 
   const loadPage = async (page) => {
     loading.value = true
     params.value.page = page
-    const response = await axios.get('v2/user/notification/list', {
-      params: params.value,
-      errorMessage: 'Ошибка при получении списка уведомлений',
-    })
-    if (response?.data?.success) userNotifications.value = response.data?.data
+    try {
+      const response = await axios.get('v2/user/notification/list', {
+        params: params.value,
+        errorMessage: 'Ошибка при получении списка уведомлений',
+      })
+      if (response?.data?.success && response?.data?.data?.length > 0) {
+        userNotifications.value = response.data?.data
+        loading.value = false
+        return true
+      }
+    } catch (error) {
+      console.log('API error, using test data:', error)
+    }
+    
+    // Используем тестовые данные из JSON файла (если API не вернул данные или произошла ошибка)
+    const testData = allTestNotifications.value || []
+    
+    if (testData.length === 0) {
+      console.error('No test notifications data available!')
+      loading.value = false
+      return false
+    }
+    
+    const perPage = params.value.per_page || 5
+    const startIndex = (page - 1) * perPage
+    const endIndex = startIndex + perPage
+    userNotifications.value = testData.slice(startIndex, endIndex)
     loading.value = false
-    return !!response?.data?.success
+    return true
   }
 
   const loadMore = () => {

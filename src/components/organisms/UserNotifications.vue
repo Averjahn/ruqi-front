@@ -15,8 +15,8 @@
           <div v-if="notificationsCounter" class="counter_view">{{ notificationsCounter }}</div>
         </div>
         <ButtonText size="s" v-if="notificationsCounter" @click="setAllReadStatus" class="title_action mark_read_btn">
-          <Icon name="doneAll" />
-          <div>Прочитать все</div>
+          <img src="@/assets/icons/FAQ/done_all.svg" alt="Прочитать всё" />
+          <div>Прочитать всё</div>
         </ButtonText>
       </div>
 
@@ -115,7 +115,7 @@ export default {
 
     showAllNotifications () {
       this.isOpen = false
-      this.$router.push('/notifications')
+      this.$router.push('/ui-new/notifications')
     },
 
     clickToLink (item) {
@@ -197,6 +197,17 @@ export default {
   .title_action {
     display: flex;
     align-items: center;
+    gap: 8px;
+    color: #1735F5;
+    
+    div {
+      color: #1735F5;
+    }
+    
+    img {
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 .notification_badge {

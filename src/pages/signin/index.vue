@@ -237,11 +237,12 @@ export default {
   mounted () {
     try {
       // Инициализируем loginClient из useAuth
-      const { loginClient, loading: authLoading, error: authError } = useAuth()
+      const { loginClient, loading: authLoading, error: authError, getErrorMessage } = useAuth()
       
       this.loginClient = loginClient
       this.authLoading = authLoading
       this.authError = authError
+      this.getErrorMessage = getErrorMessage
     } catch (error) {
       // Ошибка инициализации
     }
@@ -333,17 +334,20 @@ export default {
       }
       this.loading = true
       try {
-        // Используем правильный API v2/auth/sms/sendcode
+        // Используем правильный API согласно документации
+        const phone = clearPhoneWithoutPlus(this.phone)
         const response = await this.$axios.get(
           'api/v2/auth/recovery/client/request-code',
           { 
-            params: { login_phone: clearPhoneWithoutPlus(this.phone) },
-            errorMessage: 'Ошибка при запросе смс кода' 
+            params: { 
+              login_phone: phone,
+              verification_by: 'telegram' // По умолчанию telegram
+            },
+            errorMessage: 'Ошибка при запросе кода' 
           },
         )
         if (response?.data?.success) {
           // Сохраняем телефон в store
-          const phone = clearPhoneWithoutPlus(this.phone)
           this.$store.commit('user/setRegistrationData', { 
             phone,
             firstname: 'Иван',
@@ -356,17 +360,13 @@ export default {
           
           this.callRequested = true
           this.onceToken = response?.data?.data?.once_token
-          if (response?.data?.data?.code_sended?.method === 'waitcall') {
-            this.oldMethod = false // Для отображения экрана ввода кода
-            this.callToPhone = replace8to7inPhone(response?.data?.data?.code_sended?.callto)
-            this.authInterval = setInterval(this.authCallCheck, 5000)
-          } else {
-            this.oldMethod = false // Для отображения экрана ввода кода из телеграм
-          }
+          // Согласно документации, код отправляется через Telegram или SMS
+          // Не используем waitcall метод
+          this.oldMethod = false // Для отображения экрана ввода кода из телеграм
         } else {
           this.callRequestErrorMsg = getAPIErrorMessage(response)
           this.showNotification({
-            text: getAPIErrorMessage(response) || 'Ошибка при запросе номера.',
+            text: getAPIErrorMessage(response) || 'Ошибка при запросе кода.',
           })
         }
       } catch (error) {
@@ -404,20 +404,27 @@ export default {
       
       if (this.login.phone_or_email && this.login.password) {
         this.loading = true
+        // Очищаем телефон от + и пробелов, оставляем только цифры
         const phoneOrEmail = replace8to7inPhone(this.login.phone_or_email)
+        const cleanPhone = phoneOrEmail.replace(/\D/g, '')
         const password = this.login.password
         
         try {
           if (typeof this.loginClient === 'function') {
-            const success = await this.loginClient(phoneOrEmail, password)
+            const success = await this.loginClient(cleanPhone, password)
             
             if (success) {
               this.$router.push('/')
             } else {
               // Ошибка уже обработана в useAuth
-              if (this.authError) {
+              const errorMsg = this.getErrorMessage(this.authError?.value || this.authError)
+              if (errorMsg && errorMsg !== 'Неизвестная ошибка') {
                 this.showNotification({
-                  text: this.authError.msg || 'Ошибка при попытке авторизоваться',
+                  text: errorMsg,
+                })
+              } else {
+                this.showNotification({
+                  text: 'Ошибка при попытке авторизоваться',
                 })
               }
             }
@@ -428,14 +435,19 @@ export default {
               this.loginClient = loginClient
               
               if (typeof this.loginClient === 'function') {
-                const success = await this.loginClient(phoneOrEmail, password)
+                const success = await this.loginClient(cleanPhone, password)
                 
                 if (success) {
                   this.$router.push('/')
                 } else {
-                  if (this.authError) {
+                  const errorMsg = this.getErrorMessage(this.authError?.value || this.authError)
+                  if (errorMsg && errorMsg !== 'Неизвестная ошибка') {
                     this.showNotification({
-                      text: this.authError.msg || 'Ошибка при попытке авторизоваться',
+                      text: errorMsg,
+                    })
+                  } else {
+                    this.showNotification({
+                      text: 'Ошибка при попытке авторизоваться',
                     })
                   }
                 }

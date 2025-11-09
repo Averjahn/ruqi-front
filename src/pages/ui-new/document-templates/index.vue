@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-profile">
+  <div class="ui-document-templates">
     <!-- Sidebar Component - Fixed to left -->
     <Sidebar 
       :icon-button="require('@/assets/icons/profile/sidebar.svg')"
@@ -30,59 +30,28 @@
     <!-- App Header - Fixed to top right of sidebar -->
     <AppHeader 
       :show-notifications="true"
-      title="Личный кабинет"
-      :show-documents="true"
+      title="Документы"
+      :show-documents="false"
     />
     
-    <div class="ui-profile__main-content">
-      <div class="ui-profile__layout">
-        <!-- Left Column: ProfileMenu and ManagerCard -->
-        <div class="ui-profile__left-column">
-          <ProfileMenu 
-            :active-item="activeProfileMenuItem"
-            @item-click="handleProfileMenuClick"
-            @update:active-item="activeProfileMenuItem = $event"
-          />
-          
-          <ManagerCard 
-            name="Иванов Иван Иванович"
-            phone="+7 (999) 999-99-99"
-            email="anna.smirnova@ruqi.ru"
+    <div class="ui-document-templates__main-content">
+      <div class="ui-document-templates__layout">
+        <!-- Left Column: DocumentTemplatesMenu -->
+        <div class="ui-document-templates__left-column">
+          <DocumentTemplatesMenu 
+            :active-item="activeMenuItem"
+            @item-click="handleMenuClick"
+            @update:active-item="activeMenuItem = $event"
           />
         </div>
 
-        <!-- Right Column: ProfileHeader and PersonalData -->
-        <div class="ui-profile__right-column">
-          <ProfileHeader name="Джон МакКлейн" />
+        <!-- Right Column: Content -->
+        <div class="ui-document-templates__right-column">
+          <h2 class="ui-document-templates__title">{{ currentMenuTitle }}</h2>
           
-          <PersonalData 
-            :personal-data="personalData"
-            :contacts="{
-              phone: '+7 (999) 999-99-99',
-              email: 'example@gmail.com',
-              telegram: null,
-              phoneStatus: {
-                type: 'confirmed',
-                icon: require('@/assets/icons/checkmark_circle.svg'),
-                text: 'Телефон подтверждён'
-              },
-              emailStatus: {
-                type: 'unconfirmed',
-                icon: require('@/assets/icons/profile/input-status-red.svg'),
-                text: 'Подтвердите email'
-              }
-            }"
-            @edit="handlePersonalDataEdit"
-            @save="handlePersonalDataSave"
-            @cancel="handlePersonalDataCancel"
-            @phone-click="handlePhoneClick"
-            @email-click="handleEmailClick"
-            @telegram-link="handleTelegramLink"
-          />
-          
-          <ProfileActions 
-            @change-password="handleChangePassword"
-            @logout="handleLogout"
+          <DocumentLinksList 
+            :links="currentLinks"
+            @link-click="handleLinkClick"
           />
         </div>
       </div>
@@ -94,40 +63,34 @@
 </template>
 
 <script>
-// Импорты для profile
 import Sidebar from '@/components/organisms/Sidebar.vue'
 import AppHeader from '@/components/organisms/AppHeader.vue'
-import ProfileMenu from '@/components/organisms/ProfileMenu.vue'
-import ProfileHeader from '@/components/organisms/ProfileHeader.vue'
-import ManagerCard from '@/components/organisms/ManagerCard.vue'
-import PersonalData from '@/components/organisms/PersonalData.vue'
-import ProfileActions from '@/components/organisms/ProfileActions.vue'
+import DocumentTemplatesMenu from '@/components/organisms/DocumentTemplatesMenu.vue'
+import DocumentLinksList from '@/components/organisms/DocumentLinksList.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
 
 export default {
-  name: 'UIProfile',
+  name: 'UIDocumentTemplates',
   components: {
     Sidebar,
     AppHeader,
-    ProfileMenu,
-    ProfileHeader,
-    ManagerCard,
-    PersonalData,
-    ProfileActions,
-    MobileBottomNav,
+    DocumentTemplatesMenu,
+    DocumentLinksList,
+    MobileBottomNav
   },
   data() {
     return {
       isMobile: false,
+      activeMenuItem: 'legal',
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: true, route: '/ui-new/profile' },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: '/ui-new/profile' },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
         { id: 5, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false, route: null },
         { id: 6, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), active: false, route: null },
-        { id: 7, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: false, route: '/ui-new/document-templates' }
+        { id: 7, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: true, route: '/ui-new/document-templates' }
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
@@ -137,62 +100,46 @@ export default {
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
       ],
-      
-      activeProfileMenuItem: 'account',
-      
-      personalData: {
-        lastName: 'Брюс',
-        firstName: 'Уэйн',
-        middleName: 'Томасович'
-      },
+      // Данные для разных разделов меню
+      menuData: {
+        legal: {
+          title: 'Юридические документы',
+          links: [
+            { title: 'Пользовательское соглашение c RUQI', date: 'Действует с 10.08.2025', url: '' },
+            { title: 'Пользовательское соглашение c RUQI', date: 'Действует с 10.08.2025', url: '' },
+            { title: 'Пользовательское соглашение c RUQI', date: 'Действует с 10.08.2025', url: '' },
+            { title: 'Пользовательское соглашение c RUQI', date: 'Действует с 10.08.2025', url: '' },
+            { title: 'Пользовательское соглашение c RUQI', date: 'Действует с 10.08.2025', url: '' }
+          ]
+        },
+        licenses: {
+          title: 'Лицензии',
+          links: []
+        },
+        other: {
+          title: 'Какие то еще',
+          links: []
+        }
+      }
     }
   },
   computed: {
     isMobileView() {
       return this.isMobile
     },
-    // Для Sidebar используем ПК меню (7 пунктов)
     sidebarMenuItems() {
       return this.desktopMenuItems
+    },
+    currentMenuTitle() {
+      return this.menuData[this.activeMenuItem]?.title || ''
+    },
+    currentLinks() {
+      return this.menuData[this.activeMenuItem]?.links || []
     }
   },
   mounted() {
     this.checkMobile()
     window.addEventListener('resize', this.checkMobile)
-    // Мок для axios чтобы избежать ошибок API
-    if (!this.$axios) {
-      this.$axios = {
-        get: (url) => {
-          console.log('Mock axios.get called with:', url)
-          return Promise.resolve({ 
-            data: { 
-              success: true, 
-              data: {
-                bonus: 0,
-                referrals: [],
-                link: 'mock-referral-link'
-              }
-            } 
-          })
-        },
-        post: (url, data) => {
-          console.log('Mock axios.post called with:', url, data)
-          return Promise.resolve({ 
-            data: { 
-              success: true, 
-              data: {} 
-            } 
-          })
-        }
-      }
-    }
-    
-    // Мок для глобальных функций
-    if (typeof window !== 'undefined') {
-      window.RqloggerError = window.RqloggerError || function() {
-        console.warn('RqloggerError called:', arguments)
-      }
-    }
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.checkMobile)
@@ -213,43 +160,21 @@ export default {
       if (!route) return false
       return this.$route.path === route || this.$route.path.startsWith(route + '/')
     },
-    handleProfileMenuClick(item) {
-      console.log('Profile menu item clicked:', item)
+    handleMenuClick(item) {
+      console.log('Menu item clicked:', item)
     },
-    handlePersonalDataEdit() {
-      console.log('Edit personal data clicked')
-    },
-    handlePersonalDataSave(data) {
-      this.personalData = {
-        ...this.personalData,
-        ...data
+    handleLinkClick(link) {
+      console.log('Link clicked:', link)
+      if (link.url) {
+        // Здесь будет логика перехода по ссылке
       }
-      console.log('Personal data saved:', this.personalData)
-    },
-    handlePersonalDataCancel() {
-      console.log('Personal data edit cancelled')
-    },
-    handlePhoneClick() {
-      console.log('Phone click')
-    },
-    handleEmailClick() {
-      console.log('Email click')
-    },
-    handleTelegramLink() {
-      console.log('Telegram link clicked')
-    },
-    handleChangePassword() {
-      console.log('Change password clicked')
-    },
-    handleLogout() {
-      console.log('Logout clicked')
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.ui-profile {
+.ui-document-templates {
   padding: 20px;
   padding-left: 306px; // 286px sidebar + 20px margin
   padding-top: 100px; // 80px header + 20px margin
@@ -258,6 +183,7 @@ export default {
 
   &__main-content {
     max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
   }
 
@@ -278,7 +204,20 @@ export default {
   &__right-column {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 32px;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 24px;
+    width: 100%;
+  }
+
+  &__title {
+    font-family: 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #263043;
+    margin: 0;
   }
 }
 
@@ -310,11 +249,11 @@ export default {
     box-sizing: border-box;
     
     &:hover {
-      background-color: rgba(255, 255, 255, 0.18); // #FFFFFF2E = rgba(255, 255, 255, 0.18)
+      background-color: rgba(255, 255, 255, 0.18);
     }
     
     &--active {
-      background-color: rgba(255, 255, 255, 0.18); // #FFFFFF2E - такой же как hover
+      background-color: rgba(255, 255, 255, 0.18);
       color: #ffffff;
       
       .sidebar-nav__icon {
@@ -341,7 +280,7 @@ export default {
 }
 
 @media (max-width: 1200px) {
-  .ui-profile {
+  .ui-document-templates {
     &__layout {
       grid-template-columns: 1fr;
       gap: 24px;
@@ -350,11 +289,34 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .ui-profile {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 20px; /* Уменьшаем отступ сверху, так как Sidebar скрыт */
-    padding-bottom: 72px; /* Отступ снизу для мобильного меню (высота меню 72px) */
+  .ui-document-templates {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 20px;
+    padding-bottom: 72px;
+  }
+
+  .ui-document-templates__main-content {
+    width: calc(100% - 32px);
+    padding: 0 16px;
+    margin-top: 63px;
+  }
+
+  .ui-document-templates__layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .ui-document-templates__left-column {
+    width: 100%;
+  }
+
+  .ui-document-templates__right-column {
+    padding: 16px;
+  }
+
+  .ui-document-templates__title {
+    font-size: 20px;
   }
 
   // Скрываем обычный Sidebar на мобильных

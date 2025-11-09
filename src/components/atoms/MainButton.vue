@@ -5,7 +5,8 @@
     :class="[
       `main-button--${type}`,
       { 'main-button--loading': loading },
-      { 'main-button--disabled': disabled }
+      { 'main-button--disabled': disabled },
+      { 'main-button--full-width': fullWidth }
     ]"
     :disabled="disabled || loading"
     @click="handleClick"
@@ -55,6 +56,10 @@ export default {
       type: String,
       default: 'button',
       validator: (value) => ['button', 'submit', 'reset'].includes(value)
+    },
+    fullWidth: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['click'],
@@ -86,6 +91,11 @@ export default {
   width: 100%;
   max-width: 255px;
   height: 48px;
+
+  &--full-width {
+    max-width: 100%;
+    width: 100%;
+  }
   transition: all 0.2s ease;
   user-select: none;
   box-sizing: border-box;

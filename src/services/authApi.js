@@ -87,21 +87,31 @@ class AuthApiService {
   }
 
   /**
-   * Авторизация клиента по email/телефону и паролю
-   * @param {string} login - Email или телефон
+   * Авторизация клиента по телефону и паролю
+   * @param {string} phone - Номер телефона (10-11 цифр, без +)
    * @param {string} password - Пароль
    * @returns {Promise<Object>} Ответ API
    */
-  async loginClient(login, password) {
+  async loginClient(phone, password) {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v2/auth/login/client`, {
-        phone_or_email: login,
+      // Очищаем телефон от + и пробелов, оставляем только цифры
+      const cleanPhone = phone.replace(/\D/g, '')
+      
+      const response = await axios.post('/api/v2/auth/login/client', {
+        phone: cleanPhone,
         password: password
       })
       
-      return {
-        success: true,
-        data: response.data
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
       }
     } catch (error) {
       return this.handleError(error)
@@ -110,14 +120,19 @@ class AuthApiService {
 
   /**
    * Запрос кода восстановления пароля для клиента
-   * @param {string} loginPhone - Телефон для восстановления (без +)
+   * @param {string} loginPhone - Телефон для восстановления (10-11 цифр, без +)
+   * @param {string} verificationBy - Метод отправки кода (telegram/sms), по умолчанию telegram
    * @returns {Promise<Object>} Ответ API
    */
-  async requestRecoveryCode(loginPhone) {
+  async requestRecoveryCode(loginPhone, verificationBy = 'telegram') {
     try {
+      // Очищаем телефон от + и пробелов, оставляем только цифры
+      const cleanPhone = loginPhone.replace(/\D/g, '')
+      
       const response = await axios.get('/api/v2/auth/recovery/client/request-code', {
         params: {
-          login_phone: loginPhone
+          login_phone: cleanPhone,
+          verification_by: verificationBy
         }
       })
       
@@ -125,7 +140,7 @@ class AuthApiService {
       if (response.data.success) {
         return {
           success: true,
-          data: response.data
+          data: response.data.data || response.data
         }
       } else {
         return {
@@ -139,15 +154,15 @@ class AuthApiService {
   }
 
   /**
-   * Подтверждение кода восстановления пароля для клиента
-   * @param {string} loginPhone - Телефон для восстановления (без +)
-   * @param {string} code - Код подтверждения
-   * @returns {Promise<Object>} Ответ API
+   * Подтверждение кода восстановления пароля для клиента (Шаг 1)
+   * @param {string} onceToken - Токен из ответа requestRecoveryCode
+   * @param {string} code - Код верификации (4 цифры)
+   * @returns {Promise<Object>} Ответ API с новым once_token
    */
-  async confirmRecoveryCode(loginPhone, code) {
+  async confirmRecoveryCode(onceToken, code) {
     try {
-      const response = await axios.post('/api/v2/auth/recovery/client/confirm-code', {
-        login_phone: loginPhone,
+      const response = await axios.post('/api/v2/auth/recovery/client/submit-code', {
+        once_token: onceToken,
         code: code
       })
       
@@ -155,7 +170,7 @@ class AuthApiService {
       if (response.data.success) {
         return {
           success: true,
-          data: response.data
+          data: response.data.data || response.data
         }
       } else {
         return {
@@ -169,25 +184,25 @@ class AuthApiService {
   }
 
   /**
-   * Установка нового пароля после подтверждения кода восстановления
-   * @param {string} loginPhone - Телефон для восстановления (без +)
-   * @param {string} code - Код подтверждения
-   * @param {string} newPassword - Новый пароль
-   * @returns {Promise<Object>} Ответ API
+   * Установка нового пароля после подтверждения кода восстановления (Шаг 2)
+   * @param {string} onceToken - Токен из ответа confirmRecoveryCode
+   * @param {string} password - Новый пароль
+   * @param {string} confirmPassword - Подтверждение пароля
+   * @returns {Promise<Object>} Ответ API с authToken
    */
-  async setNewPassword(loginPhone, code, newPassword) {
+  async setNewPassword(onceToken, password, confirmPassword) {
     try {
-      const response = await axios.post('/api/v2/auth/recovery/client/set-password', {
-        login_phone: loginPhone,
-        code: code,
-        new_password: newPassword
+      const response = await axios.post('/api/v2/auth/recovery/client/submit-password', {
+        once_token: onceToken,
+        password: password,
+        confirm_password: confirmPassword
       })
       
       // Проверяем успешность ответа от API
       if (response.data.success) {
         return {
           success: true,
-          data: response.data
+          data: response.data.data || response.data
         }
       } else {
         return {
@@ -260,7 +275,8 @@ class AuthApiService {
 
   /**
    * Получение статуса клиентского кабинета
-   * @returns {Promise<Object>} Ответ API
+   * Требуется авторизация через Bearer токен
+   * @returns {Promise<Object>} Ответ API с user_status, ready_status, onboarding_status, available, is_login, login_email, login_phone, email_verified, phone_verified
    */
   async getClientStatus() {
     try {
@@ -270,7 +286,7 @@ class AuthApiService {
       if (response.data.success) {
         return {
           success: true,
-          data: response.data
+          data: response.data.data || response.data
         }
       } else {
         return {
@@ -314,14 +330,17 @@ class AuthApiService {
   }
 
   /**
-   * Регистрация клиента - отправка номера телефона
-   * @param {string} phone - Номер телефона
-   * @returns {Promise<Object>} Ответ API с once_token
+   * Регистрация клиента (Шаг 1) - отправка номера телефона
+   * @param {string} phone - Номер телефона (10-11 цифр, без +)
+   * @returns {Promise<Object>} Ответ API с once_token, client_uuid, account_uuid, code_sended
    */
   async registerClient(phone) {
     try {
+      // Очищаем телефон от + и пробелов, оставляем только цифры
+      const cleanPhone = phone.replace(/\D/g, '')
+      
       const response = await axios.post('/api/v2/auth/register/client', {
-        phone: phone
+        phone: cleanPhone
       })
       
       // Проверяем успешность ответа от API
@@ -342,10 +361,10 @@ class AuthApiService {
   }
 
   /**
-   * Подтверждение кода из Telegram при регистрации клиента
-   * @param {string} onceToken - Токен одноразового использования
-   * @param {string} code - Код из Telegram
-   * @returns {Promise<Object>} Ответ API с user_id и authToken
+   * Подтверждение кода регистрации клиента (Шаг 2)
+   * @param {string} onceToken - Токен из ответа registerClient
+   * @param {string} code - Код верификации из Telegram/SMS (4 цифры)
+   * @returns {Promise<Object>} Ответ API с client_uuid, account_uuid, authToken
    */
   async verifyCode(onceToken, code) {
     try {
@@ -358,7 +377,7 @@ class AuthApiService {
       if (response.data.success) {
         return {
           success: true,
-          data: response.data.data
+          data: response.data.data || response.data
         }
       } else {
         return {
@@ -373,16 +392,17 @@ class AuthApiService {
 
   /**
    * Установка пароля при регистрации клиента (с Bearer токеном)
-   * @param {string} authToken - Токен авторизации
+   * Согласно документации: POST /api/v2/auth/password/client/setup
+   * @param {string} authToken - Токен авторизации (Bearer токен)
    * @param {string} password - Пароль
-   * @param {string} passwordConfirmation - Подтверждение пароля
+   * @param {string} passwordConfirmation - Подтверждение пароля (используется только для валидации на клиенте)
    * @returns {Promise<Object>} Ответ API
    */
   async setupClientPassword(authToken, password, passwordConfirmation) {
     try {
-      const response = await axios.post('/api/v2/auth/register/client/setup-password', {
-        password: password,
-        password_confirmation: passwordConfirmation
+      // Согласно документации, отправляем только password (без password_confirmation)
+      const response = await axios.post('/api/v2/auth/password/client/setup', {
+        password: password
       }, {
         headers: {
           'Authorization': `Bearer ${authToken}`
@@ -489,37 +509,6 @@ class AuthApiService {
     }
   }
 
-  /**
-   * Установка нового пароля после восстановления для клиента
-   * @param {string} onceToken - Токен из процесса восстановления
-   * @param {string} password - Новый пароль
-   * @param {string} confirmPassword - Подтверждение пароля
-   * @returns {Promise<Object>} Ответ API
-   */
-  async submitRecoveryPassword(onceToken, password, confirmPassword) {
-    try {
-      const response = await axios.post('/api/v2/auth/recovery/client/submit-password', {
-        once_token: onceToken,
-        password: password,
-        confirm_password: confirmPassword
-      })
-      
-      // Проверяем успешность ответа от API
-      if (response.data.success) {
-        return {
-          success: true,
-          data: response.data
-        }
-      } else {
-        return {
-          success: false,
-          error: response.data.error
-        }
-      }
-    } catch (error) {
-      return this.handleError(error)
-    }
-  }
 }
 
 // Создаем экземпляр сервиса

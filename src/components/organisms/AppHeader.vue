@@ -3,12 +3,13 @@
     <div class="app-header__content">
       <!-- Left side: Title -->
       <div class="app-header__left">
-        <h1 class="app-header__title">Личный кабинет</h1>
+        <h1 class="app-header__title">{{ title }}</h1>
       </div>
 
       <!-- Right side: User actions -->
       <div class="app-header__right">
         <IconText 
+          v-if="showDocuments"
           :icon="require('@/assets/icons/profile/wait-doc.svg')"
           text="Документы на проверке"
           class="app-header__documents"
@@ -36,6 +37,14 @@ export default {
   },
   props: {
     showNotifications: {
+      type: Boolean,
+      default: true
+    },
+    title: {
+      type: String,
+      default: 'Личный кабинет'
+    },
+    showDocuments: {
       type: Boolean,
       default: true
     }

@@ -102,26 +102,29 @@ export function useAuth() {
   }
 
   /**
-   * Авторизация клиента по email/телефону и паролю
-   * @param {string} login - Email или телефон
+   * Авторизация клиента по телефону и паролю
+   * @param {string} phone - Номер телефона (10-11 цифр)
    * @param {string} password - Пароль
    * @returns {Promise<boolean>} Успешность авторизации
    */
-  const loginClient = async (login, password) => {
+  const loginClient = async (phone, password) => {
     loading.value = true
     error.value = null
     
     try {
-      const result = await authApiService.loginClient(login, password)
+      const result = await authApiService.loginClient(phone, password)
       
-      if (result.success && result.data.token) {
-        // Сохраняем токен и авторизуем пользователя
-        await store.dispatch('auth/auth', result.data.token)
-        return true
-      } else {
-        error.value = result.error
-        return false
+      if (result.success && result.data) {
+        // Согласно документации, авторизация возвращает token (не authToken)
+        const token = result.data.token
+        if (token) {
+          // Сохраняем токен и авторизуем пользователя
+          await store.dispatch('auth/auth', token)
+          return true
+        }
       }
+      error.value = result.error
+      return false
     } catch (err) {
       error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
       return false
@@ -132,73 +135,80 @@ export function useAuth() {
 
   /**
    * Запрос кода восстановления пароля для клиента
-   * @param {string} loginPhone - Телефон для восстановления (без +)
-   * @returns {Promise<boolean>} Успешность запроса
+   * @param {string} loginPhone - Телефон для восстановления (10-11 цифр)
+   * @param {string} verificationBy - Метод отправки кода (telegram/sms), по умолчанию telegram
+   * @returns {Promise<Object|null>} Объект с once_token и code_sended или null при ошибке
    */
-  const requestRecoveryCode = async (loginPhone) => {
+  const requestRecoveryCode = async (loginPhone, verificationBy = 'telegram') => {
     loading.value = true
     error.value = null
     
     try {
-      const result = await authApiService.requestRecoveryCode(loginPhone)
+      const result = await authApiService.requestRecoveryCode(loginPhone, verificationBy)
       
       if (result.success) {
-        return true
+        return result.data
       } else {
         error.value = result.error
-        return false
+        return null
       }
     } catch (err) {
       error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
-      return false
+      return null
     } finally {
       loading.value = false
     }
   }
 
   /**
-   * Подтверждение кода восстановления пароля для клиента
-   * @param {string} loginPhone - Телефон для восстановления (без +)
-   * @param {string} code - Код подтверждения
-   * @returns {Promise<boolean>} Успешность подтверждения
+   * Подтверждение кода восстановления пароля для клиента (Шаг 1)
+   * @param {string} onceToken - Токен из ответа requestRecoveryCode
+   * @param {string} code - Код верификации (4 цифры)
+   * @returns {Promise<Object|null>} Объект с новым once_token или null при ошибке
    */
-  const confirmRecoveryCode = async (loginPhone, code) => {
+  const confirmRecoveryCode = async (onceToken, code) => {
     loading.value = true
     error.value = null
     
     try {
-      const result = await authApiService.confirmRecoveryCode(loginPhone, code)
+      const result = await authApiService.confirmRecoveryCode(onceToken, code)
       
       if (result.success) {
-        return true
+        return result.data
       } else {
         error.value = result.error
-        return false
+        return null
       }
     } catch (err) {
       error.value = [{ code: 'UNKNOWN_ERROR', msg: 'Неизвестная ошибка' }]
-      return false
+      return null
     } finally {
       loading.value = false
     }
   }
 
   /**
-   * Установка нового пароля после подтверждения кода восстановления
-   * @param {string} loginPhone - Телефон для восстановления (без +)
-   * @param {string} code - Код подтверждения
-   * @param {string} newPassword - Новый пароль
-   * @returns {Promise<boolean>} Успешность установки пароля
+   * Установка нового пароля после подтверждения кода восстановления (Шаг 2)
+   * @param {string} onceToken - Токен из ответа confirmRecoveryCode
+   * @param {string} password - Новый пароль
+   * @param {string} confirmPassword - Подтверждение пароля
+   * @returns {Promise<boolean>} Успешность установки пароля и авторизации
    */
-  const setNewPassword = async (loginPhone, code, newPassword) => {
+  const setNewPassword = async (onceToken, password, confirmPassword) => {
     loading.value = true
     error.value = null
     
     try {
-      const result = await authApiService.setNewPassword(loginPhone, code, newPassword)
+      const result = await authApiService.setNewPassword(onceToken, password, confirmPassword)
       
-      if (result.success) {
-        return true
+      if (result.success && result.data) {
+        // Согласно документации, восстановление пароля возвращает authToken (не token)
+        const authToken = result.data.authToken
+        if (authToken) {
+          // Сохраняем токен и авторизуем пользователя
+          await store.dispatch('auth/auth', authToken)
+          return true
+        }
       } else {
         error.value = result.error
         return false

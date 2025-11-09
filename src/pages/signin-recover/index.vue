@@ -192,14 +192,16 @@ export default {
 
       try {
         // Используем authApi для запроса кода восстановления
-        const result = await authApi.requestRecoveryCode(phone)
+        const result = await authApi.requestRecoveryCode(phone, this.verification_by)
         
         if (result.success) {
+          // Сохраняем once_token из ответа
+          this.once_token = result.data?.once_token || result.data?.onceToken
           this.step = 2
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при запросе кода восстановления'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при запросе кода восстановления'
           })
         }
       } catch (error) {
@@ -214,14 +216,23 @@ export default {
 
     async confirmCode() {
       if (this.loading) return
+      if (!this.once_token) {
+        this.showNotification({
+          type: 'error',
+          text: 'Ошибка: отсутствует токен. Пожалуйста, запросите код заново.'
+        })
+        return
+      }
+      
       this.loading = true
       
       try {
-        // Отправляем запрос на сервер для подтверждения кода
-        const phone = clearPhoneWithoutPlus(this.formattedPhone)
-        const result = await authApi.confirmRecoveryCode(phone, this.code)
+        // Используем once_token для подтверждения кода
+        const result = await authApi.confirmRecoveryCode(this.once_token, this.code)
         
         if (result.success) {
+          // Сохраняем новый once_token для установки пароля
+          this.once_token = result.data?.once_token || result.data?.onceToken
           // Код подтвержден, переходим на шаг 3
           this.step = 3
           this.showNotification({
@@ -231,7 +242,7 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Неверный код подтверждения'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Неверный код подтверждения'
           })
         }
       } catch (error) {
@@ -245,23 +256,28 @@ export default {
     },
 
     async requestCodeAgain (method) {
-      this.verification_by = method
-      this.confirmMethod = method
+      this.verification_by = method || 'telegram'
+      this.confirmMethod = method || 'telegram'
       
       if (this.loading) return
       this.loading = true
       const phone = clearPhoneWithoutPlus(this.formattedPhone)
       
       try {
-        // Используем authApi для повторного запроса кода
-        const result = await authApi.requestRecoveryCode(phone)
+        // Используем authApi для повторного запроса кода с указанием метода
+        const result = await authApi.requestRecoveryCode(phone, this.verification_by)
         
         if (result.success) {
-          // Код отправлен повторно
+          // Сохраняем once_token из ответа
+          this.once_token = result.data?.once_token || result.data?.onceToken
+          this.showNotification({
+            type: 'success',
+            text: 'Код отправлен повторно'
+          })
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при запросе кода восстановления'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при запросе кода восстановления'
           })
         }
       } catch (error) {
@@ -315,29 +331,49 @@ export default {
         return
       }
 
+      if (!this.once_token) {
+        this.showNotification({
+          type: 'error',
+          text: 'Ошибка: отсутствует токен. Пожалуйста, начните процесс заново.'
+        })
+        return
+      }
+
       this.loading = true
       try {
         // Используем authApi для установки пароля после восстановления
-        const result = await authApi.submitRecoveryPassword(
-          this.once_token || 'test_token_' + Date.now(),
+        const result = await authApi.setNewPassword(
+          this.once_token,
           this.password,
           this.confirmPassword
         )
         
-        if (result.success) {
+        if (result.success && result.data) {
+          // Согласно документации, восстановление пароля возвращает authToken (не token)
+          const authToken = result.data.authToken
+          if (authToken) {
+            // Авторизуем пользователя с полученным токеном
+            await this.auth(authToken)
+          
           this.showNotification({
             type: 'success',
-            text: 'Пароль успешно изменен! Переходим на страницу входа.'
+            text: 'Пароль успешно изменен! Переходим на главную страницу.'
           })
           
-          // Переходим на страницу входа
-          setTimeout(() => {
-            this.$router.push('/client/signin')
-          }, 1500)
+            // Переходим на главную страницу
+            setTimeout(() => {
+              this.$router.push('/')
+            }, 1500)
+          } else {
+            this.showNotification({
+              type: 'error',
+              text: 'Токен авторизации не получен'
+            })
+          }
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при установке пароля'
+            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при установке пароля'
           })
         }
       } catch (error) {
