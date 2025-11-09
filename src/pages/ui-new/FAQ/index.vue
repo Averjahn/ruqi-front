@@ -76,21 +76,15 @@
       </div>
 
       <div v-else-if="activeTab === 'my-requests'" class="ui-faq__content">
-        <div class="ui-faq__my-requests">
-          <img 
-            src="@/assets/icons/FAQ/search-folder.svg" 
-            alt="Поиск" 
-            class="ui-faq__my-requests-icon"
-          />
-          <h3 class="ui-faq__my-requests-title">Обращений пока нет</h3>
-          <p class="ui-faq__my-requests-description">Нажмите на кнопку, чтобы создать обращение в поддержку</p>
-          <MainButton
-            type="primary"
-            text="Создать обращение"
-            @click="handleCreateRequest"
-            class="ui-faq__my-requests-button"
-          />
-        </div>
+        <SupportRequestsList
+          v-if="supportRequests.length > 0"
+          :requests="supportRequests"
+          @request-click="handleRequestClick"
+        />
+        <SupportRequestsEmpty
+          v-else
+          @create-request="handleCreateRequest"
+        />
       </div>
     </div>
 
@@ -108,6 +102,9 @@ import FaqCard from '@/components/molecules/FaqCard.vue'
 import FaqAccordionItem from '@/components/molecules/FaqAccordionItem.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
+import SupportRequestsList from '@/components/organisms/SupportRequestsList.vue'
+import SupportRequestsEmpty from '@/components/organisms/SupportRequestsEmpty.vue'
+import testSupportRequestsData from '@/test-support-requests.json'
 
 export default {
   name: 'UIFAQ',
@@ -119,7 +116,9 @@ export default {
     FaqCard,
     FaqAccordionItem,
     MobileBottomNav,
-    MainButton
+    MainButton,
+    SupportRequestsList,
+    SupportRequestsEmpty
   },
   data() {
     return {
@@ -175,7 +174,8 @@ export default {
             { text: 'Как записаться на заявку?', to: null }
           ]
         }
-      ]
+      ],
+      supportRequests: testSupportRequestsData.data || []
     }
   },
   computed: {
@@ -221,6 +221,11 @@ export default {
     handleTabChange(tab) {
       this.activeTab = tab
       console.log('Tab changed to:', tab)
+    },
+    handleRequestClick(request) {
+      console.log('Request clicked:', request)
+      // Здесь будет логика перехода к деталям обращения
+      // this.$router.push(`/support/${request.id}`)
     }
   }
 }
@@ -360,46 +365,6 @@ export default {
   border-bottom: 1px solid #0000001A; /* Бордер между элементами аккордеона */
 }
 
-.ui-faq__empty-state {
-  padding: 32px;
-  text-align: center;
-  color: #666666;
-}
-
-.ui-faq__my-requests {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px; /* Расстояние между всеми элементами 24px */
-  margin-top: 56px; /* 32px + 24px от tabs */
-  text-align: center;
-}
-
-.ui-faq__my-requests-icon {
-  width: 160px;
-  height: 110px;
-  object-fit: contain;
-}
-
-.ui-faq__my-requests-title {
-  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-weight: 600;
-  font-size: 32px;
-  line-height: 40px;
-  color: #263043;
-  margin: 0;
-  text-align: center;
-}
-
-.ui-faq__my-requests-description {
-  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  color: #666666;
-  margin: 0;
-  text-align: center;
-}
 
 
 @media (max-width: 1200px) {

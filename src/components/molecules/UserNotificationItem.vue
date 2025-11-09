@@ -15,7 +15,7 @@
     <div class="title">{{ item.name }}</div>
     <div class="description" :class="{ shortView: !pageView }">{{ item.description }}</div>
     <div class="link">
-      <ButtonText v-if="linkText" gap="4px" @click="$emit('clickToLink', item)">
+      <ButtonText v-if="linkText" gap="4px" class="link-button" @click="$emit('clickToLink', item)">
         <div class="div">
           {{ linkText }}
         </div>
@@ -88,6 +88,9 @@ export default {
   gap: 10px;
   border-bottom: 1px solid #dadada;
   padding: 24px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   &:hover {
     background: #f2f8ff;
   }
@@ -149,6 +152,56 @@ export default {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+    
+    // Стили для кнопки "Перейти"
+    .link-button {
+      display: flex !important;
+      align-items: center !important;
+      color: #1735F5 !important;
+      font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif !important;
+      font-weight: 400 !important;
+      font-size: 16px !important;
+      line-height: 22px !important;
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      
+      :deep(*) {
+        color: #1735F5 !important;
+        font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif !important;
+        font-weight: 400 !important;
+        font-size: 16px !important;
+        line-height: 22px !important;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      
+      :deep(.slot) {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      
+      :deep(.div) {
+        display: inline !important;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      
+      :deep(.action_icon) {
+        flex-shrink: 0;
+      }
+    }
+    
+    .header_action {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
   }
 
   .header_action {
@@ -162,8 +215,7 @@ export default {
       justify-content: center;
     }
     .header_action_text {
-      text-decoration-line: underline;
-      text-decoration-style: solid;
+      text-decoration: none;
     }
 
     &:hover {

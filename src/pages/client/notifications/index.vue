@@ -204,11 +204,13 @@ export default {
     },
     async setAllReadStatus () {
       await this.sendReadStatusAll()
-      this.fetchNotificationsCount()
+      // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+      // this.fetchNotificationsCount()
     },
     async setReadStatus (item) {
       await this.sendReadStatus([item.id])
-      this.fetchNotificationsCount()
+      // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+      // this.fetchNotificationsCount()
     },
   },
 }
@@ -219,8 +221,11 @@ export default {
   padding: 20px;
   padding-left: 306px; // 286px sidebar + 20px margin
   padding-top: 100px; // 80px header + 20px margin
-  min-height: 100vh;
+  height: 100vh;
   background: #F6F8FB;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
   &__main-content {
     max-width: 1400px;
@@ -229,6 +234,8 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    flex: 1;
+    min-height: 0;
   }
 
   &__header {
@@ -302,12 +309,17 @@ export default {
       0px 0px 10px 0px rgba(23, 53, 245, 0.03);
     border-radius: 16px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
   }
 
   &__list {
-    max-height: calc(100vh - 350px);
+    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    min-height: 0;
   }
 
   &__loading {

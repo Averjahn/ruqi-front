@@ -123,9 +123,13 @@ export default {
       this.navigateTo(item)
     },
     async notificationsFetch () {
-      return await this.$axios.get('v2/user/notification/getcount', {
-        errorMessage: 'Ошибка при получении количества непрочитанных уведомлений',
-      })
+      // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+      // return await this.$axios.get('v2/user/notification/getcount', {
+      //   errorMessage: 'Ошибка при получении количества непрочитанных уведомлений',
+      // })
+      
+      // Возвращаем пустой ответ, чтобы не было запроса
+      return Promise.resolve({ data: { success: false } })
     },
     async notificationsHandler (response) {
       if (response?.data?.success) this.setNotificationsCount(response.data.data)

@@ -196,14 +196,14 @@ export default {
 
     canFinish() {
       // Проверяем, что все обязательные поля заполнены
-      const hasLogo = !!this.formData.logo
+      // Лого организации необязательно для завершения регистрации
       const hasInn = !!this.formData.inn && this.formData.inn.length >= 10
       const hasFullName = !!this.formData.fullName
       const hasInnCertificate = !!this.formData.innCertificate?.file
       const hasOgrnCertificate = !!this.formData.ogrnCertificate?.file
       
       
-      return hasLogo && hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate
+      return hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate
     }
   },
   watch: {
@@ -214,6 +214,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('notifications', ['showNotification']),
     openDocumentModal(documentType = null) {
       this.currentDocumentFile = documentType
       this.showDocumentModal = true
@@ -260,65 +261,123 @@ export default {
     },
 
     async handleFinish() {
+      this.loading = true
       try {
-        // Получаем данные пользователя из store
-        const user = this.$store.getters['user/user']
+        // Шаг 1: Проверяем, есть ли у клиента организация
+        console.log('📤 Шаг 1: Проверяем наличие организации у клиента')
         
-        // Парсим ФИО из формы
-        const fullNameParts = this.formData.fullNamePerson?.split(' ') || []
-        const lastname = fullNameParts[0] || ''
-        const firstname = fullNameParts[1] || ''
-        const middlename = fullNameParts[2] || ''
+        const getOrgResult = await authApi.getClientOrganization()
         
-        // Получаем телефон из localStorage или store
-        const savedPhone = localStorage.getItem('registration_phone') || user?.phone || ''
-        
-        // Генерируем случайный номер телефона, если не сохранен
-        const generateRandomPhone = () => {
-          const prefix = '79' // Российский префикс
-          const randomPart = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')
-          return prefix + randomPart
-        }
-        
-        const phone = savedPhone || generateRandomPhone()
-        
-        // Подготавливаем данные для регистрации клиента
-        const clientData = {
-          firstname: firstname || user?.firstname || '',
-          lastname: lastname || user?.lastname || '',
-          middlename: middlename || user?.middlename || '',
-          phone: phone,
-          email: user?.email || 'test@example.com',
-          birthday: user?.birthday || '1990-01-15',
-          citizenship: user?.citizenship || 'RU',
-          company_name: this.formData.fullName || '',
-          company_inn: this.formData.inn || ''
-        }
-
-        // console.log('📤 Отправляем данные регистрации:', clientData)
-
-        // Вызываем registerClient из authApi
-        const result = await authApi.registerClient(clientData)
-        
-        if (result.success) {
+        if (getOrgResult.success) {
+          // У клиента уже есть организация
           this.showNotification({
-            type: 'success',
-            text: 'Регистрация успешно завершена!',
+            type: 'info',
+            text: 'У вас уже есть организация. Переходим на страницу профиля.',
           })
-          // Переход на главную страницу
-          this.$router.push('/')
-        } else {
+          
+          setTimeout(() => {
+            this.$router.push('/ui-new/profile')
+          }, 1500)
+          this.loading = false
+          return
+        }
+        
+        // Если организации нет (ошибка 404), продолжаем создание
+        const errorCode = getOrgResult.error?.code || getOrgResult.error?.[0]?.code
+        if (errorCode && errorCode !== 980081) {
+          // Если ошибка не "У клиента нет привязанной организации", показываем ошибку
           this.showNotification({
             type: 'error',
-            text: result.error?.msg || 'Ошибка при регистрации',
+            text: getOrgResult.error?.msg || getOrgResult.error?.[0]?.msg || 'Ошибка при проверке организации',
           })
+          this.loading = false
+          return
+        }
+        
+        // Шаг 2: Создание организации (если организации нет)
+        // Маппим данные из формы в формат API
+        // Извлекаем короткое название из полного наименования (до кавычек или первые слова)
+        const fullName = this.formData.fullName || ''
+        const shortName = fullName.match(/["«]([^"»]+)["»]/)?.[1] || 
+                         fullName.split(' ').slice(0, 3).join(' ') || 
+                         fullName
+        
+        // Маппим тип контрагента в тип организации
+        const counterpartyTypeMap = {
+          'legal': 'ООО',
+          'individual': 'ИП',
+          'physical': 'Физ. лицо'
+        }
+        
+        // Подготавливаем данные организации для отправки согласно API
+        const organizationData = {
+          name: shortName,
+          company_name: this.formData.fullName || '',
+          inn: this.formData.inn || undefined,
+          kpp: this.formData.kpp || undefined,
+          ogrn: this.formData.ogrn || undefined,
+          legal_address: this.formData.legalAddress || undefined,
+          address: this.formData.mailingAddress || undefined,
+          bank: this.formData.bank || undefined,
+          bik: this.formData.bic || undefined,
+          payment_account: this.formData.settlementAccount || undefined,
+          correspondent_account: this.formData.correspondentAccount || undefined,
+          gen_director: this.formData.fullNamePerson || undefined,
+          signee_fio: this.formData.fullNamePerson || undefined,
+          signee_basis: this.formData.basis || undefined,
+          signee_job_title: this.formData.position || undefined,
+          type: counterpartyTypeMap[this.formData.counterpartyType] || undefined
+        }
+        
+        // Удаляем undefined значения
+        Object.keys(organizationData).forEach(key => {
+          if (organizationData[key] === undefined || organizationData[key] === null || organizationData[key] === '') {
+            delete organizationData[key]
+          }
+        })
+
+        console.log('📤 Шаг 2: Создаем организацию с данными:', organizationData)
+
+        // Отправляем данные организации через API
+        const organizationResult = await authApi.createClientOrganization(organizationData)
+        
+        if (organizationResult.success) {
+          this.showNotification({
+            type: 'success',
+            text: organizationResult.data?.message || 'Организация успешно создана!',
+          })
+          
+          // Переход на страницу профиля
+          setTimeout(() => {
+            this.$router.push('/ui-new/profile')
+          }, 1500)
+        } else {
+          // Проверяем, не создана ли организация уже (код ошибки 980091)
+          const orgErrorCode = organizationResult.error?.code || organizationResult.error?.[0]?.code
+          if (orgErrorCode === 980091) {
+            this.showNotification({
+              type: 'info',
+              text: 'У вас уже есть организация. Переходим на страницу профиля.',
+            })
+            
+            setTimeout(() => {
+              this.$router.push('/ui-new/profile')
+            }, 1500)
+          } else {
+            this.showNotification({
+              type: 'error',
+              text: organizationResult.error?.msg || organizationResult.error?.[0]?.msg || 'Ошибка при создании организации',
+            })
+          }
         }
       } catch (error) {
-        console.error('Ошибка регистрации:', error)
+        console.error('Ошибка при завершении регистрации:', error)
         this.showNotification({
           type: 'error',
-          text: 'Произошла ошибка при регистрации',
+          text: 'Произошла ошибка при завершении регистрации',
         })
+      } finally {
+        this.loading = false
       }
     },
 

@@ -49,10 +49,14 @@ export const user = {
     },
 
     async fetchNotificationsCount ({ commit }) {
-      const response = await axios.get('v2/user/notification/getcount', {
-        errorMessage: 'Ошибка при получении количества непрочитанных уведомлений',
-      })
-      if (response?.data?.success) commit('setNotificationsCount', response.data.data)
+      // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+      // const response = await axios.get('v2/user/notification/getcount', {
+      //   errorMessage: 'Ошибка при получении количества непрочитанных уведомлений',
+      // })
+      // if (response?.data?.success) commit('setNotificationsCount', response.data.data)
+      
+      // Не обновляем счетчик, оставляем текущее значение
+      return
     },
 
     async fetchNotifications ({ dispatch, commit }, params) {

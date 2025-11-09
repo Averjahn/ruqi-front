@@ -24,27 +24,37 @@ export default function useUserNotifications () {
   }
 
   const sendReadStatus = async (notification_ids) => {
-    const response = await axios.put(
-      'v2/user/notification/massupdate',
-      { notification_ids, web_status: 3 },
-      { errorMessage: 'Ошибка при изменении статуса уведомления' },
-    )
-    if (response?.data?.success) {
-      userNotifications?.value?.forEach((notification) => {
-        if (notification_ids?.includes(notification.id)) notification.web_status = 3
-      })
-    }
+    // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+    // const response = await axios.put(
+    //   'v2/user/notification/massupdate',
+    //   { notification_ids, web_status: 3 },
+    //   { errorMessage: 'Ошибка при изменении статуса уведомления' },
+    // )
+    // if (response?.data?.success) {
+    //   userNotifications?.value?.forEach((notification) => {
+    //     if (notification_ids?.includes(notification.id)) notification.web_status = 3
+    //   })
+    // }
+    
+    // Обновляем статус локально без запроса к API
+    userNotifications?.value?.forEach((notification) => {
+      if (notification_ids?.includes(notification.id)) notification.web_status = 3
+    })
   }
 
   const sendReadStatusAll = async () => {
-    const response = await axios.put(
-      'v2/user/notification/massupdate',
-      { web_status: 3, all: true },
-      { errorMessage: 'Ошибка при изменении статуса уведомления' },
-    )
-    if (response?.data?.success) {
-      userNotifications?.value?.forEach((notification) => (notification.web_status = 3))
-    }
+    // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+    // const response = await axios.put(
+    //   'v2/user/notification/massupdate',
+    //   { web_status: 3, all: true },
+    //   { errorMessage: 'Ошибка при изменении статуса уведомления' },
+    // )
+    // if (response?.data?.success) {
+    //   userNotifications?.value?.forEach((notification) => (notification.web_status = 3))
+    // }
+    
+    // Обновляем статус локально без запроса к API
+    userNotifications?.value?.forEach((notification) => (notification.web_status = 3))
   }
 
   const navigateTo = async (notification) => {
@@ -81,23 +91,25 @@ export default function useUserNotifications () {
       params.value.page = 1
       userNotifications.value = []
     }
-    try {
-      const response = await axios.get('v2/user/notification/list', {
-        params: params.value,
-        errorMessage: 'Ошибка при получении списка уведомлений',
-      })
-      if (response?.data?.success && response?.data?.data?.length > 0) {
-        totalPages.value = response?.data?.meta?.last_page
-        userNotifications.value = [...userNotifications.value, ...response.data?.data]
-        busy.value = response.data.meta?.current_page >= response.data.meta?.last_page
-        loading.value = false
-        return
-      }
-    } catch (error) {
-      console.log('API error, using test data:', error)
-    }
     
-    // Используем тестовые данные из JSON файла (если API не вернул данные или произошла ошибка)
+    // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+    // try {
+    //   const response = await axios.get('v2/user/notification/list', {
+    //     params: params.value,
+    //     errorMessage: 'Ошибка при получении списка уведомлений',
+    //   })
+    //   if (response?.data?.success && response?.data?.data?.length > 0) {
+    //     totalPages.value = response?.data?.meta?.last_page
+    //     userNotifications.value = [...userNotifications.value, ...response.data?.data]
+    //     busy.value = response.data.meta?.current_page >= response.data.meta?.last_page
+    //     loading.value = false
+    //     return
+    //   }
+    // } catch (error) {
+    //   console.log('API error, using test data:', error)
+    // }
+    
+    // Используем тестовые данные из JSON файла
     const testData = allTestNotifications.value || []
     
     if (testData.length === 0) {
@@ -127,21 +139,23 @@ export default function useUserNotifications () {
   const loadPage = async (page) => {
     loading.value = true
     params.value.page = page
-    try {
-      const response = await axios.get('v2/user/notification/list', {
-        params: params.value,
-        errorMessage: 'Ошибка при получении списка уведомлений',
-      })
-      if (response?.data?.success && response?.data?.data?.length > 0) {
-        userNotifications.value = response.data?.data
-        loading.value = false
-        return true
-      }
-    } catch (error) {
-      console.log('API error, using test data:', error)
-    }
     
-    // Используем тестовые данные из JSON файла (если API не вернул данные или произошла ошибка)
+    // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений
+    // try {
+    //   const response = await axios.get('v2/user/notification/list', {
+    //     params: params.value,
+    //     errorMessage: 'Ошибка при получении списка уведомлений',
+    //   })
+    //   if (response?.data?.success && response?.data?.data?.length > 0) {
+    //     userNotifications.value = response.data?.data
+    //     loading.value = false
+    //     return true
+    //   }
+    // } catch (error) {
+    //   console.log('API error, using test data:', error)
+    // }
+    
+    // Используем тестовые данные из JSON файла
     const testData = allTestNotifications.value || []
     
     if (testData.length === 0) {

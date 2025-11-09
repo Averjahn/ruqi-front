@@ -34,11 +34,10 @@
         <div class="organisation-data-form__inn-search">
           <Input
             :model-value="modelValue.inn"
-            @update:model-value="updateField('inn', $event)"
+            @update:model-value="handleInnUpdate"
             placeholder="Введите ИНН"
             :rules="[rules.required]"
             class="organisation-data-form__input"
-            @input="onInnChange"
           />
         </div>
         <div v-if="dadataError" class="organisation-data-form__error">
@@ -277,18 +276,21 @@ export default {
       })
     },
 
-    onInnChange() {
+    handleInnUpdate(value) {
+      // Обновляем поле ИНН
+      this.updateField('inn', value)
+      
       // Очищаем ошибку при изменении ИНН
       this.dadataError = null
       
       // Если ИНН пустой - очищаем все поля
-      if (!this.modelValue.inn || this.modelValue.inn.length === 0) {
+      if (!value || value.length === 0) {
         this.clearAllFields()
         return
       }
       
       // Автоматический поиск при достижении 10 или 12 символов
-      const innLength = this.modelValue.inn.length
+      const innLength = value.length
       if (innLength === 10 || innLength === 12) {
         this.searchByInn()
       }

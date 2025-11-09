@@ -301,6 +301,7 @@ export default {
               type: 'error',
               text: 'Не получен токен для подтверждения кода'
             })
+            this.loading = false
             return
           }
           
@@ -323,8 +324,9 @@ export default {
           type: 'error',
           text: getAPIError(error) || 'Ошибка при отправке номера телефона'
         })
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
 
 
@@ -355,8 +357,9 @@ export default {
           type: 'error',
           text: getAPIError(error) || 'Ошибка при запросе кода'
         })
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
 
     async verifyCode() {
@@ -381,7 +384,7 @@ export default {
         const result = await authApi.verifyCode(this.onceToken, this.code)
         
         if (result.success) {
-          // Согласно документации, регистрация возвращает authToken (не token)
+          // Сохраняем authToken для использования как Bearer токен в заголовке Authorization
           this.authToken = result.data?.authToken
           this.clientUuid = result.data?.client_uuid
           this.accountUuid = result.data?.account_uuid
@@ -391,6 +394,7 @@ export default {
               type: 'error',
               text: 'Токен авторизации не получен'
             })
+            this.loading = false
             return
           }
 
@@ -411,8 +415,9 @@ export default {
           type: 'error',
           text: getAPIError(error) || 'Ошибка при подтверждении кода'
         })
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
 
     copyPhoneNumber() {
@@ -432,6 +437,7 @@ export default {
       this.step = 1
       this.code = ''
       this.onceToken = null
+      this.authToken = null
       if (this.authInterval) {
         clearInterval(this.authInterval)
       }
@@ -460,7 +466,7 @@ export default {
 
       this.loading = true
       try {
-        // Устанавливаем пароль с Bearer токеном
+        // Устанавливаем пароль с authToken в заголовке Authorization Bearer
         const result = await authApi.setupClientPassword(
           this.authToken,
           this.password,
@@ -468,6 +474,16 @@ export default {
         )
         
         if (result.success) {
+          // Сохраняем токен авторизации в store и localStorage
+          // Используем токен из ответа API, если он есть, иначе используем authToken из предыдущего шага
+          const token = result.data?.authToken || result.data?.token || this.authToken
+          if (token) {
+            await this.$store.dispatch('auth/auth', token)
+          } else if (this.authToken) {
+            // Если токена в ответе нет, используем authToken из предыдущего шага
+            await this.$store.dispatch('auth/auth', this.authToken)
+          }
+          
           // Сохраняем телефон в store и localStorage
           const phone = clearPhoneWithoutPlus(this.phone)
           this.$store.commit('user/setRegistrationData', { 
@@ -500,8 +516,9 @@ export default {
           type: 'error',
           text: getAPIError(error) || 'Ошибка при установке пароля'
         })
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
 
     goToSignIn () {

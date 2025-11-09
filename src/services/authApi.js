@@ -391,20 +391,24 @@ class AuthApiService {
   }
 
   /**
-   * Установка пароля при регистрации клиента (с Bearer токеном)
-   * Согласно документации: POST /api/v2/auth/password/client/setup
-   * @param {string} authToken - Токен авторизации (Bearer токен)
+   * Установка пароля при регистрации клиента
+   * POST /api/v2/auth/register/client/setup-password
+   * @param {string} authToken - Токен авторизации (Bearer токен), полученный на предыдущем шаге (подтверждение кода)
    * @param {string} password - Пароль
-   * @param {string} passwordConfirmation - Подтверждение пароля (используется только для валидации на клиенте)
+   * @param {string} confirmPassword - Подтверждение пароля
    * @returns {Promise<Object>} Ответ API
    */
-  async setupClientPassword(authToken, password, passwordConfirmation) {
+  async setupClientPassword(authToken, password, confirmPassword) {
     try {
-      // Согласно документации, отправляем только password (без password_confirmation)
-      const response = await axios.post('/api/v2/auth/password/client/setup', {
-        password: password
-      }, {
+      // Отправляем password и password_confirmation как form-data (application/x-www-form-urlencoded)
+      // authToken используется как Bearer токен в заголовке Authorization
+      const formData = new URLSearchParams()
+      formData.append('password', password)
+      formData.append('password_confirmation', confirmPassword)
+      
+      const response = await axios.post('/api/v2/auth/register/client/setup-password', formData.toString(), {
         headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Bearer ${authToken}`
         }
       })
@@ -414,6 +418,61 @@ class AuthApiService {
         return {
           success: true,
           data: response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Получение организации текущего клиента
+   * GET /api/v2/auth/client/organization
+   * Требуется авторизация (Bearer токен)
+   * @returns {Promise<Object>} Ответ API с данными организации или ошибкой 404 если организации нет
+   */
+  async getClientOrganization() {
+    try {
+      const response = await axios.get('/api/v2/auth/client/organization')
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Создание организации для текущего клиента
+   * POST /api/v2/auth/client/organization
+   * Требуется авторизация (Bearer токен)
+   * @param {Object} organizationData - Данные организации
+   * @returns {Promise<Object>} Ответ API с uuid организации
+   */
+  async createClientOrganization(organizationData) {
+    try {
+      const response = await axios.post('/api/v2/auth/client/organization', organizationData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
         }
       } else {
         return {
