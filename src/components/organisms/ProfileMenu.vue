@@ -75,13 +75,14 @@ export default {
   padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px; /* 4px + 2px для ПК версии, чтобы hover стили не наезжали */
 
   @media (max-width: 768px) {
     width: 100%;
     border-radius: 0;
     margin: 0 -16px;
     width: calc(100% + 32px);
+    gap: 4px; /* На мобильной версии оставляем меньший отступ */
   }
 }
 

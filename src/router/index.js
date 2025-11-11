@@ -35,16 +35,27 @@ store.dispatch('auth/checkClientStatus').then((isClient) => {
 router.beforeEach((to, from, next) => {
   store.dispatch('app/startLoading')
   const isLogged = store.getters['auth/isLogged']
-  if (to.fullPath.includes('signin') && isLogged) {
-    next({ path: '/' })
-    store.dispatch('app/stopLoading')
+  
+  // Разрешаем доступ к страницам авторизации/регистрации всегда (даже при прямом вводе URL)
+  const isAuthPage = to.path.startsWith('/client/signin') || 
+                     to.path.startsWith('/client/signup') || 
+                     to.path.startsWith('/client/signin-recovery') ||
+                     to.path.startsWith('/client/organisationData')
+  
+  // Если это страница авторизации - всегда разрешаем доступ
+  if (isAuthPage) {
+    next()
     return
   }
+  
+  // Если страница требует авторизации и пользователь не залогинен
   if (to.matched.some((record) => record.meta.requiresAuth) && !isLogged) {
     next({ path: '/client/signin' })
     store.dispatch('app/stopLoading')
     return
   }
+  
+  // Для всех остальных случаев разрешаем переход
   next()
 })
 

@@ -147,6 +147,7 @@
               >
                 Отменить
               </Button>
+              <div class="ui-organisation-data__actions-divider"></div>
               <Button
                 type="contained"
                 color="blue"
@@ -492,7 +493,8 @@ export default {
 
   &__actions {
     display: flex;
-    gap: 16px;
+    align-items: center;
+    gap: 12px;
     justify-content: flex-end;
     margin-top: 0;
     padding-top: 0;
@@ -515,6 +517,13 @@ export default {
       margin-bottom: 0;
       width: auto;
     }
+  }
+
+  &__actions-divider {
+    width: 1px;
+    height: 20px;
+    background: #E0E0E0;
+    flex-shrink: 0;
   }
 
   &__documents {

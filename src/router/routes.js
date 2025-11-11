@@ -11,16 +11,19 @@ export const routes = [
   { path: '/ui-new/organisation-data', component: i('/ui-new/organisation-data/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/notifications', component: i('/client/notifications/index.vue'), meta: { layout: 'EmptyLayout' } },
   
-  // client routes
-  { path: '/client/signin', component: i('/signin/index.vue'), meta: { layout: 'EmptyLayout' } },
-  { path: '/client/signup', component: i('/signup/index.vue'), meta: { layout: 'EmptyLayout' } },
-  { path: '/client/signin-recovery', component: i('/signin-recover/index.vue'), meta: { layout: 'EmptyLayout' } },
+  // client routes - всегда доступны без авторизации
+  { path: '/client/signin', component: i('/signin/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/client/signup', component: i('/signup/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/client/signin-recovery', component: i('/signin-recover/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   {
     path: '/client/organisationData',
     component: i('/organisationData/index.vue'),
-    meta: { layout: 'EmptyLayout' },
+    meta: { requiresAuth: false, layout: 'EmptyLayout' },
   },
   
   // redirects
   { path: '/welcome-prompt', redirect: '/ui-new/profile' },
+  
+  // catch-all route для 404
+  { path: '/:pathMatch(.*)*', component: i('/404/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
 ]
