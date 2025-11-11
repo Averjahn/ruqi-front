@@ -57,13 +57,9 @@ export default {
   }
 
   &.flex-flex {
-    @media (max-width: 500px) {
-      display: contents;
-    }
-    @media (min-width: 501px) {
-      & > div {
-        flex: 1;
-      }
+    // В мобильной версии поля остаются по 2 в ряд
+    & > div {
+      flex: 1;
     }
   }
 }

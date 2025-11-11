@@ -54,10 +54,6 @@ export default {
   background: #ffffff;
   border-radius: 10px;
 
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-
   &__title {
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
     font-weight: 600;

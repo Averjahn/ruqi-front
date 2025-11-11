@@ -546,8 +546,13 @@ export default {
     }
 
     &__fields-row-three {
-      flex-direction: column;
-      gap: 16px;
+      // В мобильной версии поля остаются по 3 в ряд
+      flex-direction: row;
+      gap: 12px;
+      
+      .organisation-data-form__field {
+        flex: 1;
+      }
     }
   }
 }

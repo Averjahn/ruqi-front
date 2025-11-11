@@ -256,6 +256,16 @@ export default {
   background: white;
   padding: 24px;
   border-radius: 10px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin: 0 -16px;
+    padding: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    width: calc(100% + 32px);
+    border-radius: 0;
+  }
 }
 
 .personal-data__section {

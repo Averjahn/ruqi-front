@@ -46,6 +46,8 @@ export default {
   padding: 24px;
   border-radius: 10px;
 
+
+
   &__avatar {
     width: 64px;
     height: 64px;

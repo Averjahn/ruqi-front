@@ -18,7 +18,25 @@
 
     <!-- Sidebar Content -->
     <div class="sidebar__content">
-      <slot />
+      <div v-if="menuItems && menuItems.length > 0" class="sidebar-nav">
+        <div 
+          v-for="item in menuItems" 
+          :key="item.id"
+          class="sidebar-nav__item"
+          :class="{ 'sidebar-nav__item--active': item.active || isActiveRoute(item.route) }"
+          @click="handleItemClick(item)"
+        >
+          <img 
+            v-if="item.iconPath" 
+            :src="item.iconPath" 
+            alt="" 
+            class="sidebar-nav__icon"
+          />
+          <span class="sidebar-nav__text">{{ item.title }}</span>
+          <span v-if="item.badge" class="sidebar-nav__badge">{{ item.badge }}</span>
+        </div>
+      </div>
+      <slot v-else />
     </div>
 
     <!-- Sidebar Footer (optional) -->
@@ -52,9 +70,29 @@ export default {
     fixed: {
       type: Boolean,
       default: true
+    },
+    menuItems: {
+      type: Array,
+      default: () => []
     }
   },
-  emits: ['icon-click']
+  emits: ['icon-click', 'item-click'],
+  methods: {
+    isActiveRoute(route) {
+      if (!route) return false
+      // Если мы на странице /ui-new/profile, ничего не должно быть active
+      if (this.$route.path === '/ui-new/profile' || this.$route.path === '/profile') {
+        return false
+      }
+      return this.$route.path === route || this.$route.path.startsWith(route + '/')
+    },
+    handleItemClick(item) {
+      this.$emit('item-click', item)
+      if (item.route) {
+        this.$router.push(item.route)
+      }
+    }
+  }
 }
 </script>
 
@@ -120,6 +158,82 @@ export default {
   &__footer {
     padding: 20px 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+}
+
+// Sidebar Navigation Styles
+.sidebar-nav {
+  padding: 0 0 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 270px;
+    height: 42px;
+    padding: 9px 16px;
+    margin-bottom: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-family: 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0%;
+    color: #AAB3D1;
+    opacity: 1;
+    box-sizing: border-box;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.18); // #FFFFFF2E = rgba(255, 255, 255, 0.18)
+    }
+    
+    &--active {
+      background-color: rgba(255, 255, 255, 0.18); // #FFFFFF2E - такой же как hover
+      color: #ffffff;
+      
+      .sidebar-nav__icon {
+        filter: brightness(0) invert(1);
+      }
+    }
+  }
+  
+  &__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+  
+  &__item--active &__icon {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+  
+  &__text {
+    flex: 1;
+  }
+  
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #ffffff;
+    border-radius: 10px;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #263043;
     flex-shrink: 0;
   }
 }

@@ -6,9 +6,11 @@ export const routes = [
   { path: '/ui-new/atoms', component: i('/ui-new/atoms/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/molecules', component: i('/ui-new/molecules/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/profile', component: i('/ui-new/profile/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-new/profile/account', component: i('/ui-new/profile/account/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/FAQ', component: i('/ui-new/FAQ/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/document-templates', component: i('/ui-new/document-templates/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/organisation-data', component: i('/ui-new/organisation-data/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-new/platform-documents', component: i('/ui-new/platform-documents/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/notifications', component: i('/client/notifications/index.vue'), meta: { layout: 'EmptyLayout' } },
   
   // client routes - всегда доступны без авторизации

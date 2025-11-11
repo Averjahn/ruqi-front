@@ -138,6 +138,15 @@ export default {
 @media (max-width: 768px) {
   .app-header {
     left: 0;
+    
+    &__right {
+      display: none; /* Скрываем документы, уведомления и меню пользователя */
+    }
+    
+    &__left {
+      justify-content: center; /* Центрируем заголовок */
+      padding-left: 0;
+    }
   }
 }
 </style>

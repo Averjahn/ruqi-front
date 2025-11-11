@@ -6,27 +6,10 @@
       icon-button-type="outlined"
       icon-button-size="m"
       :fixed="true"
+      :menu-items="sidebarMenuItems"
       @icon-click="handleSidebarIconClick"
-    >
-      <div class="sidebar-nav">
-        <div 
-          v-for="item in sidebarMenuItems" 
-          :key="item.id"
-          class="sidebar-nav__item"
-          :class="{ 'sidebar-nav__item--active': item.active || isActiveRoute(item.route) }"
-          @click="handleSidebarItemClick(item)"
-        >
-          <img 
-            v-if="item.iconPath" 
-            :src="item.iconPath" 
-            alt="" 
-            class="sidebar-nav__icon"
-          />
-          <span class="sidebar-nav__text">{{ item.title }}</span>
-          <span v-if="item.badge" class="sidebar-nav__badge">{{ item.badge }}</span>
-        </div>
-      </div>
-    </Sidebar>
+      @item-click="handleSidebarItemClick"
+    />
 
     <!-- App Header - Fixed to top right of sidebar -->
     <AppHeader 
@@ -37,8 +20,27 @@
     
     <div class="ui-profile__main-content">
       <div class="ui-profile__layout">
-        <!-- Left Column: ProfileMenu and ManagerCard -->
-        <div class="ui-profile__left-column">
+        <!-- Mobile: ProfileHeader, ProfileMenu, ManagersList (vertical order) -->
+        <template v-if="isMobileView">
+          <div class="ui-profile__mobile-block">
+            <ProfileHeader name="Джон МакКлейн" />
+          </div>
+          <div class="ui-profile__mobile-block">
+            <ProfileMenu 
+              :active-item="activeProfileMenuItem"
+              @item-click="handleProfileMenuClick"
+              @update:active-item="activeProfileMenuItem = $event"
+            />
+          </div>
+          <div class="ui-profile__mobile-block">
+            <ManagersList 
+              :managers="managers"
+            />
+          </div>
+        </template>
+
+        <!-- Desktop: Left Column: ProfileMenu and ManagerCard -->
+        <div v-else class="ui-profile__left-column">
           <ProfileMenu 
             :active-item="activeProfileMenuItem"
             @item-click="handleProfileMenuClick"
@@ -50,8 +52,8 @@
           />
         </div>
 
-        <!-- Right Column: ProfileHeader and PersonalData -->
-        <div class="ui-profile__right-column">
+        <!-- Desktop: Right Column: ProfileHeader and PersonalData -->
+        <div v-if="!isMobileView" class="ui-profile__right-column">
           <ProfileHeader name="Джон МакКлейн" />
           
           <PersonalData 
@@ -120,7 +122,7 @@ export default {
       isMobile: false,
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: '/ui-new/profile' },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: null },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
@@ -131,14 +133,14 @@ export default {
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: '/ui-new/profile' },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: null },
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
       ],
       
-      activeProfileMenuItem: 'account',
+      activeProfileMenuItem: null, // В мобильной версии по умолчанию нет активного пункта
       
       personalData: {
         lastName: 'Брюс',
@@ -222,19 +224,30 @@ export default {
       console.log('Sidebar icon clicked')
     },
     handleSidebarItemClick(item) {
-      if (item.route) {
-        this.$router.push(item.route)
-      }
-    },
-    isActiveRoute(route) {
-      if (!route) return false
-      return this.$route.path === route || this.$route.path.startsWith(route + '/')
+      // Обработка клика по элементу меню (если нужна дополнительная логика)
+      console.log('Sidebar item clicked:', item)
     },
     handleProfileMenuClick(item) {
-      if (item.id === 'organization') {
-        this.$router.push('/ui-new/organisation-data')
+      if (this.isMobileView) {
+        // В мобильной версии при клике на "Учетная запись" переходим на отдельную страницу
+        if (item.id === 'account') {
+          this.$router.push('/ui-new/profile/account')
+        } else if (item.id === 'organization') {
+          this.$router.push('/ui-new/organisation-data')
+        } else if (item.id === 'doc-platform') {
+          this.$router.push('/ui-new/platform-documents')
+        } else {
+          console.log('Profile menu item clicked:', item)
+        }
       } else {
-        console.log('Profile menu item clicked:', item)
+        // В десктопной версии просто обновляем активный пункт
+        if (item.id === 'organization') {
+          this.$router.push('/ui-new/organisation-data')
+        } else if (item.id === 'doc-platform') {
+          this.$router.push('/ui-new/platform-documents')
+        } else {
+          console.log('Profile menu item clicked:', item)
+        }
       }
     },
     handlePersonalDataEdit() {
@@ -277,6 +290,10 @@ export default {
   min-height: 100vh;
   background: #F6F8FB;
 
+  @media (max-width: 768px) {
+    background: #F6F8FB;
+  }
+
   &__main-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -306,101 +323,25 @@ export default {
     flex-direction: column;
     gap: 16px;
     width: 290px;
-
-    @media (max-width: 768px) {
-      margin: 0 -16px;
-      width: calc(100% + 32px);
-    }
   }
 
   &__right-column {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    background: #ffffff;
+    background: #F6F8FB;
     border-radius: 8px;
     padding: 24px;
+  }
 
-    @media (max-width: 768px) {
-      width: 100%;
-      border-radius: 0;
-      padding: 16px;
-    }
-  }
-}
+  &__mobile-block {
+    width: 100%;
+    margin: 0 -16px;
+    padding: 0 16px;
 
-// Sidebar Navigation Styles
-.sidebar-nav {
-  padding: 0 0 8px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 270px;
-    height: 42px;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-family: 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 16px;
-    line-height: 22px;
-    letter-spacing: 0%;
-    color: #AAB3D1;
-    opacity: 1;
-    box-sizing: border-box;
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.18); // #FFFFFF2E = rgba(255, 255, 255, 0.18)
+    @media (min-width: 769px) {
+      display: none;
     }
-    
-    &--active {
-      background-color: rgba(255, 255, 255, 0.18); // #FFFFFF2E - такой же как hover
-      color: #ffffff;
-      
-      .sidebar-nav__icon {
-        filter: brightness(0) invert(1);
-      }
-    }
-  }
-  
-  &__icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    opacity: 0.7;
-  }
-  
-  &__item--active &__icon {
-    opacity: 1;
-    filter: brightness(0) invert(1);
-  }
-  
-  &__text {
-    flex: 1;
-  }
-  
-  &__badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    background: #ffffff;
-    border-radius: 10px;
-    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 16px;
-    color: #263043;
-    flex-shrink: 0;
   }
 }
 
@@ -409,6 +350,7 @@ export default {
     &__layout {
       grid-template-columns: 1fr;
       gap: 24px;
+      align-items: center;
     }
   }
 }
@@ -418,6 +360,7 @@ export default {
     padding: 16px;
     padding-top: 24px; /* Отступ сверху для статус-бара */
     padding-bottom: 88px; /* 16px отступ + 72px для мобильного меню */
+    margin-top: 64px; /* Отступ сверху для header */
   }
 
   // Скрываем обычный Sidebar на мобильных

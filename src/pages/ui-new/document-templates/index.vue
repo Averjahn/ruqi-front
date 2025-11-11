@@ -16,27 +16,10 @@
       icon-button-type="outlined"
       icon-button-size="m"
       :fixed="true"
+      :menu-items="sidebarMenuItems"
       @icon-click="handleSidebarIconClick"
-    >
-      <div class="sidebar-nav">
-        <div 
-          v-for="item in sidebarMenuItems" 
-          :key="item.id"
-          class="sidebar-nav__item"
-          :class="{ 'sidebar-nav__item--active': item.active || isActiveRoute(item.route) }"
-          @click="handleSidebarItemClick(item)"
-        >
-          <img 
-            v-if="item.iconPath" 
-            :src="item.iconPath" 
-            alt="" 
-            class="sidebar-nav__icon"
-          />
-          <span class="sidebar-nav__text">{{ item.title }}</span>
-          <span v-if="item.badge" class="sidebar-nav__badge">{{ item.badge }}</span>
-        </div>
-      </div>
-    </Sidebar>
+      @item-click="handleSidebarItemClick"
+    />
 
     <!-- App Header - Fixed to top right of sidebar (Desktop only) -->
     <AppHeader 
@@ -96,7 +79,7 @@ export default {
       activeMenuItem: 'legal',
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: '/ui-new/profile' },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: null },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
@@ -107,7 +90,7 @@ export default {
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: '/ui-new/profile' },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: null },
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
@@ -165,13 +148,8 @@ export default {
       console.log('Sidebar icon clicked')
     },
     handleSidebarItemClick(item) {
-      if (item.route) {
-        this.$router.push(item.route)
-      }
-    },
-    isActiveRoute(route) {
-      if (!route) return false
-      return this.$route.path === route || this.$route.path.startsWith(route + '/')
+      // Обработка клика по элементу меню (если нужна дополнительная логика)
+      console.log('Sidebar item clicked:', item)
     },
     handleMenuClick(item) {
       console.log('Menu item clicked:', item)
@@ -302,81 +280,6 @@ export default {
   }
 }
 
-// Sidebar Navigation Styles
-.sidebar-nav {
-  padding: 0 0 8px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 270px;
-    height: 42px;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-family: 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 16px;
-    line-height: 22px;
-    letter-spacing: 0%;
-    color: #AAB3D1;
-    opacity: 1;
-    box-sizing: border-box;
-    
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.18);
-    }
-    
-    &--active {
-      background-color: rgba(255, 255, 255, 0.18);
-      color: #ffffff;
-      
-      .sidebar-nav__icon {
-        filter: brightness(0) invert(1);
-      }
-    }
-  }
-  
-  &__icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    opacity: 0.7;
-  }
-  
-  &__item--active &__icon {
-    opacity: 1;
-    filter: brightness(0) invert(1);
-  }
-  
-  &__text {
-    flex: 1;
-  }
-  
-  &__badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    background: #ffffff;
-    border-radius: 10px;
-    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 16px;
-    color: #263043;
-    flex-shrink: 0;
-  }
-}
-
 @media (max-width: 1200px) {
   .ui-document-templates {
     &__layout {
@@ -392,6 +295,7 @@ export default {
     padding-right: 0;
     padding-top: 20px;
     padding-bottom: 72px;
+    background: #ffffff; // Белый фон в мобильной версии
   }
 
   .ui-document-templates__main-content {
