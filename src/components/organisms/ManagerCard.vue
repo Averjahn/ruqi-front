@@ -1,13 +1,17 @@
 <template>
   <div class="manager-card">
-    <img 
-      :src="avatarUrl || require('@/assets/imgs/document.png')" 
-      alt="Manager Avatar" 
-      class="manager-card__avatar"
-    />
+    <div class="manager-card__avatar-wrapper">
+      <img 
+        :src="avatarUrl || require('@/assets/imgs/document.png')" 
+        alt="Manager Avatar" 
+        class="manager-card__avatar"
+      />
+    </div>
     <div class="manager-card__content">
-      <h3 class="manager-card__name">{{ name }}</h3>
-      <p class="manager-card__role">{{ role }}</p>
+      <div class="manager-card__info">
+        <p class="manager-card__role">{{ role }}</p>
+        <h3 class="manager-card__name">{{ name }}</h3>
+      </div>
       <div class="manager-card__contacts">
         <div class="manager-card__contact-item">
           <img 
@@ -40,7 +44,7 @@ export default {
     },
     role: {
       type: String,
-      default: 'Ваш персональный менеджер'
+      default: 'Объект 1'
     },
     phone: {
       type: String,
@@ -60,61 +64,80 @@ export default {
 
 <style lang="scss" scoped>
 .manager-card {
-  width: 290px;
-  height: 130px;
+  width: 258px;
   display: flex;
   align-items: flex-start;
+  gap: 12px;
   padding: 16px;
   background: #ffffff;
+  border: 1px solid #E0E0E0;
   border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    min-height: 130px;
+  }
+
+  &__avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
 
   &__avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    flex-shrink: 0;
+    background: #f3f3f3;
   }
 
   &__content {
-    margin-left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__info {
     display: flex;
     flex-direction: column;
     gap: 2px;
     align-items: flex-start;
-    justify-content: flex-start;
-    flex: 1;
-    padding-top: 0;
-  }
-
-  &__name {
-    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 600;
-    font-style: normal;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: 0%;
-    vertical-align: middle;
-    color: #263043;
-    margin: 0;
+    width: 100%;
   }
 
   &__role {
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 17.5px;
+    letter-spacing: 0%;
+    color: #000000;
+    margin: 0;
+  }
+
+  &__name {
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
     font-weight: 400;
     font-style: normal;
     font-size: 14px;
     line-height: 22px;
     letter-spacing: 0.1px;
-    vertical-align: middle;
-    color: #666666;
+    color: #000000;
     margin: 0;
   }
 
   &__contacts {
     display: flex;
     flex-direction: column;
+    gap: 4px;
+    width: 100%;
   }
 
   &__contact-item {
@@ -137,7 +160,6 @@ export default {
     font-size: 14px;
     line-height: 22px;
     letter-spacing: 0.1px;
-    vertical-align: middle;
     color: #666666;
   }
 }

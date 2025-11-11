@@ -551,7 +551,7 @@ export default {
     return {
       // Test data
       testMenuItems: [
-        { text: 'Профиль', href: '/profile' },
+        { text: 'Профиль', href: '/ui-new/profile' },
         { text: 'Задачи', href: '/tasks' },
         { text: 'Настройки', href: '/settings' }
       ],

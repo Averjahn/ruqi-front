@@ -23,6 +23,7 @@
             class="sidebar-nav__icon"
           />
           <span class="sidebar-nav__text">{{ item.title }}</span>
+          <span v-if="item.badge" class="sidebar-nav__badge">{{ item.badge }}</span>
         </div>
       </div>
     </Sidebar>
@@ -44,10 +45,8 @@
             @update:active-item="activeProfileMenuItem = $event"
           />
           
-          <ManagerCard 
-            name="Иванов Иван Иванович"
-            phone="+7 (999) 999-99-99"
-            email="anna.smirnova@ruqi.ru"
+          <ManagersList 
+            :managers="managers"
           />
         </div>
 
@@ -99,7 +98,7 @@ import Sidebar from '@/components/organisms/Sidebar.vue'
 import AppHeader from '@/components/organisms/AppHeader.vue'
 import ProfileMenu from '@/components/organisms/ProfileMenu.vue'
 import ProfileHeader from '@/components/organisms/ProfileHeader.vue'
-import ManagerCard from '@/components/organisms/ManagerCard.vue'
+import ManagersList from '@/components/organisms/ManagersList.vue'
 import PersonalData from '@/components/organisms/PersonalData.vue'
 import ProfileActions from '@/components/organisms/ProfileActions.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
@@ -111,7 +110,7 @@ export default {
     AppHeader,
     ProfileMenu,
     ProfileHeader,
-    ManagerCard,
+    ManagersList,
     PersonalData,
     ProfileActions,
     MobileBottomNav,
@@ -125,9 +124,10 @@ export default {
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
-        { id: 5, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false, route: null },
-        { id: 6, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), active: false, route: null },
-        { id: 7, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: false, route: '/ui-new/document-templates' }
+        { id: 5, title: 'Чат', iconPath: require('@/assets/icons/profile/chat-icon.svg'), active: false, route: null, badge: 11 },
+        { id: 6, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false, route: null },
+        { id: 7, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), active: false, route: null },
+        { id: 8, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: false, route: '/ui-new/document-templates' }
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
@@ -145,6 +145,23 @@ export default {
         firstName: 'Уэйн',
         middleName: 'Томасович'
       },
+      
+      managers: [
+        {
+          name: 'Иванов Иван Иванович',
+          role: 'Объект 1',
+          phone: '+7 (999) 999-99-99',
+          email: 'anna.smirnova@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Иванов Иван Иванович',
+          role: 'Объект 1',
+          phone: '+7 (999) 999-99-99',
+          email: 'anna.smirnova@ruqi.ru',
+          avatarUrl: null
+        }
+      ],
     }
   },
   computed: {
@@ -214,7 +231,11 @@ export default {
       return this.$route.path === route || this.$route.path.startsWith(route + '/')
     },
     handleProfileMenuClick(item) {
-      console.log('Profile menu item clicked:', item)
+      if (item.id === 'organization') {
+        this.$router.push('/ui-new/organisation-data')
+      } else {
+        console.log('Profile menu item clicked:', item)
+      }
     },
     handlePersonalDataEdit() {
       console.log('Edit personal data clicked')
@@ -259,6 +280,12 @@ export default {
   &__main-content {
     max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 0;
+    }
   }
 
   &__layout {
@@ -266,6 +293,12 @@ export default {
     grid-template-columns: 290px 1fr;
     gap: 16px;
     align-items: start;
+
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
   }
 
   &__left-column {
@@ -273,12 +306,26 @@ export default {
     flex-direction: column;
     gap: 16px;
     width: 290px;
+
+    @media (max-width: 768px) {
+      margin: 0 -16px;
+      width: calc(100% + 32px);
+    }
   }
 
   &__right-column {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 24px;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      border-radius: 0;
+      padding: 16px;
+    }
   }
 }
 
@@ -338,6 +385,23 @@ export default {
   &__text {
     flex: 1;
   }
+  
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #ffffff;
+    border-radius: 10px;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #263043;
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -351,10 +415,9 @@ export default {
 
 @media (max-width: 768px) {
   .ui-profile {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 20px; /* Уменьшаем отступ сверху, так как Sidebar скрыт */
-    padding-bottom: 72px; /* Отступ снизу для мобильного меню (высота меню 72px) */
+    padding: 16px;
+    padding-top: 24px; /* Отступ сверху для статус-бара */
+    padding-bottom: 88px; /* 16px отступ + 72px для мобильного меню */
   }
 
   // Скрываем обычный Sidebar на мобильных

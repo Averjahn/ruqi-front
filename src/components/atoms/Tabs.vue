@@ -48,7 +48,7 @@ export default {
     },
     type: {
       type: String,
-      default: 'rounded', // contained | chip | flat
+      default: 'rounded', // contained | chip | flat | underlined
     },
     counter: {
       type: Object,
@@ -251,6 +251,47 @@ export default {
         font-size: 14px;
         padding: 8px 0 6px 0;
       }
+    }
+  }
+
+  &.underlined {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 0;
+      border-bottom: 2px solid transparent;
+      font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 32px;
+      color: #666666;
+      transition: all 200ms ease-in-out;
+      cursor: pointer;
+      &:not(.disabled):hover {
+        color: #263043;
+      }
+    }
+    .active {
+      border-bottom: 2px solid #1735F5;
+      color: #263043;
+      font-weight: 600;
+      line-height: 20px;
+      &:not(.disabled):hover {
+        border-bottom: 2px solid #1735F5;
+      }
+    }
+    .counter {
+      display: block;
+      font-size: 10px;
+      color: white;
+      background-color: #1735f5;
+      border-radius: 16px;
+      padding: 4px 9px 1px 9px;
+      line-height: 12px;
     }
   }
 }

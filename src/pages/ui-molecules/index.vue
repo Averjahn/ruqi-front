@@ -301,12 +301,12 @@ export default {
       
       testBreadcrumbs: [
         { text: 'Главная', href: '/' },
-        { text: 'Профиль', href: '/profile' },
-        { text: 'Настройки', href: '/profile/settings' }
+        { text: 'Профиль', href: '/ui-new/profile' },
+        { text: 'Настройки', href: '/ui-new/profile/settings' }
       ],
       
       testMenuItems: [
-        { text: 'Профиль', href: '/profile' },
+        { text: 'Профиль', href: '/ui-new/profile' },
         { text: 'Задачи', href: '/tasks' },
         { text: 'Настройки', href: '/settings' }
       ],

@@ -240,7 +240,7 @@ export default {
         timeout: 6000,
         text: 'Необходим действующий сертификат электронной подписи',
       })
-      this.$router.push('/profile?tab=signature')
+      this.$router.push('/ui-new/profile?tab=signature')
     },
 
     async loadData () {

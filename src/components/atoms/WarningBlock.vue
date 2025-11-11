@@ -35,19 +35,21 @@ export default {
 .warning-block {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  background: #EFF2FD;
+  gap: 0;
+  padding: 16px 12px 16px 16px;
+  background: #F2F8FF;
   border: 1px solid #B0BAFF;
-  border-radius: 12px;
-  margin-bottom: 32px;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .warning-block__icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
-  margin-top: 2px;
+  padding-top: 16px;
+  padding-right: 12px;
 
   img {
     width: 100%;
@@ -57,19 +59,27 @@ export default {
 
 .warning-block__content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .warning-block__title {
-  font-size: 16px;
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+  font-size: 16px;
+  line-height: 20px;
+  color: #666666;
+  margin: 0;
 }
 
 .warning-block__text {
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 400;
   font-size: 14px;
-  line-height: 20px;
-  color: #1a1a1a;
+  line-height: 22px;
+  letter-spacing: 0.1px;
+  color: #666666;
   margin: 0;
 }
 </style>

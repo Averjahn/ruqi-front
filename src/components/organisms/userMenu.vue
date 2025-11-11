@@ -20,7 +20,7 @@ export default {
   methods: {
     onClickProfile () {
       if (!this.isLogged) this.login()
-      this.$router.push('/profile')
+      this.$router.push('/ui-new/profile')
     },
     login () {
       this.$router.push('/client/signin')

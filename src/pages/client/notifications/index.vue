@@ -23,6 +23,7 @@
             class="sidebar-nav__icon"
           />
           <span class="sidebar-nav__text">{{ item.title }}</span>
+          <span v-if="item.badge" class="sidebar-nav__badge">{{ item.badge }}</span>
         </div>
       </div>
     </Sidebar>
@@ -134,9 +135,10 @@ export default {
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
-        { id: 5, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false, route: null },
-        { id: 6, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), active: false, route: null },
-        { id: 7, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: false, route: '/ui-new/document-templates' }
+        { id: 5, title: 'Чат', iconPath: require('@/assets/icons/profile/chat-icon.svg'), active: false, route: null, badge: 11 },
+        { id: 6, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false, route: null },
+        { id: 7, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), active: false, route: null },
+        { id: 8, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: false, route: '/ui-new/document-templates' }
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
@@ -399,6 +401,23 @@ export default {
   
   &__text {
     flex: 1;
+  }
+  
+  &__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #ffffff;
+    border-radius: 10px;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #263043;
+    flex-shrink: 0;
   }
 }
 

@@ -198,10 +198,10 @@ export default function useTask (task, updateTask) {
       router.push('/finance')
     },
     signPDAgreement: () => {
-      router.push('/profile?tab=contracts')
+      router.push('/ui-new/profile?tab=contracts')
     },
     signUserAgreement: () => {
-      router.push('/profile?tab=contracts')
+      router.push('/ui-new/profile?tab=contracts')
     },
 
     addTelegram: async () => {

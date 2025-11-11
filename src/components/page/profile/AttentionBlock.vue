@@ -83,7 +83,7 @@ export default {
     ...mapActions('notifications', ['showNotification']),
 
     signContract () {
-      this.$router.push('/profile?tab=contracts')
+      this.$router.push('/ui-new/profile?tab=contracts')
     },
   },
 }

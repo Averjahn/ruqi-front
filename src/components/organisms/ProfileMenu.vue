@@ -76,6 +76,13 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    border-radius: 0;
+    margin: 0 -16px;
+    width: calc(100% + 32px);
+  }
 }
 
 .profile-menu__item {
