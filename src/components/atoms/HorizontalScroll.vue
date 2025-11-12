@@ -6,6 +6,7 @@
     <div
       ref="visibleWrapperBlock"
       class="center_section"
+      :class="{ 'no-border': noBorder }"
       @wheel="onWheel"
       @touchstart="startMove"
       @mousedown="startMove"
@@ -49,6 +50,10 @@ export default {
     centerOnElement: {
       type: String,
       default: null,
+    },
+    noBorder: {
+      type: Boolean,
+      default: false,
     },
   },
   data () {
@@ -218,6 +223,11 @@ export default {
     flex: 1;
     position: relative;
     overflow-x: hidden;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    
+    &.no-border {
+      border-bottom: none;
+    }
   }
   .scroll_section {
     width: max-content;

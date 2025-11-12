@@ -103,65 +103,70 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .change-phone-modal {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 32px;
   display: flex;
   flex-direction: column;
+  gap: 24px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  min-width: 359px;
+  max-width: 560px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .change-phone-modal__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .change-phone-modal__title {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 600;
-  font-style: normal;
   font-size: 20px;
-  line-height: 125%;
-  letter-spacing: 0%;
-  vertical-align: middle;
+  line-height: 25px;
   color: #263043;
   margin: 0;
+  flex: 1;
 }
 
 .change-phone-modal__close {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &:hover {
-    background: #f3f4f6;
-  }
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .change-phone-modal__close-icon {
-  width: 20px;
-  height: 20px;
+  width: 15.5px;
+  height: 15.5px;
+  object-fit: contain;
 }
 
 .change-phone-modal__content {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .change-phone-modal__input {
@@ -171,19 +176,19 @@ export default {
 .change-phone-modal__footer {
   display: flex;
   gap: 16px;
+  align-items: center;
+
+  :deep(.main-button) {
+    flex: 1;
+  }
 }
 
 .change-phone-modal__button {
-  width: 240px;
-  
   :deep(.main-button__text) {
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
     font-weight: 600;
-    font-style: normal;
     font-size: 18px;
     line-height: 24px;
-    letter-spacing: 0px;
-    vertical-align: middle;
   }
   
   &.main-button--primary-outline :deep(.main-button__text) {
@@ -197,11 +202,30 @@ export default {
 
 @media (max-width: 768px) {
   .change-phone-modal-overlay {
-    padding: 16px;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
   }
 
   .change-phone-modal {
-    padding: 24px;
+    padding: 24px 16px;
+    min-width: auto;
+    max-width: calc(100vw - 32px);
+    border-radius: 16px;
+    gap: 24px;
+  }
+
+  .change-phone-modal__title {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .change-phone-modal__footer {
+    flex-direction: column;
+
+    :deep(.main-button) {
+      width: 100%;
+    }
   }
 }
 </style>

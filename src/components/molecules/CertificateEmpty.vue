@@ -3,17 +3,21 @@
     <div class="main_container" :class="[color]">
       <Icon class="icon" name="signatureThin" :size="48" />
       <div class="text">{{ text }}</div>
-      <Button v-if="pending" class="button" @click="$emit('refresh')" :loading="loading" type="outlined">Обновить</Button>
-      <Button v-else class="button" @click="$emit('create')" :loading="loading" type="outlined">{{ buttonText }}</Button>
+      <MainButton v-if="pending" :text="'Обновить'" type="primary-outline" :loading="loading" @click="$emit('refresh')" />
+      <MainButton v-else :text="buttonText" type="primary-outline" :loading="loading" @click="$emit('create')" />
     </div>
   </div>
 </template>
 
 <script>
+import MainButton from '@/components/atoms/MainButton.vue'
+
 export default {
   name: 'CertificateEmpty',
   emits: ['create', 'refresh'],
-  components: {},
+  components: {
+    MainButton
+  },
   props: {
     type: {
       type: String,
@@ -61,6 +65,9 @@ export default {
 .main_container {
   width: 100%;
   max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   color: #666666;
   &.red {

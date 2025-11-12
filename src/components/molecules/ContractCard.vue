@@ -1,79 +1,71 @@
 <template>
-  <div class="document-card">
-    <div class="document-card__header">
-      <div class="document-card__info">
-        <h3 class="document-card__title">{{ document.title || document.name || document.performerName }}</h3>
+  <div class="contract-card">
+    <div class="contract-card__header">
+      <div class="contract-card__info">
+        <h3 class="contract-card__title">{{ contract.performerName }}</h3>
         
         <!-- Status or Validity Period -->
-        <div v-if="document.status" class="document-card__status">
+        <div v-if="contract.status" class="contract-card__status">
           <img 
-            v-if="document.status.type === 'needs-signature'"
+            v-if="contract.status.type === 'needs-signature'"
             :src="require('@/assets/icons/profile/yellow-pen.svg')" 
             alt="Status" 
-            class="document-card__status-icon"
+            class="contract-card__status-icon"
           />
           <img 
-            v-else-if="document.status.icon" 
-            :src="document.status.icon" 
+            v-else-if="contract.status.icon" 
+            :src="contract.status.icon" 
             alt="Status" 
-            class="document-card__status-icon"
+            class="contract-card__status-icon"
           />
           <span 
-            class="document-card__status-text"
-            :class="`document-card__status-text--${document.status.type}`"
+            class="contract-card__status-text"
+            :class="`contract-card__status-text--${contract.status.type}`"
           >
-            {{ document.status.text }}
+            {{ contract.status.text }}
           </span>
         </div>
         
-        <div v-else-if="document.validityPeriod" class="document-card__validity">
-          <span class="document-card__validity-text">
-            Срок действия: {{ document.validityPeriod }}
+        <div v-else-if="contract.validityPeriod" class="contract-card__validity">
+          <span class="contract-card__validity-text">
+            Срок действия: {{ contract.validityPeriod }}
           </span>
         </div>
       </div>
       
       <button 
-        class="document-card__download-button"
+        class="contract-card__download-button"
         @click="$emit('download')"
         :title="'Скачать документ'"
       >
         <img 
           src="@/assets/icons/profile/download-doc.svg" 
           alt="Download" 
-          class="document-card__download-icon"
+          class="contract-card__download-icon"
         />
       </button>
     </div>
     
-    <!-- Document Type (optional) -->
-    <div v-if="document.documentType" class="document-card__document-type">
-      <span class="document-card__document-type-label">Тип документы</span>
-      <span class="document-card__document-type-value">{{ document.documentType }}</span>
+    <!-- Document Type -->
+    <div v-if="contract.documentType" class="contract-card__document-type">
+      <span class="contract-card__document-type-label">Тип документы</span>
+      <span class="contract-card__document-type-value">{{ contract.documentType }}</span>
     </div>
     
-    <!-- Details -->
-    <div class="document-card__details">
-      <slot name="details">
-        <div v-if="document.createdDate" class="document-card__detail-item">
-          <span class="document-card__detail-label">Создан</span>
-          <span class="document-card__detail-value">{{ document.createdDate }}</span>
-        </div>
-        
-        <div v-if="document.requestName" class="document-card__detail-item">
-          <span class="document-card__detail-label">Заявка</span>
-          <span class="document-card__detail-value">{{ document.requestName }}</span>
-        </div>
-        
-        <div v-if="document.signedDate" class="document-card__detail-item">
-          <span class="document-card__detail-label">Подписан</span>
-          <span class="document-card__detail-value">{{ document.signedDate }}</span>
-        </div>
-      </slot>
+    <div class="contract-card__dates">
+      <div v-if="contract.createdDate" class="contract-card__date-item">
+        <span class="contract-card__date-label">Создан</span>
+        <span class="contract-card__date-value">{{ contract.createdDate }}</span>
+      </div>
+      
+      <div v-if="contract.signedDate" class="contract-card__date-item">
+        <span class="contract-card__date-label">Подписан</span>
+        <span class="contract-card__date-value">{{ contract.signedDate }}</span>
+      </div>
     </div>
 
     <!-- Sign Button for Mobile -->
-    <div v-if="document.status && document.status.type === 'needs-signature'" class="document-card__sign-button-mobile">
+    <div v-if="contract.status && contract.status.type === 'needs-signature'" class="contract-card__sign-button-mobile">
       <Button
         type="contained"
         color="blue"
@@ -90,16 +82,16 @@
 import Button from '@/components/atoms/Button.vue'
 
 export default {
-  name: 'DocumentCard',
+  name: 'ContractCard',
   components: {
     Button
   },
   props: {
-    document: {
+    contract: {
       type: Object,
       required: true,
-      validator: (doc) => {
-        return doc.title || doc.name || doc.performerName
+      validator: (contract) => {
+        return contract.performerName && (contract.status || contract.validityPeriod || contract.createdDate)
       }
     }
   },
@@ -108,7 +100,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.document-card {
+.contract-card {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   padding: 20px;
@@ -122,7 +114,7 @@ export default {
   }
 }
 
-.document-card__header {
+.contract-card__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -130,7 +122,7 @@ export default {
   min-height: 58px;
 }
 
-.document-card__info {
+.contract-card__info {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -138,7 +130,7 @@ export default {
   min-width: 0;
 }
 
-.document-card__title {
+.contract-card__title {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 600;
   font-size: 18px;
@@ -151,19 +143,19 @@ export default {
   }
 }
 
-.document-card__status {
+.contract-card__status {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.document-card__status-icon {
+.contract-card__status-icon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
 
-.document-card__status-text {
+.contract-card__status-text {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -179,12 +171,12 @@ export default {
   }
 }
 
-.document-card__validity {
+.contract-card__validity {
   display: flex;
   align-items: center;
 }
 
-.document-card__validity-text {
+.contract-card__validity-text {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -193,7 +185,7 @@ export default {
   color: #666666;
 }
 
-.document-card__download-button {
+.contract-card__download-button {
   width: 32px;
   height: 32px;
   display: flex;
@@ -217,48 +209,48 @@ export default {
   }
 }
 
-.document-card__download-icon {
+.contract-card__document-type {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contract-card__document-type-label {
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  color: #666666;
+}
+
+.contract-card__document-type-value {
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  color: #263043;
+}
+
+.contract-card__download-icon {
   width: 20px;
   height: 20px;
   object-fit: contain;
 }
 
-.document-card__document-type {
+.contract-card__dates {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.document-card__document-type-label {
-  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
-  color: #666666;
-}
-
-.document-card__document-type-value {
-  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
-  color: #263043;
-}
-
-.document-card__details {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  gap: 32px;
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.document-card__detail-item {
+.contract-card__date-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.document-card__detail-label {
+.contract-card__date-label {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 16px;
@@ -266,7 +258,7 @@ export default {
   color: #666666;
 }
 
-.document-card__detail-value {
+.contract-card__date-value {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 16px;
@@ -274,7 +266,7 @@ export default {
   color: #263043;
 }
 
-.document-card__sign-button-mobile {
+.contract-card__sign-button-mobile {
   display: none;
 
   @media (max-width: 768px) {
@@ -284,25 +276,25 @@ export default {
   }
 }
 
-.document-card__sign-button-mobile :deep(.rq_button) {
+.contract-card__sign-button-mobile :deep(.rq_button) {
   @media (max-width: 768px) {
     width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .document-card {
+  .contract-card {
     padding: 16px;
     gap: 16px;
   }
 
-  .document-card__header {
+  .contract-card__header {
     flex-direction: row;
     align-items: flex-start;
     gap: 16px;
   }
 
-  .document-card__details {
+  .contract-card__dates {
     gap: 32px;
   }
 }

@@ -10,6 +10,9 @@
       <template #left>
         <img src="@/assets/icons/calendar.svg" />
       </template>
+      <template #right>
+        <slot name="right" />
+      </template>
     </Input>
 
     <input class="input_plug" ref="inputPlug" />

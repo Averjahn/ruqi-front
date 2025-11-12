@@ -301,7 +301,6 @@ export default {
   .ui-document-templates__main-content {
     width: calc(100% - 32px);
     padding: 0 16px;
-    margin-top: 63px;
   }
 
   .ui-document-templates__layout {

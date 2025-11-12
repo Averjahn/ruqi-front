@@ -65,6 +65,42 @@
         @logout="handleLogout"
       />
     </div>
+
+    <!-- Change Password Modal -->
+    <Popup :show="showChangePasswordModal" @update:show="showChangePasswordModal = $event">
+      <ChangePasswordModal
+        @close="showChangePasswordModal = false"
+        @select-option="handlePasswordOptionSelect"
+      />
+    </Popup>
+
+    <!-- Change Password Phone Modal -->
+    <Popup :show="showChangePasswordPhoneModal" @update:show="showChangePasswordPhoneModal = $event">
+      <ChangePasswordPhoneModal
+        @close="showChangePasswordPhoneModal = false"
+        @get-code="handleGetCode"
+      />
+    </Popup>
+
+    <!-- Change Password Code Modal -->
+    <Popup :show="showChangePasswordCodeModal" @update:show="showChangePasswordCodeModal = $event">
+      <ChangePasswordCodeModal
+        :phone="changePasswordPhone"
+        @close="showChangePasswordCodeModal = false"
+        @back="handleCodeModalBack"
+        @continue="handleCodeContinue"
+        @resend-code="handleResendCode"
+      />
+    </Popup>
+
+    <!-- Change Password New Password Modal -->
+    <Popup :show="showChangePasswordNewPasswordModal" @update:show="showChangePasswordNewPasswordModal = $event">
+      <ChangePasswordNewPasswordModal
+        @close="showChangePasswordNewPasswordModal = false"
+        @back="handleNewPasswordModalBack"
+        @confirm="handlePasswordConfirm"
+      />
+    </Popup>
   </div>
 </template>
 
@@ -73,6 +109,11 @@ import AppHeader from '@/components/organisms/AppHeader.vue'
 import ProfileAvatar from '@/components/organisms/ProfileAvatar.vue'
 import PersonalData from '@/components/organisms/PersonalData.vue'
 import ProfileActions from '@/components/organisms/ProfileActions.vue'
+import Popup from '@/components/atoms/Popup.vue'
+import ChangePasswordModal from '@/components/organisms/popups/ChangePasswordModal.vue'
+import ChangePasswordPhoneModal from '@/components/organisms/popups/ChangePasswordPhoneModal.vue'
+import ChangePasswordCodeModal from '@/components/organisms/popups/ChangePasswordCodeModal.vue'
+import ChangePasswordNewPasswordModal from '@/components/organisms/popups/ChangePasswordNewPasswordModal.vue'
 
 export default {
   name: 'UIProfileAccount',
@@ -80,13 +121,23 @@ export default {
     AppHeader,
     ProfileAvatar,
     PersonalData,
-    ProfileActions
+    ProfileActions,
+    Popup,
+    ChangePasswordModal,
+    ChangePasswordPhoneModal,
+    ChangePasswordCodeModal,
+    ChangePasswordNewPasswordModal
   },
   data() {
     return {
       isMobile: false,
       avatarUrl: null,
       userName: 'Джон МакКлейн',
+      showChangePasswordModal: false,
+      showChangePasswordPhoneModal: false,
+      showChangePasswordCodeModal: false,
+      showChangePasswordNewPasswordModal: false,
+      changePasswordPhone: '',
       personalData: {
         lastName: 'Брюс',
         firstName: 'Уэйн',
@@ -136,7 +187,50 @@ export default {
       console.log('Telegram link clicked')
     },
     handleChangePassword() {
-      console.log('Change password clicked')
+      this.showChangePasswordModal = true
+    },
+    handlePasswordOptionSelect(option) {
+      if (option === 'phone') {
+        // Закрываем первое модальное окно и открываем модальное окно с телефоном
+        this.showChangePasswordModal = false
+        this.showChangePasswordPhoneModal = true
+      } else {
+        // TODO: Implement password change logic for other options
+        console.log('Password option selected:', option)
+        this.showChangePasswordModal = false
+      }
+    },
+    handleGetCode(phone) {
+      console.log('Get code for phone:', phone)
+      // Сохраняем номер телефона и открываем модальное окно с кодом
+      this.changePasswordPhone = phone
+      this.showChangePasswordPhoneModal = false
+      this.showChangePasswordCodeModal = true
+    },
+    handleCodeModalBack() {
+      // Возвращаемся к модальному окну с телефоном
+      this.showChangePasswordCodeModal = false
+      this.showChangePasswordPhoneModal = true
+    },
+    handleCodeContinue(code) {
+      console.log('Continue with code:', code)
+      // Закрываем модальное окно с кодом и открываем модальное окно для нового пароля
+      this.showChangePasswordCodeModal = false
+      this.showChangePasswordNewPasswordModal = true
+    },
+    handleNewPasswordModalBack() {
+      // Возвращаемся к модальному окну с кодом
+      this.showChangePasswordNewPasswordModal = false
+      this.showChangePasswordCodeModal = true
+    },
+    handlePasswordConfirm({ password, confirmPassword }) {
+      console.log('Password confirmed:', password, confirmPassword)
+      // TODO: Implement password change logic
+      this.showChangePasswordNewPasswordModal = false
+    },
+    handleResendCode(phone) {
+      console.log('Resend code for phone:', phone)
+      // TODO: Implement resend code logic
     },
     handleLogout() {
       console.log('Logout clicked')

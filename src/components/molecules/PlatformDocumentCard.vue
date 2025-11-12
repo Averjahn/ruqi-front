@@ -7,7 +7,13 @@
         <!-- Status or Validity Period -->
         <div v-if="document.status" class="platform-document-card__status">
           <img 
-            v-if="document.status.icon" 
+            v-if="document.status.type === 'needs-signature'"
+            :src="require('@/assets/icons/profile/yellow-pen.svg')" 
+            alt="Status" 
+            class="platform-document-card__status-icon"
+          />
+          <img 
+            v-else-if="document.status.icon" 
             :src="document.status.icon" 
             alt="Status" 
             class="platform-document-card__status-icon"
@@ -33,6 +39,7 @@
           type="contained"
           color="blue"
           size="m"
+          class="platform-document-card__sign-button"
           @click="$emit('sign')"
         >
           Подписать
@@ -44,7 +51,7 @@
           :title="'Скачать документ'"
         >
           <img 
-            src="@/assets/icons/arrow_download.svg" 
+            src="@/assets/icons/profile/download-doc.svg" 
             alt="Download" 
             class="platform-document-card__download-icon"
           />
@@ -62,6 +69,18 @@
         <span class="platform-document-card__date-label">Подписан</span>
         <span class="platform-document-card__date-value">{{ document.signedDate }}</span>
       </div>
+    </div>
+    
+    <!-- Sign Button for Mobile -->
+    <div v-if="document.status && document.status.type === 'needs-signature'" class="platform-document-card__sign-button-mobile">
+      <Button
+        type="contained"
+        color="blue"
+        size="m"
+        @click="$emit('sign')"
+      >
+        Подписать
+      </Button>
     </div>
   </div>
 </template>
@@ -96,6 +115,14 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 24px;
+
+  @media (max-width: 768px) {
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
   @media (min-width: 769px) {
     padding: 24px;
@@ -240,7 +267,7 @@ export default {
 
 @media (max-width: 768px) {
   .platform-document-card__header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
     gap: 16px;
   }
@@ -249,8 +276,28 @@ export default {
     justify-content: flex-end;
   }
 
+  .platform-document-card__sign-button {
+    display: none;
+  }
+
+  .platform-document-card__sign-button-mobile {
+    display: flex;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .platform-document-card__sign-button-mobile :deep(.rq_button) {
+    width: 100%;
+  }
+
   .platform-document-card__dates {
     gap: 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .platform-document-card__sign-button-mobile {
+    display: none;
   }
 }
 </style>

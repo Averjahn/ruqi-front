@@ -1,5 +1,5 @@
 <template>
-  <HorizontalScroll :centerOnElement="centerOnElement" :wide="wide">
+  <HorizontalScroll :centerOnElement="centerOnElement" :wide="wide" :no-border="type === 'contained'">
     <div class="tabs_container" :class="[type, { wide, disabled }]">
       <div
         v-for="tab in tabs"
@@ -265,9 +265,9 @@ export default {
       padding: 12px 0;
       border-bottom: 2px solid transparent;
       font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 400;
-      line-height: 32px;
+      line-height: 24px;
       color: #666666;
       transition: all 200ms ease-in-out;
       cursor: pointer;
@@ -279,7 +279,7 @@ export default {
       border-bottom: 2px solid #1735F5;
       color: #263043;
       font-weight: 600;
-      line-height: 20px;
+      line-height: 24px;
       &:not(.disabled):hover {
         border-bottom: 2px solid #1735F5;
       }

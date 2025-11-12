@@ -16,7 +16,7 @@
       icon-button-type="outlined"
       icon-button-size="m"
       :fixed="true"
-      :menu-items="sidebarMenuItems"
+      :menu-items="desktopMenuItems"
       @icon-click="handleSidebarIconClick"
       @item-click="handleSidebarItemClick"
     />
@@ -46,7 +46,7 @@
 
         <!-- Right Column: Content -->
         <div class="ui-platform-documents__right-column">
-          <h2 class="ui-platform-documents__title">Документы с платформой</h2>
+          <h2 v-if="!isMobile" class="ui-platform-documents__title">Документы с платформой</h2>
           
           <div class="ui-platform-documents__list">
             <PlatformDocumentCard
@@ -121,63 +121,24 @@ export default {
           avatar: require('@/assets/imgs/document.png')
         }
       ],
-      sidebarMenuItems: [
-        {
-          id: 'requests',
-          label: 'Заявки',
-          icon: require('@/assets/icons/profile/objects-icon.svg'),
-          route: null,
-          active: false
-        },
-        {
-          id: 'chat',
-          label: 'Чат',
-          icon: require('@/assets/icons/profile/chat-icon.svg'),
-          route: null,
-          badge: 11,
-          active: false
-        },
-        {
-          id: 'support',
-          label: 'Поддержка',
-          icon: require('@/assets/icons/profile/help.svg'),
-          route: '/ui-new/FAQ',
-          active: false
-        },
-        {
-          id: 'registries',
-          label: 'Реестры',
-          icon: require('@/assets/icons/profile/book.svg'),
-          route: '/ui-new/document-templates',
-          active: false
-        }
+      // ПК меню (8 пунктов) - для Sidebar
+      desktopMenuItems: [
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: null },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
+        { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
+        { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
+        { id: 5, title: 'Чат', iconPath: require('@/assets/icons/profile/chat-icon.svg'), active: false, route: null, badge: 11 },
+        { id: 6, title: 'Реестры', iconPath: require('@/assets/icons/profile/book.svg'), active: false, route: null },
+        { id: 7, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), active: false, route: null },
+        { id: 8, title: 'Шаблоны документов', iconPath: require('@/assets/icons/profile/document.svg'), active: false, route: '/ui-new/document-templates' }
       ],
+      // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
-        {
-          id: 'requests',
-          label: 'Заявки',
-          icon: require('@/assets/icons/profile/objects-icon.svg'),
-          route: null
-        },
-        {
-          id: 'chat',
-          label: 'Чат',
-          icon: require('@/assets/icons/profile/chat-icon.svg'),
-          route: null,
-          badge: 11
-        },
-        {
-          id: 'support',
-          label: 'Поддержка',
-          icon: require('@/assets/icons/profile/help.svg'),
-          route: '/ui-new/FAQ'
-        },
-        {
-          id: 'registries',
-          label: 'Реестры',
-          icon: require('@/assets/icons/profile/book.svg'),
-          route: '/ui-new/document-templates'
-        }
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: null },
+        { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
+        { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
+        { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
       ]
     }
   },
@@ -231,9 +192,12 @@ export default {
 .ui-platform-documents {
   min-height: 100vh;
   background: #F6F8FB;
-  padding-top: 64px; // Space for AppHeader
+  padding: 20px;
+  padding-left: 306px; // 286px sidebar + 20px margin
+  padding-top: 100px; // 80px header + 20px margin
 
   @media (max-width: 768px) {
+    padding: 0;
     padding-top: 0;
     background: #ffffff;
   }
@@ -291,22 +255,24 @@ export default {
 }
 
 .ui-platform-documents__main-content {
-  padding: 24px;
-  padding-top: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 
   @media (max-width: 768px) {
-    padding: 16px;
-    padding-top: 2px; // Offset for status bar
+    width: 100%;
+    padding: 0;
   }
 }
 
 .ui-platform-documents__layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: 290px 1fr;
   gap: 16px;
-  max-width: 1440px;
-  margin: 0 auto;
+  align-items: start;
 
   @media (max-width: 768px) {
+    display: flex;
     flex-direction: column;
     gap: 0;
   }
@@ -321,18 +287,19 @@ export default {
 }
 
 .ui-platform-documents__right-column {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
   background: #ffffff;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 24px;
 
   @media (max-width: 768px) {
-    padding: 16px;
+    padding: 24px 16px;
     border-radius: 0;
     background: #ffffff;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 
@@ -343,17 +310,41 @@ export default {
   line-height: 28px;
   color: #263043;
   margin: 0;
-
-  @media (max-width: 768px) {
-    font-size: 18px;
-    line-height: 24px;
-  }
 }
 
 .ui-platform-documents__list {
   display: flex;
   flex-direction: column;
   gap: 24px;
+
+  @media (max-width: 768px) {
+    gap: 24px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .ui-platform-documents {
+    &__layout {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .ui-platform-documents {
+    padding: 0;
+    padding-top: 2px; // Offset for status bar
+    padding-bottom: 72px; // Space for mobile bottom nav
+  }
+
+  .ui-platform-documents__title {
+    font-size: 18px;
+    line-height: 24px;
+    padding: 0;
+  }
 }
 </style>
 

@@ -46,6 +46,11 @@ export default {
   position: fixed;
   z-index: 220;
   backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .v-enter-active,

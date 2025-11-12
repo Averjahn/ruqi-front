@@ -35,24 +35,24 @@ export default {
           text: 'Об организации'
         },
         {
+          id: 'signature',
+          icon: require('@/assets/icons/profile/signature-icon.svg'),
+          text: 'Электронная подпись'
+        },
+        {
           id: 'doc-platform',
           icon: require('@/assets/icons/profile/tabs/Doc-platform.svg'),
-          text: 'Документы с платформы'
+          text: 'Документы с платформой'
         },
         {
           id: 'acts',
-          icon: require('@/assets/icons/profile/document.svg'),
+          icon: require('@/assets/icons/profile/acts-icon.svg'),
           text: 'Акты'
         },
         {
           id: 'docs-executors',
-          icon: require('@/assets/icons/profile/document.svg'),
+          icon: require('@/assets/icons/profile/doc-exec.svg'),
           text: 'Договора с исполнителями'
-        },
-        {
-          id: 'signature',
-          icon: require('@/assets/icons/profile/document.svg'),
-          text: 'Электронная подпись'
         }
       ]
     }
@@ -71,23 +71,23 @@ export default {
 .profile-menu {
   width: 290px;
   background: #ffffff;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px; /* 4px + 2px для ПК версии, чтобы hover стили не наезжали */
+  gap: 0;
 
   @media (max-width: 768px) {
     width: 100%;
     margin: 0;
-    gap: 4px; /* На мобильной версии оставляем меньший отступ */
+    gap: 0;
   }
 }
 
 .profile-menu__item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   padding: 12px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -113,8 +113,8 @@ export default {
 }
 
 .profile-menu__icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
   object-fit: contain;
   transition: filter 0.2s ease;
@@ -132,11 +132,12 @@ export default {
 
 .profile-menu__text {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 22px;
   color: #666666;
   transition: color 0.2s ease;
+  white-space: pre;
 }
 </style>
 

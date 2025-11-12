@@ -11,8 +11,40 @@
       />
     </div>
 
-    <!-- Row 1: Вид контрагента + ИНН -->
-    <FieldsRow>
+    <!-- Row 1 Desktop: Вид контрагента + Ставка НДС -->
+    <FieldsRow type="flex-flex" class="organisation-data-form__row-1-desktop">
+      <div class="organisation-data-form__field">
+        <label class="organisation-data-form__label">
+          Вид контрагента*
+        </label>
+        <Select
+          :model-value="modelValue.counterpartyType"
+          @update:model-value="updateField('counterpartyType', $event)"
+          :options="counterpartyTypes"
+          placeholder="Выберите вид контрагента"
+          class="organisation-data-form__input"
+          item-value="value"
+          item-text="label"
+        />
+      </div>
+      <div class="organisation-data-form__field organisation-data-form__row-vat-desktop">
+        <label class="organisation-data-form__label">
+          Ставка НДС*
+        </label>
+        <Select
+          :model-value="modelValue.vatRate"
+          @update:model-value="updateField('vatRate', $event)"
+          :options="vatRateOptions"
+          placeholder="Выберите значение"
+          class="organisation-data-form__input"
+          item-value="value"
+          item-text="label"
+        />
+      </div>
+    </FieldsRow>
+
+    <!-- Row 1 Mobile: Вид контрагента + Ставка НДС -->
+    <FieldsRow type="flex-flex" class="organisation-data-form__row-1-mobile">
       <div class="organisation-data-form__field">
         <label class="organisation-data-form__label">
           Вид контрагента*
@@ -29,20 +61,17 @@
       </div>
       <div class="organisation-data-form__field">
         <label class="organisation-data-form__label">
-          ИНН*
+          Ставка НДС*
         </label>
-        <div class="organisation-data-form__inn-search">
-          <Input
-            :model-value="modelValue.inn"
-            @update:model-value="handleInnUpdate"
-            placeholder="Введите ИНН"
-            :rules="[rules.required]"
-            class="organisation-data-form__input"
-          />
-        </div>
-        <div v-if="dadataError" class="organisation-data-form__error">
-          {{ dadataError }}
-        </div>
+        <Select
+          :model-value="modelValue.vatRate"
+          @update:model-value="updateField('vatRate', $event)"
+          :options="vatRateOptions"
+          placeholder="Выберите значение"
+          class="organisation-data-form__input"
+          item-value="value"
+          item-text="label"
+        />
       </div>
     </FieldsRow>
 
@@ -60,8 +89,28 @@
       />
     </div>
 
-    <!-- Row 3: КПП + ОГРН + ОКАТО -->
-    <div class="organisation-data-form__fields-row-three">
+    <!-- Row 2.5 Desktop: ИНН -->
+    <div class="organisation-data-form__field organisation-data-form__field--full organisation-data-form__field-inn organisation-data-form__field-inn-desktop">
+      <label class="organisation-data-form__label">
+        ИНН*
+      </label>
+      <div class="organisation-data-form__inn-search">
+        <Input
+          :model-value="modelValue.inn"
+          @update:model-value="handleInnUpdate"
+          placeholder="Введите ИНН"
+          :rules="[rules.required]"
+          class="organisation-data-form__input"
+        />
+      </div>
+      <div v-if="dadataError" class="organisation-data-form__error">
+        {{ dadataError }}
+      </div>
+    </div>
+
+    <!-- Row 3 Desktop: КПП + ОГРН + ОКАТО -->
+    <!-- Row 3 Mobile: ОКАТО + ИНН -->
+    <div class="organisation-data-form__fields-row-three organisation-data-form__row-3-desktop">
       <div class="organisation-data-form__field">
         <label class="organisation-data-form__label">
           КПП*
@@ -99,6 +148,67 @@
         />
       </div>
     </div>
+
+    <!-- Row 3 Mobile: ОКАТО + ИНН -->
+    <FieldsRow class="organisation-data-form__row-3-mobile">
+      <div class="organisation-data-form__field">
+        <label class="organisation-data-form__label">
+          ОКАТО*
+        </label>
+        <Input
+          :model-value="modelValue.okato"
+          @update:model-value="updateField('okato', $event)"
+          placeholder="Введите ОКАТО"
+          :rules="[rules.required]"
+          class="organisation-data-form__input"
+        />
+      </div>
+      <div class="organisation-data-form__field organisation-data-form__field-inn-mobile">
+        <label class="organisation-data-form__label">
+          ИНН*
+        </label>
+        <div class="organisation-data-form__inn-search">
+          <Input
+            :model-value="modelValue.inn"
+            @update:model-value="handleInnUpdate"
+            placeholder="Введите ИНН"
+            :rules="[rules.required]"
+            class="organisation-data-form__input"
+          />
+        </div>
+        <div v-if="dadataError" class="organisation-data-form__error">
+          {{ dadataError }}
+        </div>
+      </div>
+    </FieldsRow>
+
+    <!-- Row 4 Mobile: КПП + ОГРН -->
+    <FieldsRow class="organisation-data-form__row-4-mobile">
+      <div class="organisation-data-form__field">
+        <label class="organisation-data-form__label">
+          КПП*
+        </label>
+        <Input
+          :model-value="modelValue.kpp"
+          @update:model-value="updateField('kpp', $event)"
+          placeholder="Введите КПП"
+          :rules="[rules.required]"
+          class="organisation-data-form__input"
+        />
+      </div>
+      <div class="organisation-data-form__field">
+        <label class="organisation-data-form__label">
+          ОГРН*
+        </label>
+        <Input
+          :model-value="modelValue.ogrn"
+          @update:model-value="updateField('ogrn', $event)"
+          placeholder="Введите ОГРН"
+          :rules="[rules.required]"
+          class="organisation-data-form__input"
+        />
+      </div>
+    </FieldsRow>
 
     <!-- Row 4: ФИО -->
     <div class="organisation-data-form__field organisation-data-form__field--full">
@@ -267,7 +377,13 @@ export default {
       dadataLoading: false,
       dadataError: null,
       searchTimeout: null,
-      currentSearchInn: null
+      currentSearchInn: null,
+      vatRateOptions: [
+        { value: '0', label: '0%' },
+        { value: '10', label: '10%' },
+        { value: '20', label: '20%' },
+        { value: 'without', label: 'Без НДС' }
+      ]
     }
   },
   beforeUnmount() {
@@ -285,9 +401,6 @@ export default {
     },
 
     handleInnUpdate(value) {
-      // Обновляем поле ИНН
-      this.updateField('inn', value)
-      
       // Очищаем предыдущий таймер, если он есть
       if (this.searchTimeout) {
         clearTimeout(this.searchTimeout)
@@ -297,12 +410,37 @@ export default {
       // Очищаем ошибку при изменении ИНН
       this.dadataError = null
       
-      // Если ИНН пустой - очищаем все поля
+      // Если ИНН пустой - очищаем все поля, включая сам ИНН
       if (!value || value.length === 0) {
-        this.clearAllFields()
         this.currentSearchInn = null
+        // Обновляем все поля, включая ИНН, одним событием
+        const cleared = {
+          inn: '',
+          fullName: '',
+          kpp: '',
+          ogrn: '',
+          okato: '',
+          fullNamePerson: '',
+          position: '',
+          basis: '',
+          mailingAddress: '',
+          legalAddress: '',
+          settlementAccount: '',
+          correspondentAccount: '',
+          bic: '',
+          bank: '',
+          vatRate: '',
+          counterpartyType: this.counterpartyTypes[0]?.value || 'legal'
+        }
+        this.$emit('update:modelValue', {
+          ...this.modelValue,
+          ...cleared
+        })
         return
       }
+      
+      // Обновляем поле ИНН
+      this.updateField('inn', value)
       
       // Автоматический поиск при достижении 10 или 12 символов с debounce
       const innLength = value.length
@@ -441,6 +579,7 @@ export default {
         correspondentAccount: '',
         bic: '',
         bank: '',
+        vatRate: '',
         counterpartyType: this.counterpartyTypes[0]?.value || 'legal'
       }
       
@@ -545,14 +684,58 @@ export default {
       font-size: 16px; // Предотвращает зум на iOS
     }
 
-    &__fields-row-three {
-      // В мобильной версии поля остаются по 3 в ряд
-      flex-direction: row;
-      gap: 12px;
+    // Скрываем десктопные блоки в мобильной версии
+    &__row-1-desktop,
+    &__row-3-desktop,
+    &__row-vat-desktop {
+      display: none;
+    }
+
+    // Скрываем ИНН из десктопной версии
+    &__field-inn-desktop {
+      display: none;
+    }
+
+    // Показываем мобильные блоки
+    &__row-1-mobile,
+    &__row-3-mobile,
+    &__row-4-mobile {
+      display: flex;
       
       .organisation-data-form__field {
         flex: 1;
+        min-width: 0;
       }
+    }
+
+    &__fields-row-three {
+      display: none; // Скрываем тройной ряд в мобильной версии
+    }
+  }
+}
+
+@media (min-width: 769px) {
+  .organisation-data-form {
+    // Скрываем мобильные блоки в десктопной версии
+    &__row-1-mobile,
+    &__row-3-mobile,
+    &__row-4-mobile {
+      display: none;
+    }
+
+    // Показываем десктопные блоки
+    &__row-1-desktop,
+    &__row-3-desktop {
+      display: flex;
+    }
+
+    &__row-vat-desktop {
+      display: block;
+    }
+
+    // Показываем ИНН в десктопной версии
+    &__field-inn-desktop {
+      display: block;
     }
   }
 }

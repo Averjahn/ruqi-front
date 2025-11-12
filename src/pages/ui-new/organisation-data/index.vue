@@ -474,8 +474,8 @@ export default {
   &__actions {
     display: flex;
     align-items: center;
-    gap: 12px;
-    justify-content: flex-end;
+    gap: 15px;
+    justify-content: center;
     margin-top: 0;
     padding-top: 0;
     border-top: none;
@@ -486,24 +486,41 @@ export default {
     margin-bottom: -16px;
     width: calc(100% + 32px);
 
+    :deep(.rq_button) {
+      flex: 1;
+      max-width: 45vw;
+      min-width: 40vw;
+    }
+
     @media (min-width: 769px) {
-      margin-top: 24px;
+      gap: 12px;
+      justify-content: flex-end;
       padding-top: 24px;
       border-top: 1px solid #E0E0E0;
       background: transparent;
-      padding: 0;
       margin-left: 0;
       margin-right: 0;
       margin-bottom: 0;
       width: auto;
+
+      :deep(.rq_button) {
+        flex: none;
+        max-width: none;
+        min-width: auto;
+      }
     }
   }
 
   &__actions-divider {
-    width: 1px;
-    height: 20px;
-    background: #E0E0E0;
-    flex-shrink: 0;
+    display: none;
+
+    @media (min-width: 769px) {
+      display: block;
+      width: 1px;
+      height: 20px;
+      background: #E0E0E0;
+      flex-shrink: 0;
+    }
   }
 
   &__documents {
