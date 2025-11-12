@@ -18,9 +18,9 @@
       
       <!-- Desktop Filters -->
       <div class="acts-content__filter-item acts-content__filter-item--desktop">
-        <DatePicker
-          v-model="selectedDate"
-          placeholder="Дата"
+        <DatePickerRange
+          :range="selectedDateRange"
+          @update:range="selectedDateRange = $event"
           class="acts-content__date-input"
         />
       </div>
@@ -74,12 +74,12 @@
     <FilterModal
       v-if="isMobile"
       :show="showFilterModal"
-      :date="computedDate"
+      :date-range="selectedDateRange"
       :status="selectedStatus"
       @close="showFilterModal = false"
       @apply="handleFilterApply"
       @reset="handleFilterReset"
-      @update:date="handleDateUpdate"
+      @update:date-range="selectedDateRange = $event"
       @update:status="selectedStatus = $event"
     />
   </div>
@@ -88,7 +88,7 @@
 <script>
 import ActCard from '@/components/molecules/ActCard.vue'
 import Input from '@/components/atoms/Input.vue'
-import DatePicker from '@/components/atoms/DatePicker.vue'
+import DatePickerRange from '@/components/atoms/DatePickerRange.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
 import FilterModal from '@/components/organisms/popups/FilterModal.vue'
 
@@ -97,7 +97,7 @@ export default {
   components: {
     ActCard,
     Input,
-    DatePicker,
+    DatePickerRange,
     Pagination,
     FilterModal
   },
@@ -115,7 +115,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      selectedDate: null,
+      selectedDateRange: null,
       selectedStatus: '',
       currentPage: 1,
       itemsPerPage: 10,
@@ -138,20 +138,6 @@ export default {
     totalPages() {
       return Math.ceil(this.totalCount / this.itemsPerPage)
     },
-    computedDate() {
-      if (!this.selectedDate) {
-        return null
-      }
-      // Создаем чистый Date объект, чтобы избежать циклических ссылок
-      try {
-        return this.selectedDate instanceof Date 
-          ? new Date(this.selectedDate.getTime())
-          : new Date(this.selectedDate)
-      } catch (e) {
-        console.error('Error creating date:', e)
-        return null
-      }
-    }
   },
   methods: {
     handleSign(act) {
@@ -173,37 +159,21 @@ export default {
     toggleFilterMenu() {
       this.showFilterModal = true
     },
-    handleDateUpdate(date) {
-      // Создаем новый Date объект из значения, чтобы избежать циклических ссылок
-      if (date) {
-        if (date instanceof Date) {
-          this.selectedDate = new Date(date.getTime())
-        } else {
-          this.selectedDate = new Date(date)
-        }
-      } else {
-        this.selectedDate = null
-      }
-    },
     handleFilterApply(filters) {
-      if (filters.date) {
-        // Создаем новый Date объект из значения, чтобы избежать циклических ссылок
-        if (filters.date instanceof Date) {
-          this.selectedDate = new Date(filters.date.getTime())
-        } else {
-          this.selectedDate = new Date(filters.date)
-        }
-      } else {
-        this.selectedDate = null
-      }
+      this.selectedDateRange = filters.dateRange
       this.selectedStatus = filters.status
+      this.$emit('filter-change', {
+        search: this.searchQuery,
+        dateRange: filters.dateRange,
+        status: filters.status
+      })
     },
     handleFilterReset() {
-      this.selectedDate = null
+      this.selectedDateRange = null
       this.selectedStatus = ''
       this.$emit('filter-change', {
         search: this.searchQuery,
-        date: null,
+        dateRange: null,
         status: ''
       })
     }

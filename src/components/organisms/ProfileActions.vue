@@ -60,13 +60,7 @@ export default {
   gap: 16px;
   width: 100%;
 
-  @media (min-width: 769px) {
-    margin-top: 16px;
-  }
 
-  @media (max-width: 768px) {
-    padding: 0 16px;
-  }
 }
 
 .profile-actions__button {

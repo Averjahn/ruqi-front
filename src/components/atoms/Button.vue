@@ -23,7 +23,7 @@ export default {
     },
     size: {
       type: String,
-      default: 'm', // s, m, l
+      default: 'm', // xs, s, m, l
     },
     loading: {
       type: Boolean,
@@ -196,6 +196,13 @@ export default {
       gap: 4px;
     }
   }
+  &.xs {
+    padding: 4px 16px;
+    min-height: 16px;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 500;
+  }
   &.s {
     padding: 8px 12px;
     min-height: 32px;
@@ -204,8 +211,8 @@ export default {
     line-height: 14px;
   }
   &.m {
-    padding: 8px 16px;
-    min-height: 40px;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
     font-size: 14px;
     line-height: 22px;
     font-weight: 500;

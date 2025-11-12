@@ -38,7 +38,7 @@
           v-if="document.status && document.status.type === 'needs-signature'"
           type="contained"
           color="blue"
-          size="m"
+          size="xs"
           class="platform-document-card__sign-button"
           @click="$emit('sign')"
         >
@@ -206,6 +206,7 @@ export default {
   gap: 10px;
   flex-shrink: 0;
 }
+
 
 .platform-document-card__download-button {
   width: 32px;
