@@ -44,6 +44,7 @@
 import AppHeader from '@/components/organisms/AppHeader.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
 import ContractsWithPerformersContent from '@/components/organisms/ContractsWithPerformersContent.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'UIProfileContracts',
@@ -61,32 +62,14 @@ export default {
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
-      ],
-      contracts: [
-        {
-          performerName: 'Иванов И.И.',
-          status: {
-            type: 'needs-signature',
-            text: 'Нужно подписать'
-          },
-          documentType: 'Пользовательское соглашение',
-          createdDate: '01.10.2021',
-          signedDate: null
-        },
-        {
-          performerName: 'Петров П.П.',
-          status: {
-            type: 'signed',
-            text: 'Подписан'
-          },
-          createdDate: '01.10.2021',
-          signedDate: '01.10.2021'
-        }
-      ],
-      contractsTotalCount: 2
+      ]
     }
   },
   computed: {
+    ...mapState('profileDocuments', {
+      contracts: (state) => state.contracts,
+      contractsTotalCount: (state) => state.contractsTotalCount,
+    }),
     isMobileView() {
       return this.isMobile
     }

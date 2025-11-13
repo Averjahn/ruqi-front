@@ -107,11 +107,6 @@ export default {
     border-color: #1735F5;
     background: #F2F8FF;
   }
-
-  &--highlighted {
-    background: #F2F8FF;
-    border-color: #dadada;
-  }
 }
 
 .change-password-modal__option-title {

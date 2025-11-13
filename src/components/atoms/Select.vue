@@ -82,6 +82,7 @@ export default {
     itemValue: { type: String, default: 'id' },
     itemText: { type: String, default: 'name' },
     ignoreOverflow: { type: Boolean, default: false },
+    dropUp: { type: Boolean, default: false },
     small: { type: Boolean, default: false },
     disableValidation: { type: Boolean, default: false },
     rules: { type: Array, default: () => [] },
@@ -247,14 +248,15 @@ export default {
 
     positionList () {
       const size = this.$refs.selectSection.getBoundingClientRect()
+      this.list.style.display = 'block'
       const listSize = this.list.getBoundingClientRect()
       const windowHeight = window.innerHeight
       const distanceBottom = windowHeight - size.bottom
-      if (distanceBottom < 310) this.list.style.top = size.top + window.scrollY - listSize.height - 5 + 'px'
+      const shouldDropUp = this.dropUp || distanceBottom < 310
+      if (shouldDropUp) this.list.style.top = size.top + window.scrollY - listSize.height - 5 + 'px'
       else this.list.style.top = size.top + window.scrollY + 50 + 'px'
       this.list.style.left = size.left + 'px'
       this.list.style.width = size.width + 'px'
-      this.list.style.display = 'block'
     },
 
     openSelect () {
@@ -450,7 +452,7 @@ input {
   }
   &.ignoreOverflow {
     left: -9999px;
-    z-index: 400;
+    z-index: 2200;
   }
 }
 </style>

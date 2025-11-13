@@ -209,6 +209,7 @@ import ChangePasswordModal from '@/components/organisms/popups/ChangePasswordMod
 import ChangePasswordPhoneModal from '@/components/organisms/popups/ChangePasswordPhoneModal.vue'
 import ChangePasswordCodeModal from '@/components/organisms/popups/ChangePasswordCodeModal.vue'
 import ChangePasswordNewPasswordModal from '@/components/organisms/popups/ChangePasswordNewPasswordModal.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'UIProfile',
@@ -303,54 +304,6 @@ export default {
           signedDate: '01.10.2021'
         }
       ],
-      contracts: [
-        {
-          performerName: 'Иванов И.И.',
-          status: {
-            type: 'needs-signature',
-            text: 'Нужно подписать',
-            icon: require('@/assets/icons/profile/document.svg')
-          },
-          createdDate: '01.10.2021'
-        },
-        {
-          performerName: 'Петров П.П.',
-          validityPeriod: '01.10.2022',
-          createdDate: '01.10.2021',
-          signedDate: '01.10.2021'
-        },
-        {
-          performerName: 'Петров П.П.',
-          validityPeriod: '01.10.2022',
-          createdDate: '01.10.2021',
-          signedDate: '01.10.2021'
-        }
-      ],
-      contractsTotalCount: 100,
-      acts: [
-        {
-          name: 'Смирнова В.К.',
-          status: {
-            type: 'needs-signature',
-            text: 'Нужно подписать'
-          },
-          createdDate: '01.10.2021',
-          requestName: 'Название заявки'
-        },
-        {
-          name: 'ООО «Секвоя»',
-          validityPeriod: '01.10.2022',
-          createdDate: '01.10.2021',
-          requestName: 'Название заявки'
-        },
-        {
-          name: 'ООО «Секвоя»',
-          validityPeriod: '01.10.2022',
-          createdDate: '01.10.2021',
-          requestName: 'Название заявки'
-        }
-      ],
-      actsTotalCount: 100,
       organisationFormData: {
         logo: null,
         counterpartyType: 'legal',
@@ -378,6 +331,12 @@ export default {
     }
   },
   computed: {
+    ...mapState('profileDocuments', {
+      acts: (state) => state.acts,
+      actsTotalCount: (state) => state.actsTotalCount,
+      contracts: (state) => state.contracts,
+      contractsTotalCount: (state) => state.contractsTotalCount,
+    }),
     isMobileView() {
       return this.isMobile
     },

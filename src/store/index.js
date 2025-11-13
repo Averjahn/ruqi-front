@@ -7,6 +7,7 @@ import { dictionary } from './dictionary.js'
 import { finances } from './finances.js'
 import { payments } from './payments.js'
 import { profilePage } from './profilePage.js'
+import { profileDocuments } from './profileDocuments.js'
 import { app } from './app.js'
 
 const store = createStore({
@@ -19,6 +20,7 @@ const store = createStore({
     finances,
     payments,
     profilePage,
+    profileDocuments,
     app,
   },
 })

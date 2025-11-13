@@ -26,24 +26,15 @@
       </div>
       
       <div class="contracts-with-performers-content__filter-item contracts-with-performers-content__filter-item--desktop">
-        <Input
-          :model-value="selectedStatus || 'Подписан'"
+        <Select
+          v-model="selectedStatus"
+          :options="statusOptions"
           placeholder="Статус"
-          readonly
+          clearable
           class="contracts-with-performers-content__status-input"
-          @click="toggleStatusMenu"
-        >
-          <template #right>
-            <button
-              v-if="selectedStatus"
-              class="contracts-with-performers-content__clear-button"
-              @click.stop="clearStatus"
-            >
-              <img src="@/assets/icons/cross.svg" alt="Clear" class="contracts-with-performers-content__clear-icon" />
-            </button>
-            <img src="@/assets/icons/profile/arrow-icon.svg" alt="Dropdown" class="contracts-with-performers-content__dropdown-icon" />
-          </template>
-        </Input>
+          item-value="value"
+          item-text="label"
+        />
       </div>
 
       <!-- Mobile Filter Button -->
@@ -95,6 +86,7 @@
 <script>
 import ContractCard from '@/components/molecules/ContractCard.vue'
 import Input from '@/components/atoms/Input.vue'
+import Select from '@/components/atoms/Select.vue'
 import DatePickerRange from '@/components/atoms/DatePickerRange.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
 import FilterModal from '@/components/organisms/popups/FilterModal.vue'
@@ -104,6 +96,7 @@ export default {
   components: {
     ContractCard,
     Input,
+    Select,
     DatePickerRange,
     Pagination,
     FilterModal
@@ -123,11 +116,15 @@ export default {
     return {
       searchQuery: '',
       selectedDateRange: [new Date('2025-09-07'), new Date('2025-09-10')],
-      selectedStatus: 'Подписан',
+      selectedStatus: 'signed',
       currentPage: 1,
       itemsPerPage: 10,
       showFilterModal: false,
-      isMobile: false
+      isMobile: false,
+      statusOptions: [
+        { value: 'signed', label: 'Подписан' },
+        { value: 'not-signed', label: 'Не подписан' }
+      ]
     }
   },
   mounted() {
@@ -140,7 +137,16 @@ export default {
   computed: {
     filteredContracts() {
       // TODO: Implement filtering logic
-      return this.contracts
+      let contracts = this.contracts
+      
+      // Применяем пагинацию только на ПК версии
+      if (!this.isMobile && this.currentPage && this.itemsPerPage) {
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage
+        const endIndex = startIndex + this.itemsPerPage
+        contracts = contracts.slice(startIndex, endIndex)
+      }
+      
+      return contracts
     },
     totalPages() {
       return Math.ceil(this.totalCount / this.itemsPerPage)
@@ -156,9 +162,6 @@ export default {
     handlePageChange(page) {
       this.currentPage = page
       this.$emit('page-change', page)
-    },
-    toggleStatusMenu() {
-      // TODO: Implement status dropdown menu
     },
     checkMobile() {
       this.isMobile = window.innerWidth <= 768
@@ -177,27 +180,11 @@ export default {
     },
     handleFilterReset() {
       this.selectedDateRange = null
-      this.selectedStatus = ''
+      this.selectedStatus = null
       this.$emit('filter-change', {
         search: this.searchQuery,
         dateRange: null,
-        status: ''
-      })
-    },
-    clearDate() {
-      this.selectedDateRange = null
-      this.$emit('filter-change', {
-        search: this.searchQuery,
-        dateRange: null,
-        status: this.selectedStatus
-      })
-    },
-    clearStatus() {
-      this.selectedStatus = ''
-      this.$emit('filter-change', {
-        search: this.searchQuery,
-        dateRange: this.selectedDateRange,
-        status: ''
+        status: null
       })
     }
   }

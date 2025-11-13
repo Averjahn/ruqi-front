@@ -44,6 +44,7 @@
 import AppHeader from '@/components/organisms/AppHeader.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
 import ActsContent from '@/components/organisms/ActsContent.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'UIProfileActs',
@@ -61,22 +62,14 @@ export default {
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
-      ],
-      acts: [
-        {
-          name: 'Иванов И.И.',
-          status: {
-            type: 'needs-signature',
-            text: 'Нужно подписать'
-          },
-          createdDate: '01.10.2021',
-          requestName: 'Название заявки'
-        }
-      ],
-      actsTotalCount: 100
+      ]
     }
   },
   computed: {
+    ...mapState('profileDocuments', {
+      acts: (state) => state.acts,
+      actsTotalCount: (state) => state.actsTotalCount,
+    }),
     isMobileView() {
       return this.isMobile
     }

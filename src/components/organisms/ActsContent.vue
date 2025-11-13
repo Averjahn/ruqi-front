@@ -26,17 +26,15 @@
       </div>
       
       <div class="acts-content__filter-item acts-content__filter-item--desktop">
-        <Input
+        <Select
           v-model="selectedStatus"
+          :options="statusOptions"
           placeholder="Статус"
-          readonly
+          clearable
           class="acts-content__status-input"
-          @click="toggleStatusMenu"
-        >
-          <template #right>
-            <img src="@/assets/icons/profile/arrow-icon.svg" alt="Dropdown" class="acts-content__dropdown-icon" />
-          </template>
-        </Input>
+          item-value="value"
+          item-text="label"
+        />
       </div>
 
       <!-- Mobile Filter Button -->
@@ -88,6 +86,7 @@
 <script>
 import ActCard from '@/components/molecules/ActCard.vue'
 import Input from '@/components/atoms/Input.vue'
+import Select from '@/components/atoms/Select.vue'
 import DatePickerRange from '@/components/atoms/DatePickerRange.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
 import FilterModal from '@/components/organisms/popups/FilterModal.vue'
@@ -97,6 +96,7 @@ export default {
   components: {
     ActCard,
     Input,
+    Select,
     DatePickerRange,
     Pagination,
     FilterModal
@@ -116,11 +116,15 @@ export default {
     return {
       searchQuery: '',
       selectedDateRange: null,
-      selectedStatus: '',
+      selectedStatus: null,
       currentPage: 1,
       itemsPerPage: 10,
       showFilterModal: false,
-      isMobile: false
+      isMobile: false,
+      statusOptions: [
+        { value: 'signed', label: 'Подписан' },
+        { value: 'not-signed', label: 'Не подписан' }
+      ]
     }
   },
   mounted() {
@@ -133,7 +137,16 @@ export default {
   computed: {
     filteredActs() {
       // TODO: Implement filtering logic
-      return this.acts
+      let acts = this.acts
+      
+      // Применяем пагинацию только на ПК версии
+      if (!this.isMobile && this.currentPage && this.itemsPerPage) {
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage
+        const endIndex = startIndex + this.itemsPerPage
+        acts = acts.slice(startIndex, endIndex)
+      }
+      
+      return acts
     },
     totalPages() {
       return Math.ceil(this.totalCount / this.itemsPerPage)
@@ -149,9 +162,6 @@ export default {
     handlePageChange(page) {
       this.currentPage = page
       this.$emit('page-change', page)
-    },
-    toggleStatusMenu() {
-      // TODO: Implement status dropdown menu
     },
     checkMobile() {
       this.isMobile = window.innerWidth <= 768
@@ -170,11 +180,11 @@ export default {
     },
     handleFilterReset() {
       this.selectedDateRange = null
-      this.selectedStatus = ''
+      this.selectedStatus = null
       this.$emit('filter-change', {
         search: this.searchQuery,
         dateRange: null,
-        status: ''
+        status: null
       })
     }
   }

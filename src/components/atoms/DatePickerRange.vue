@@ -29,12 +29,19 @@ export default {
       default: null,
     },
   },
+  data() {
+    return {
+      hoveredRange: null, // Временный диапазон при наведении
+    }
+  },
   computed: {
     dateString () {
-      if (this.range?.[1]) {
-        const startDate = this.$dayjs(this.range[0])
+      // Используем hoveredRange для отображения при наведении, иначе range
+      const displayRange = this.hoveredRange || this.range
+      if (displayRange?.[1]) {
+        const startDate = this.$dayjs(displayRange[0])
         const format = startDate.isSame(new Date(), 'year') ? 'DD.MM' : 'DD.MM.YY'
-        const res = startDate.format(format) + ' - ' + this.$dayjs(this.range[1]).format(format)
+        const res = startDate.format(format) + ' - ' + this.$dayjs(displayRange[1]).format(format)
         return res
       }
       return ''
@@ -93,6 +100,22 @@ export default {
             }
           }, 0)
         }
+        // Добавляем обработчики hover после открытия календаря
+        setTimeout(() => {
+          self.addHoverHandlers()
+        }, 100)
+      },
+      onRenderCell: ({ date, cellType }) => {
+        // Переустанавливаем обработчики при рендеринге ячеек (при смене месяца/года)
+        if (cellType === 'day') {
+          setTimeout(() => {
+            self.addHoverHandlers()
+          }, 50)
+        }
+      },
+      onHide: () => {
+        // Очищаем hoveredRange при закрытии календаря
+        self.hoveredRange = null
       },
     })
     
@@ -134,6 +157,103 @@ export default {
       const windowHeight = window.innerHeight
       const distanceBottom = windowHeight - inputRect.bottom
       return distanceBottom < 310 ? 'top left' : 'bottom left'
+    },
+    addHoverHandlers() {
+      if (!this.dp || !this.dp.$datepicker) return
+      
+      const self = this
+      const datepickerEl = this.dp.$datepicker
+      const cells = datepickerEl.querySelectorAll('.air-datepicker-cell:not(.-disabled-)')
+      
+      cells.forEach(cell => {
+        // Удаляем старые обработчики, если они есть
+        const oldHandler = cell._hoverHandler
+        const oldLeaveHandler = cell._leaveHandler
+        if (oldHandler) {
+          cell.removeEventListener('mouseenter', oldHandler)
+        }
+        if (oldLeaveHandler) {
+          cell.removeEventListener('mouseleave', oldLeaveHandler)
+        }
+        
+        // Создаем новые обработчики с привязкой к ячейке
+        const hoverHandler = (e) => self.handleCellHover(e, cell)
+        const leaveHandler = () => self.handleCellLeave()
+        
+        // Сохраняем ссылки для последующего удаления
+        cell._hoverHandler = hoverHandler
+        cell._leaveHandler = leaveHandler
+        
+        // Добавляем новые обработчики
+        cell.addEventListener('mouseenter', hoverHandler)
+        cell.addEventListener('mouseleave', leaveHandler)
+      })
+    },
+    handleCellHover(event, cell) {
+      // Получаем дату из ячейки через AirDatepicker API
+      // AirDatepicker хранит дату в data-атрибутах или можно получить через dp.viewDate
+      let hoveredDate = null
+      
+      // Пробуем разные способы получения даты
+      const day = parseInt(cell.getAttribute('data-cell-day') || cell.textContent.trim())
+      const month = parseInt(cell.getAttribute('data-cell-month'))
+      const year = parseInt(cell.getAttribute('data-cell-year'))
+      
+      if (day && !isNaN(day)) {
+        // Если есть месяц и год, создаем дату
+        if (month !== null && !isNaN(month) && year && !isNaN(year)) {
+          hoveredDate = new Date(year, month, day)
+        } else {
+          // Используем текущий месяц и год из календаря
+          const viewDate = this.dp.viewDate || new Date()
+          hoveredDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day)
+        }
+      }
+      
+      // Если не получилось, пробуем получить из класса ячейки
+      if (!hoveredDate || isNaN(hoveredDate.getTime())) {
+        // Пробуем получить из data-date
+        const dateStr = cell.getAttribute('data-date')
+        if (dateStr) {
+          hoveredDate = new Date(dateStr)
+        }
+      }
+      
+      if (hoveredDate && !isNaN(hoveredDate.getTime())) {
+        this.updateHoveredRange(hoveredDate)
+      }
+    },
+    updateHoveredRange(hoveredDate) {
+      if (!hoveredDate || isNaN(hoveredDate.getTime())) return
+      
+      const selectedDates = this.dp.selectedDates || []
+      
+      // Если уже выбраны две даты, не меняем hoveredRange
+      if (selectedDates.length === 2) {
+        return
+      }
+      
+      // Если выбрана только одна дата, показываем диапазон от выбранной до наведенной
+      if (selectedDates.length === 1) {
+        const startDate = selectedDates[0]
+        const endDate = hoveredDate
+        
+        // Определяем правильный порядок дат
+        if (endDate < startDate) {
+          this.hoveredRange = [new Date(endDate), new Date(startDate)]
+        } else {
+          this.hoveredRange = [new Date(startDate), new Date(endDate)]
+        }
+      } else if (selectedDates.length === 0) {
+        // Если ничего не выбрано, показываем только наведенную дату
+        this.hoveredRange = [new Date(hoveredDate), new Date(hoveredDate)]
+      }
+    },
+    handleCellLeave() {
+      // Очищаем hoveredRange при уходе мыши, если ничего не выбрано
+      if (!this.dp.selectedDates || this.dp.selectedDates.length === 0) {
+        this.hoveredRange = null
+      }
     },
   },
 }

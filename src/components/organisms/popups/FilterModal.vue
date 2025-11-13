@@ -35,24 +35,18 @@
 
             <!-- Status Filter -->
             <div class="filter-modal__filter-item">
-              <Input
-                :model-value="status || 'Подписан'"
+              <Select
+                :model-value="status"
+                :options="statusOptions"
                 placeholder="Статус"
-                readonly
+                clearable
                 class="filter-modal__status-input"
-                @click="handleStatusClick"
-              >
-                <template #right>
-                  <button
-                    v-if="status"
-                    class="filter-modal__clear-button"
-                    @click.stop="handleClearStatus"
-                  >
-                    <img src="@/assets/icons/cross.svg" alt="Clear" class="filter-modal__clear-icon" />
-                  </button>
-                  <img src="@/assets/icons/profile/arrow-icon.svg" alt="Dropdown" class="filter-modal__dropdown-icon" />
-                </template>
-              </Input>
+                item-value="value"
+                item-text="label"
+                :ignore-overflow="true"
+                drop-up
+                @update:model-value="handleStatusUpdate"
+              />
             </div>
           </div>
 
@@ -88,14 +82,16 @@
 
 <script>
 import DatePicker from '@/components/atoms/DatePicker.vue'
-import Input from '@/components/atoms/Input.vue'
+import DatePickerRange from '@/components/atoms/DatePickerRange.vue'
+import Select from '@/components/atoms/Select.vue'
 import Button from '@/components/atoms/Button.vue'
 
 export default {
   name: 'FilterModal',
   components: {
     DatePicker,
-    Input,
+    DatePickerRange,
+    Select,
     Button
   },
   props: {
@@ -108,11 +104,19 @@ export default {
       default: null
     },
     status: {
-      type: String,
-      default: ''
+      type: [Object, String],
+      default: null
     }
   },
-  emits: ['close', 'apply', 'reset', 'update:date', 'update:status'],
+  emits: ['close', 'apply', 'reset', 'update:date', 'update:date-range', 'update:status'],
+  data() {
+    return {
+      statusOptions: [
+        { value: 'signed', label: 'Подписан' },
+        { value: 'not-signed', label: 'Не подписан' }
+      ]
+    }
+  },
   mounted() {
     if (this.show) {
       document.body.classList.add('filter-modal-open')
@@ -149,11 +153,8 @@ export default {
     handleClearDate() {
       this.$emit('update:date', null)
     },
-    handleStatusClick() {
-      // TODO: Open status dropdown
-    },
-    handleClearStatus() {
-      this.$emit('update:status', '')
+    handleStatusUpdate(value) {
+      this.$emit('update:status', value)
     },
     handleReset() {
       this.$emit('reset')
