@@ -87,7 +87,11 @@ export default {
       return this.$route.path === route || this.$route.path.startsWith(route + '/')
     },
     handleItemClick(item) {
+      // Сначала эмитим событие, чтобы родительский компонент мог обработать клик
       this.$emit('item-click', item)
+      // Переход происходит только если есть route и родитель не предотвратил его
+      // (родитель может вернуть false из обработчика, но мы не проверяем это явно)
+      // Вместо этого, если route === null, переход не происходит
       if (item.route) {
         this.$router.push(item.route)
       }

@@ -36,10 +36,19 @@ export const auth = {
       return response
     },
 
-    async logOut ({ dispatch }) {
-      localStorage.clear()
-      await dispatch('rootActions/logout', null, { root: true })
+    async logOut ({ commit, dispatch }) {
+      // Очищаем токен из axios
       axios.setToken(null)
+      // Очищаем состояние авторизации
+      commit('clearAuth')
+      // Очищаем localStorage
+      localStorage.removeItem('ruqi_employee_auth_data')
+      // Вызываем rootActions logout если есть
+      try {
+        await dispatch('rootActions/logout', null, { root: true })
+      } catch (e) {
+        // Игнорируем ошибку если rootActions/logout не существует
+      }
     },
 
     async checkClientStatus ({ commit, dispatch }) {
@@ -79,6 +88,10 @@ export const auth = {
       state.clientStatus = status
     },
     clearClientStatus (state) {
+      state.clientStatus = null
+    },
+    clearAuth (state) {
+      state.isLogged = false
       state.clientStatus = null
     },
   },

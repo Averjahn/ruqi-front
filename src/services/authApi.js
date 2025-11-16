@@ -532,6 +532,248 @@ class AuthApiService {
   }
 
   /**
+   * Получить профиль текущего клиента
+   * GET /api/v2/auth/client/profile
+   * Требуется авторизация (Bearer токен)
+   * @returns {Promise<Object>} Ответ API с данными профиля клиента
+   */
+  async getClientProfile() {
+    try {
+      const response = await axios.get('/api/v2/auth/client/profile')
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Создать или обновить профиль клиента (PUT)
+   * PUT /api/v2/auth/client/profile
+   * Требуется авторизация (Bearer токен)
+   * @param {Object} profileData - Данные профиля для обновления
+   * @returns {Promise<Object>} Ответ API
+   */
+  async updateClientProfile(profileData) {
+    try {
+      const response = await axios.put('/api/v2/auth/client/profile', profileData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Создать или обновить профиль клиента (PATCH)
+   * PATCH /api/v2/auth/client/profile
+   * Требуется авторизация (Bearer токен)
+   * @param {Object} profileData - Данные профиля для частичного обновления
+   * @returns {Promise<Object>} Ответ API
+   */
+  async patchClientProfile(profileData) {
+    try {
+      const response = await axios.patch('/api/v2/auth/client/profile', profileData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Запросить код для смены номера телефона
+   * POST /api/v2/auth/client/phone/request-change
+   * Требуется авторизация (Bearer токен)
+   * @param {string} phone - Новый номер телефона
+   * @returns {Promise<Object>} Ответ API
+   */
+  async requestPhoneChange(phone) {
+    try {
+      // Очищаем телефон от + и пробелов, оставляем только цифры
+      const cleanPhone = phone.replace(/\D/g, '')
+      
+      const response = await axios.post('/api/v2/auth/client/phone/request-change', {
+        phone: cleanPhone
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Подтвердить смену номера телефона
+   * POST /api/v2/auth/client/phone/confirm-change
+   * Требуется авторизация (Bearer токен)
+   * @param {string} code - Код подтверждения
+   * @param {string} phone - Номер телефона (опционально, если требуется)
+   * @returns {Promise<Object>} Ответ API
+   */
+  async confirmPhoneChange(code, phone = null) {
+    try {
+      const requestData = { code }
+      if (phone) {
+        const cleanPhone = phone.replace(/\D/g, '')
+        requestData.phone = cleanPhone
+      }
+      
+      const response = await axios.post('/api/v2/auth/client/phone/confirm-change', requestData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Запросить привязку email
+   * POST /api/v2/auth/client/email/request-bind
+   * Требуется авторизация (Bearer токен)
+   * @param {string} email - Email адрес для привязки
+   * @returns {Promise<Object>} Ответ API
+   */
+  async requestEmailBind(email) {
+    try {
+      const response = await axios.post('/api/v2/auth/client/email/request-bind', {
+        email: email
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Подтвердить привязку email
+   * POST /api/v2/auth/client/email/confirm-bind
+   * Требуется авторизация (Bearer токен)
+   * @param {string} code - Код подтверждения
+   * @param {string} email - Email адрес (опционально, если требуется)
+   * @returns {Promise<Object>} Ответ API
+   */
+  async confirmEmailBind(code, email = null) {
+    try {
+      const requestData = { code }
+      if (email) {
+        requestData.email = email
+      }
+      
+      const response = await axios.post('/api/v2/auth/client/email/confirm-bind', requestData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Получить ссылку для привязки Telegram
+   * GET /api/v2/auth/client/telegram/link
+   * Требуется авторизация (Bearer токен)
+   * @returns {Promise<Object>} Ответ API с ссылкой для привязки Telegram
+   */
+  async getTelegramLink() {
+    try {
+      const response = await axios.get('/api/v2/auth/client/telegram/link')
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
    * Обработка ошибок API
    * @param {Error} error - Ошибка
    * @returns {Object} Форматированная ошибка

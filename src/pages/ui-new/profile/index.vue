@@ -19,11 +19,14 @@
     />
     
     <div class="ui-profile__main-content">
-      <div class="ui-profile__layout">
-        <!-- Mobile: ProfileHeader, ProfileMenu, ManagersList (vertical order) -->
-        <template v-if="isMobileView">
+      <div class="ui-profile__layout" :class="{ 
+        'ui-profile__layout--show-menu': isMobileView && activeContent === null,
+        'ui-profile__layout--objects': !isMobileView && activeContent === 'objects'
+      }">
+        <!-- Mobile: ProfileHeader, ProfileMenu, ManagersList (vertical order) - показываются только когда контент не выбран -->
+        <template v-if="isMobileView && activeContent === null">
           <div class="ui-profile__mobile-block">
-            <ProfileHeader name="Джон МакКлейн" />
+            <ProfileHeader :name="userName || 'Пользователь'" />
           </div>
           <div class="ui-profile__mobile-block">
             <ProfileMenu 
@@ -40,7 +43,8 @@
         </template>
 
         <!-- Desktop: Left Column: ProfileMenu and ManagerCard -->
-        <div v-else class="ui-profile__left-column">
+        <!-- Скрываем меню профиля и менеджеров когда выбраны Объекты -->
+        <div v-if="!isMobileView && activeContent !== 'objects'" class="ui-profile__left-column">
           <ProfileMenu 
             :active-item="activeProfileMenuItem"
             @item-click="handleProfileMenuClick"
@@ -52,33 +56,155 @@
           />
         </div>
 
+        <!-- Mobile: Content with Header - показывается только когда контент выбран -->
+        <template v-if="isMobileView && activeContent !== null">
+          <!-- Mobile Header -->
+          <div class="ui-profile__mobile-header">
+            <button 
+              class="ui-profile__mobile-back-button"
+              @click="handleBack"
+            >
+              <img 
+                :src="require('@/assets/icons/profile/arrow-left.svg')" 
+                alt="Back" 
+                class="ui-profile__mobile-back-icon"
+              />
+            </button>
+            <h1 class="ui-profile__mobile-title">{{ getMobileTitle() }}</h1>
+            <div class="ui-profile__mobile-header-spacer"></div>
+          </div>
+
+          <!-- Mobile Content -->
+          <div class="ui-profile__mobile-content">
+            <!-- Account Content -->
+            <!-- PersonalData и ProfileActions показываются только когда меню скрыто (activeContent !== null) -->
+            <div v-if="activeContent === 'account'" class="ui-profile__content-block">
+              <ProfileAvatar 
+                :name="userName"
+                :avatar-url="avatarUrl"
+                @avatar-upload="handleAvatarUpload"
+                @edit-click="handleAvatarEditClick"
+              />
+              
+              <PersonalData 
+                :personal-data="personalData"
+                :contacts="contacts"
+                @edit="handlePersonalDataEdit"
+                @save="handlePersonalDataSave"
+                @cancel="handlePersonalDataCancel"
+                @phone-click="handlePhoneClick"
+                @phone-get-code="handlePhoneGetCode"
+                @phone-confirm-code="handlePhoneConfirmCode"
+                @phone-resend-code="handlePhoneResendCode"
+                @email-click="handleEmailClick"
+                @telegram-link="handleTelegramLink"
+              />
+              
+              <ProfileActions 
+                @change-password="handleChangePassword"
+                @logout="handleLogout"
+              />
+            </div>
+
+            <!-- Objects Content -->
+            <div v-else-if="activeContent === 'objects'" class="ui-profile__content-block">
+              <ObjectsContent
+                :objects="objects"
+                :total-count="objectsTotalCount"
+                @create-object="handleCreateObject"
+                @object-action="handleObjectAction"
+                @page-change="handleObjectsPageChange"
+                @filter-change="handleObjectsFilterChange"
+              />
+            </div>
+
+            <!-- Organization Content -->
+            <div v-else-if="activeContent === 'organization'" class="ui-profile__content-block">
+              <OrganisationDataContent
+                :form-data="organisationFormData"
+                @update:form-data="organisationFormData = $event"
+                :counterparty-types="counterpartyTypes"
+                @data-filled="handleOrganisationDataFilled"
+                @save="handleOrganisationSave"
+                @cancel="handleOrganisationCancel"
+              />
+            </div>
+
+            <!-- Platform Documents Content -->
+            <div v-else-if="activeContent === 'platform-documents'" class="ui-profile__content-block">
+              <div class="ui-profile__documents-content">
+                <h2 class="ui-profile__content-title">Документы с платформой</h2>
+                
+                <div class="ui-profile__documents-list">
+                  <PlatformDocumentCard
+                    v-for="(document, index) in platformDocuments"
+                    :key="index"
+                    :document="document"
+                    @sign="handleSign(document)"
+                    @download="handleDownload(document)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Acts Content -->
+            <div v-else-if="activeContent === 'acts'" class="ui-profile__content-block">
+              <ActsContent
+                :acts="acts"
+                :total-count="actsTotalCount"
+                @sign="handleActSign"
+                @download="handleActDownload"
+                @page-change="handleActPageChange"
+              />
+            </div>
+
+            <!-- Contracts with Performers Content -->
+            <div v-else-if="activeContent === 'docs-executors'" class="ui-profile__content-block">
+              <ContractsWithPerformersContent
+                :contracts="contracts"
+                :total-count="contractsTotalCount"
+                @sign="handleContractSign"
+                @download="handleContractDownload"
+                @page-change="handleContractPageChange"
+              />
+            </div>
+
+            <!-- Electronic Signature Content -->
+            <div v-else-if="activeContent === 'signature'" class="ui-profile__content-block">
+              <ElectronicSignatureContent @archive="handleSignatureArchive" />
+            </div>
+          </div>
+        </template>
+
         <!-- Desktop: Right Column: Content -->
-        <div v-if="!isMobileView" class="ui-profile__right-column">
+        <!-- При выборе Объекты контент занимает всю ширину -->
+        <div v-if="!isMobileView" class="ui-profile__right-column" :class="{ 'ui-profile__right-column--full-width': activeContent === 'objects' }">
+          <!-- Objects Content - занимает всю ширину -->
+          <div v-if="activeContent === 'objects'" class="ui-profile__content-block ui-profile__content-block--full-width">
+            <ObjectsContent
+              :objects="objects"
+              :total-count="objectsTotalCount"
+              @create-object="handleCreateObject"
+              @object-action="handleObjectAction"
+              @page-change="handleObjectsPageChange"
+              @filter-change="handleObjectsFilterChange"
+            />
+          </div>
+
           <!-- Account Content -->
-          <div v-if="activeContent === 'account' || activeContent === null" class="ui-profile__content-block">
-            <ProfileHeader name="Джон МакКлейн" />
+          <div v-else-if="activeContent === 'account' || activeContent === null" class="ui-profile__content-block">
+            <ProfileHeader :name="userName || 'Пользователь'" />
             
             <PersonalData 
               :personal-data="personalData"
-              :contacts="{
-                phone: '+7 (999) 999-99-99',
-                email: 'example@gmail.com',
-                telegram: null,
-                phoneStatus: {
-                  type: 'confirmed',
-                  icon: require('@/assets/icons/checkmark_circle.svg'),
-                  text: 'Телефон подтверждён'
-                },
-                emailStatus: {
-                  type: 'unconfirmed',
-                  icon: require('@/assets/icons/profile/input-status-red.svg'),
-                  text: 'Подтвердите email'
-                }
-              }"
+              :contacts="contacts"
               @edit="handlePersonalDataEdit"
               @save="handlePersonalDataSave"
               @cancel="handlePersonalDataCancel"
               @phone-click="handlePhoneClick"
+              @phone-get-code="handlePhoneGetCode"
+              @phone-confirm-code="handlePhoneConfirmCode"
+              @phone-resend-code="handlePhoneResendCode"
               @email-click="handleEmailClick"
               @telegram-link="handleTelegramLink"
             />
@@ -195,6 +321,7 @@ import Sidebar from '@/components/organisms/Sidebar.vue'
 import AppHeader from '@/components/organisms/AppHeader.vue'
 import ProfileMenu from '@/components/organisms/ProfileMenu.vue'
 import ProfileHeader from '@/components/organisms/ProfileHeader.vue'
+import ProfileAvatar from '@/components/organisms/ProfileAvatar.vue'
 import ManagersList from '@/components/organisms/ManagersList.vue'
 import PersonalData from '@/components/organisms/PersonalData.vue'
 import ProfileActions from '@/components/organisms/ProfileActions.vue'
@@ -204,12 +331,14 @@ import OrganisationDataContent from '@/components/organisms/OrganisationDataCont
 import ElectronicSignatureContent from '@/components/organisms/ElectronicSignatureContent.vue'
 import ContractsWithPerformersContent from '@/components/organisms/ContractsWithPerformersContent.vue'
 import ActsContent from '@/components/organisms/ActsContent.vue'
+import ObjectsContent from '@/components/organisms/ObjectsContent.vue'
 import Popup from '@/components/atoms/Popup.vue'
 import ChangePasswordModal from '@/components/organisms/popups/ChangePasswordModal.vue'
 import ChangePasswordPhoneModal from '@/components/organisms/popups/ChangePasswordPhoneModal.vue'
 import ChangePasswordCodeModal from '@/components/organisms/popups/ChangePasswordCodeModal.vue'
 import ChangePasswordNewPasswordModal from '@/components/organisms/popups/ChangePasswordNewPasswordModal.vue'
 import { mapState } from 'vuex'
+import authApiService from '@/services/authApi'
 
 export default {
   name: 'UIProfile',
@@ -218,6 +347,7 @@ export default {
     AppHeader,
     ProfileMenu,
     ProfileHeader,
+    ProfileAvatar,
     ManagersList,
     PersonalData,
     ProfileActions,
@@ -227,6 +357,7 @@ export default {
     ElectronicSignatureContent,
     ContractsWithPerformersContent,
     ActsContent,
+    ObjectsContent,
     Popup,
     ChangePasswordModal,
     ChangePasswordPhoneModal,
@@ -236,6 +367,9 @@ export default {
   data() {
     return {
       isMobile: false,
+      mobileMediaQuery: null,
+      avatarUrl: null,
+      userName: 'Джон МакКлейн',
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: null },
@@ -265,10 +399,26 @@ export default {
       changePasswordPhone: '',
       
       personalData: {
-        lastName: 'Брюс',
-        firstName: 'Уэйн',
-        middleName: 'Томасович'
+        lastName: '',
+        firstName: '',
+        middleName: ''
       },
+      contacts: {
+        phone: '',
+        email: '',
+        telegram: null,
+        phoneStatus: {
+          type: 'unconfirmed',
+          icon: require('@/assets/icons/profile/input-status-red.svg'),
+          text: 'Телефон не подтверждён'
+        },
+        emailStatus: {
+          type: 'unconfirmed',
+          icon: require('@/assets/icons/profile/input-status-red.svg'),
+          text: 'Email не подтверждён'
+        }
+      },
+      profileLoading: false,
       
       managers: [
         {
@@ -328,6 +478,9 @@ export default {
         { value: 'legal', label: 'Юридическое лицо' },
         { value: 'individual', label: 'Индивидуальный предприниматель' }
       ],
+      objects: [],
+      objectsTotalCount: 0,
+      objectsLoading: false,
     }
   },
   computed: {
@@ -345,36 +498,8 @@ export default {
       return this.desktopMenuItems
     }
   },
-  mounted() {
-    this.checkMobile()
-    window.addEventListener('resize', this.checkMobile)
-    // Мок для axios чтобы избежать ошибок API
-    if (!this.$axios) {
-      this.$axios = {
-        get: (url) => {
-          console.log('Mock axios.get called with:', url)
-          return Promise.resolve({ 
-            data: { 
-              success: true, 
-              data: {
-                bonus: 0,
-                referrals: [],
-                link: 'mock-referral-link'
-              }
-            } 
-          })
-        },
-        post: (url, data) => {
-          console.log('Mock axios.post called with:', url, data)
-          return Promise.resolve({ 
-            data: { 
-              success: true, 
-              data: {} 
-            } 
-          })
-        }
-      }
-    }
+  async mounted() {
+    this.initMobileTracking()
     
     // Мок для глобальных функций
     if (typeof window !== 'undefined') {
@@ -382,74 +507,417 @@ export default {
         console.warn('RqloggerError called:', arguments)
       }
     }
+    
+    // Загружаем профиль клиента при монтировании
+    await this.loadClientProfile()
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.checkMobile)
+    this.cleanupMobileTracking()
   },
   methods: {
+    initMobileTracking() {
+      // Используем matchMedia для более надежного отслеживания ширины экрана
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        this.mobileMediaQuery = window.matchMedia('(max-width: 768px)')
+        this.isMobile = this.mobileMediaQuery.matches
+        
+        // Используем addListener для совместимости со старыми браузерами
+        if (this.mobileMediaQuery.addEventListener) {
+          this.mobileMediaQuery.addEventListener('change', this.handleMediaChange)
+        } else if (this.mobileMediaQuery.addListener) {
+          this.mobileMediaQuery.addListener(this.handleMediaChange)
+        }
+      } else {
+        // Fallback для старых браузеров
+        this.checkMobile()
+        window.addEventListener('resize', this.checkMobile)
+      }
+    },
+    cleanupMobileTracking() {
+      if (this.mobileMediaQuery) {
+        if (this.mobileMediaQuery.removeEventListener) {
+          this.mobileMediaQuery.removeEventListener('change', this.handleMediaChange)
+        } else if (this.mobileMediaQuery.removeListener) {
+          this.mobileMediaQuery.removeListener(this.handleMediaChange)
+        }
+      } else {
+        window.removeEventListener('resize', this.checkMobile)
+      }
+    },
+    handleMediaChange(e) {
+      this.isMobile = e.matches
+    },
     checkMobile() {
       this.isMobile = window.innerWidth <= 768
+    },
+    getMobileTitle() {
+      const titles = {
+        'account': 'Учётная запись',
+        'objects': 'Объекты',
+        'organization': 'Данные организации',
+        'platform-documents': 'Документы с платформой',
+        'acts': 'Акты',
+        'docs-executors': 'Договора с исполнителями',
+        'signature': 'Электронная подпись'
+      }
+      return titles[this.activeContent] || 'Личный кабинет'
+    },
+    handleBack() {
+      this.activeContent = null
+      this.activeProfileMenuItem = null
     },
     handleSidebarIconClick() {
       console.log('Sidebar icon clicked')
     },
     handleSidebarItemClick(item) {
-      // Обработка клика по элементу меню (если нужна дополнительная логика)
+      // Обработка клика по элементу меню Sidebar
+      if (item.id === 2 && item.title === 'Объекты') {
+        // При клике на "Объекты" в Sidebar открываем вкладку объектов в профиле
+        // Предотвращаем переход на другую страницу, если route === null
+        this.activeContent = 'objects'
+        this.activeProfileMenuItem = 'objects'
+        // Загружаем объекты при открытии вкладки
+        this.loadObjects()
+        // Не переходим на другую страницу, остаемся на странице профиля
+        return
+      }
+      // Для остальных пунктов меню логика остается стандартной
       console.log('Sidebar item clicked:', item)
     },
     handleProfileMenuClick(item) {
-      if (this.isMobileView) {
-        // В мобильной версии при клике на "Учетная запись" переходим на отдельную страницу
-        if (item.id === 'account') {
-          this.$router.push('/ui-new/profile/account')
-        } else if (item.id === 'organization') {
-          this.$router.push('/ui-new/organisation-data')
-        } else if (item.id === 'doc-platform') {
-          this.$router.push('/ui-new/platform-documents')
-        } else if (item.id === 'signature') {
-          this.$router.push('/ui-new/profile/signature')
-        } else if (item.id === 'docs-executors') {
-          this.$router.push('/ui-new/profile/contracts')
-        } else if (item.id === 'acts') {
-          this.$router.push('/ui-new/profile/acts')
-        } else {
-          console.log('Profile menu item clicked:', item)
-        }
+      // Единая логика для мобильной и десктопной версии - меняем контент без перехода на другую страницу
+      if (item.id === 'account') {
+        this.activeContent = 'account'
+        this.activeProfileMenuItem = 'account'
+      } else if (item.id === 'objects') {
+        this.activeContent = 'objects'
+        this.activeProfileMenuItem = 'objects'
+        // Загружаем объекты при открытии вкладки
+        this.loadObjects()
+      } else if (item.id === 'organization') {
+        this.activeContent = 'organization'
+        this.activeProfileMenuItem = 'organization'
+        // Загружаем данные организации при открытии вкладки
+        this.loadClientOrganization()
+      } else if (item.id === 'doc-platform') {
+        this.activeContent = 'platform-documents'
+        this.activeProfileMenuItem = 'doc-platform'
+      } else if (item.id === 'acts') {
+        this.activeContent = 'acts'
+        this.activeProfileMenuItem = 'acts'
+      } else if (item.id === 'docs-executors') {
+        this.activeContent = 'docs-executors'
+        this.activeProfileMenuItem = 'docs-executors'
+      } else if (item.id === 'signature') {
+        this.activeContent = 'signature'
+        this.activeProfileMenuItem = 'signature'
       } else {
-        // В десктопной версии меняем контент в правой колонке
-        if (item.id === 'account') {
-          this.activeContent = null
-          this.activeProfileMenuItem = 'account'
-        } else if (item.id === 'organization') {
-          this.activeContent = 'organization'
-          this.activeProfileMenuItem = 'organization'
-        } else if (item.id === 'doc-platform') {
-          this.activeContent = 'platform-documents'
-          this.activeProfileMenuItem = 'doc-platform'
-        } else if (item.id === 'acts') {
-          this.activeContent = 'acts'
-          this.activeProfileMenuItem = 'acts'
-        } else if (item.id === 'docs-executors') {
-          this.activeContent = 'docs-executors'
-          this.activeProfileMenuItem = 'docs-executors'
-        } else if (item.id === 'signature') {
-          this.activeContent = 'signature'
-          this.activeProfileMenuItem = 'signature'
+        console.log('Profile menu item clicked:', item)
+      }
+    },
+    /**
+     * Загрузить данные организации клиента
+     */
+    async loadClientOrganization() {
+      try {
+        const result = await authApiService.getClientOrganization()
+        
+        if (result.success && result.data) {
+          const org = result.data
+          
+          // Маппим данные из API в формат формы
+          this.organisationFormData = {
+            logo: null, // Логотип не приходит из API
+            counterpartyType: 'legal', // По умолчанию, можно определить по ИНН
+            inn: org.inn || '',
+            fullName: org.company_name || org.name || '',
+            kpp: org.kpp || '',
+            ogrn: org.ogrn || '',
+            okato: '', // Не приходит из API
+            fullNamePerson: '', // Не приходит из API
+            position: '', // Не приходит из API
+            basis: '', // Не приходит из API
+            mailingAddress: org.address || '',
+            legalAddress: org.legal_address || org.address || '',
+            settlementAccount: '', // Не приходит из API
+            correspondentAccount: '', // Не приходит из API
+            bic: '', // Не приходит из API
+            bank: '', // Не приходит из API
+            vatRate: org.vat || null
+          }
+        } else if (result.error?.code === 980081) {
+          // У клиента нет привязанной организации (404)
+          // Оставляем форму пустой для создания новой организации
+          console.log('У клиента нет привязанной организации')
         } else {
-          console.log('Profile menu item clicked:', item)
+          // Другая ошибка
+          const errorMsg = result.error?.msg || 'Ошибка при загрузке данных организации'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке организации:', error)
+        // Не показываем ошибку, если это 404 (организации нет)
+        if (error?.response?.status !== 404) {
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Ошибка при загрузке данных организации'
+          })
         }
       }
     },
+    
     handleOrganisationDataFilled() {
       console.log('Organisation data filled')
     },
-    handleOrganisationSave() {
-      console.log('Organisation data saved')
+    
+    /**
+     * Сохранить данные организации
+     */
+    async handleOrganisationSave() {
+      try {
+        // Проверяем, есть ли уже организация (по UUID или другим признакам)
+        // Если есть - обновляем, если нет - создаем
+        const orgData = {
+          name: this.organisationFormData.fullName,
+          company_name: this.organisationFormData.fullName,
+          inn: this.organisationFormData.inn,
+          kpp: this.organisationFormData.kpp || null,
+          ogrn: this.organisationFormData.ogrn || null,
+          legal_address: this.organisationFormData.legalAddress,
+          address: this.organisationFormData.mailingAddress || this.organisationFormData.legalAddress,
+          vat: this.organisationFormData.vatRate || null
+        }
+        
+        // Удаляем пустые поля
+        Object.keys(orgData).forEach(key => {
+          if (orgData[key] === '' || orgData[key] === null) {
+            delete orgData[key]
+          }
+        })
+        
+        // Пытаемся сначала получить организацию, чтобы понять - создавать или обновлять
+        const getResult = await authApiService.getClientOrganization()
+        
+        let result
+        if (getResult.success && getResult.data) {
+          // Организация существует - обновляем (нужен PUT или PATCH эндпоинт)
+          // Пока используем createClientOrganization, так как обновления может не быть
+          result = await authApiService.createClientOrganization(orgData)
+        } else {
+          // Организации нет - создаем
+          result = await authApiService.createClientOrganization(orgData)
+        }
+        
+        if (result.success) {
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Данные организации успешно сохранены'
+          })
+          
+          // Перезагружаем данные организации
+          await this.loadClientOrganization()
+        } else {
+          const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при сохранении данных организации'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при сохранении организации:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при сохранении данных организации'
+        })
+      }
     },
+    
     handleOrganisationCancel() {
       this.activeContent = null
       this.activeProfileMenuItem = null
+      // Перезагружаем данные организации, чтобы отменить изменения
+      this.loadClientOrganization()
     },
+    
+    /**
+     * Загрузить объекты клиента
+     */
+    async loadObjects() {
+      try {
+        this.objectsLoading = true
+        // TODO: Заменить на реальный API эндпоинт
+        // const result = await objectsApiService.getClientObjects()
+        
+        // Временные моковые данные для демонстрации
+        this.objects = [
+          {
+            id: 1,
+            name: 'Магнит косметик',
+            applications: 5,
+            location: 'Россия, Санкт-Петербург пр. Невский, 85',
+            avgExit: 3,
+            exit: 2,
+            exitPercent: 70,
+            archived: false
+          },
+          {
+            id: 2,
+            name: 'Пятёрочка',
+            applications: 11,
+            location: 'Россия, Екатеринбург ул. Ленина, 12',
+            avgExit: 5,
+            exit: 3,
+            exitPercent: 100,
+            archived: false
+          },
+          {
+            id: 3,
+            name: 'Озон фреш',
+            applications: 0,
+            location: 'Россия, Москва ул. Генерала Горбатого 34',
+            avgExit: 0,
+            exit: 0,
+            exitPercent: 0,
+            archived: false
+          },
+          {
+            id: 4,
+            name: 'Карусель',
+            applications: 3,
+            location: 'Россия, Москва ул. Примерная, 1',
+            avgExit: 2,
+            exit: 1,
+            exitPercent: 50,
+            archived: false
+          },
+          {
+            id: 5,
+            name: 'Билла',
+            applications: 7,
+            location: 'Россия, Санкт-Петербург ул. Примерная, 2',
+            avgExit: 4,
+            exit: 2,
+            exitPercent: 40,
+            archived: false
+          },
+          {
+            id: 6,
+            name: 'Твой дом',
+            applications: 2,
+            location: 'Россия, Москва ул. Примерная, 3',
+            avgExit: 1,
+            exit: 1,
+            exitPercent: 1,
+            archived: false
+          },
+          {
+            id: 7,
+            name: 'Дикси',
+            applications: 4,
+            location: 'Россия, Екатеринбург ул. Примерная, 4',
+            avgExit: 2,
+            exit: 1,
+            exitPercent: 2,
+            archived: false
+          },
+          {
+            id: 8,
+            name: 'Лента',
+            applications: 8,
+            location: 'Россия, Москва ул. Примерная, 5',
+            avgExit: 6,
+            exit: 2,
+            exitPercent: 100,
+            archived: false
+          },
+          {
+            id: 9,
+            name: 'Светофор',
+            applications: 1,
+            location: 'Россия, Санкт-Петербург ул. Примерная, 6',
+            avgExit: 0,
+            exit: 0,
+            exitPercent: 0,
+            archived: false
+          },
+          {
+            id: 10,
+            name: 'Ашан',
+            applications: 9,
+            location: 'Россия, Москва ул. Примерная, 7',
+            avgExit: 7,
+            exit: 3,
+            exitPercent: 100,
+            archived: false
+          },
+          {
+            id: 11,
+            name: 'Окей',
+            applications: 6,
+            location: 'Россия, Екатеринбург ул. Примерная, 8',
+            avgExit: 3,
+            exit: 2,
+            exitPercent: 70,
+            archived: false
+          },
+          {
+            id: 12,
+            name: 'Перекрёсток',
+            applications: 10,
+            location: 'Россия, Москва ул. Примерная, 9',
+            avgExit: 4,
+            exit: 2,
+            exitPercent: 50,
+            archived: false
+          }
+        ]
+        this.objectsTotalCount = this.objects.length
+      } catch (error) {
+        console.error('Ошибка при загрузке объектов:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при загрузке объектов'
+        })
+      } finally {
+        this.objectsLoading = false
+      }
+    },
+    
+    /**
+     * Обработка создания объекта
+     */
+    handleCreateObject() {
+      console.log('Создать объект')
+      // TODO: Открыть модальное окно или перейти на страницу создания объекта
+      this.$store.dispatch('notifications/showNotification', {
+        text: 'Функция создания объекта будет реализована'
+      })
+    },
+    
+    /**
+     * Обработка действий с объектом
+     */
+    handleObjectAction(object) {
+      console.log('Действие с объектом:', object)
+      // TODO: Открыть меню действий (редактировать, удалить, архивировать и т.д.)
+      this.$store.dispatch('notifications/showNotification', {
+        text: `Действие с объектом "${object.name}"`
+      })
+    },
+    
+    /**
+     * Обработка изменения страницы объектов
+     */
+    handleObjectsPageChange(page) {
+      console.log('Смена страницы объектов:', page)
+      // TODO: Загрузить объекты для указанной страницы
+    },
+    
+    /**
+     * Обработка изменения фильтров объектов
+     */
+    handleObjectsFilterChange(filters) {
+      console.log('Изменение фильтров объектов:', filters)
+      // TODO: Применить фильтры и перезагрузить объекты
+    },
+    
     handleSign(document) {
       console.log('Sign document:', document)
       // TODO: Implement sign document logic
@@ -486,27 +954,257 @@ export default {
       console.log('Archive signature:', certificate)
       // TODO: Implement archive signature logic
     },
+    /**
+     * Загрузить профиль клиента
+     */
+    async loadClientProfile() {
+      try {
+        this.profileLoading = true
+        const result = await authApiService.getClientProfile()
+        
+        if (result.success && result.data) {
+          const profile = result.data
+          
+          // Обновляем персональные данные
+          if (profile.first_name || profile.last_name || profile.middle_name) {
+            this.personalData = {
+              firstName: profile.first_name || '',
+              lastName: profile.last_name || '',
+              middleName: profile.middle_name || ''
+            }
+          }
+          
+          // Обновляем контакты
+          if (profile.phone) {
+            this.contacts.phone = profile.phone
+            this.contacts.phoneStatus = {
+              type: profile.phone_verified ? 'confirmed' : 'unconfirmed',
+              icon: profile.phone_verified 
+                ? require('@/assets/icons/checkmark_circle.svg')
+                : require('@/assets/icons/profile/input-status-red.svg'),
+              text: profile.phone_verified ? 'Телефон подтверждён' : 'Телефон не подтверждён'
+            }
+          }
+          
+          if (profile.email) {
+            this.contacts.email = profile.email
+            this.contacts.emailStatus = {
+              type: profile.email_verified ? 'confirmed' : 'unconfirmed',
+              icon: profile.email_verified 
+                ? require('@/assets/icons/checkmark_circle.svg')
+                : require('@/assets/icons/profile/input-status-red.svg'),
+              text: profile.email_verified ? 'Email подтверждён' : 'Email не подтверждён'
+            }
+          }
+          
+          if (profile.telegram) {
+            this.contacts.telegram = profile.telegram
+          }
+          
+          // Обновляем имя пользователя для заголовка
+          if (profile.first_name || profile.last_name) {
+            this.userName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке профиля:', error)
+      } finally {
+        this.profileLoading = false
+      }
+    },
+    
     handlePersonalDataEdit() {
       console.log('Edit personal data clicked')
     },
-    handlePersonalDataSave(data) {
+    
+    /**
+     * Сохранить персональные данные профиля
+     */
+    async handlePersonalDataSave(data) {
+      try {
+        // Используем PATCH для частичного обновления
+        const profileData = {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          middle_name: data.middleName
+        }
+        
+        const result = await authApiService.patchClientProfile(profileData)
+        
+        if (result.success) {
+          // Обновляем локальные данные
       this.personalData = {
         ...this.personalData,
         ...data
       }
-      console.log('Personal data saved:', this.personalData)
+          
+          // Обновляем имя пользователя
+          if (data.firstName || data.lastName) {
+            this.userName = `${data.firstName || ''} ${data.lastName || ''}`.trim()
+          }
+          
+          // Показываем уведомление об успехе
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Профиль успешно обновлён'
+          })
+        } else {
+          // Показываем ошибку
+          const errorMsg = result.error?.[0]?.msg || 'Ошибка при сохранении профиля'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при сохранении профиля:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при сохранении профиля'
+        })
+      }
     },
+    
     handlePersonalDataCancel() {
       console.log('Personal data edit cancelled')
     },
+    
+    /**
+     * Обработка клика по телефону (открытие модального окна)
+     */
     handlePhoneClick() {
       console.log('Phone click')
     },
-    handleEmailClick() {
-      console.log('Email click')
+    
+    /**
+     * Запросить код для смены телефона
+     */
+    async handlePhoneGetCode(phone) {
+      try {
+        const result = await authApiService.requestPhoneChange(phone)
+        
+        if (result.success) {
+          // Код успешно отправлен, модальное окно подтверждения уже открыто в PersonalData
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Код подтверждения отправлен'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || 'Ошибка при запросе кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при запросе кода смены телефона:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при запросе кода'
+        })
+      }
     },
-    handleTelegramLink() {
-      console.log('Telegram link clicked')
+    
+    /**
+     * Подтвердить смену телефона
+     */
+    async handlePhoneConfirmCode({ phone, code }) {
+      try {
+        const result = await authApiService.confirmPhoneChange(code, phone)
+        
+        if (result.success) {
+          // Обновляем телефон в контактах
+          this.contacts.phone = phone
+          this.contacts.phoneStatus = {
+            type: 'confirmed',
+            icon: require('@/assets/icons/checkmark_circle.svg'),
+            text: 'Телефон подтверждён'
+          }
+          
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Телефон успешно изменён'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || 'Ошибка при подтверждении кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при подтверждении смены телефона:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при подтверждении кода'
+        })
+      }
+    },
+    
+    /**
+     * Повторно отправить код для смены телефона
+     */
+    async handlePhoneResendCode(phone) {
+      try {
+        const result = await authApiService.requestPhoneChange(phone)
+        
+        if (result.success) {
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Код подтверждения отправлен повторно'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || 'Ошибка при повторной отправке кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при повторной отправке кода:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при повторной отправке кода'
+        })
+      }
+    },
+    
+    /**
+     * Обработка клика по email
+     */
+    async handleEmailClick() {
+      try {
+        // Здесь можно открыть модальное окно для ввода email
+        // Пока просто запрашиваем привязку email (нужно будет добавить модальное окно)
+        console.log('Email click - нужно добавить модальное окно для ввода email')
+        // TODO: Добавить модальное окно для ввода email и вызова requestEmailBind
+      } catch (error) {
+        console.error('Ошибка при обработке клика по email:', error)
+      }
+    },
+    
+    /**
+     * Получить ссылку для привязки Telegram
+     */
+    async handleTelegramLink() {
+      try {
+        const result = await authApiService.getTelegramLink()
+        
+        if (result.success && result.data) {
+          const link = result.data.link || result.data.url || result.data.telegram_link
+          
+          if (link) {
+            // Открываем ссылку в новом окне
+            window.open(link, '_blank')
+            
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Ссылка для привязки Telegram открыта'
+            })
+          } else {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Не удалось получить ссылку для привязки Telegram'
+            })
+          }
+        } else {
+          const errorMsg = result.error?.[0]?.msg || 'Ошибка при получении ссылки Telegram'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при получении ссылки Telegram:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при получении ссылки Telegram'
+        })
+      }
     },
     handleChangePassword() {
       this.showChangePasswordModal = true
@@ -554,8 +1252,30 @@ export default {
       console.log('Resend code for phone:', phone)
       // TODO: Implement resend code logic
     },
-    handleLogout() {
-      console.log('Logout clicked')
+    /**
+     * Выход из аккаунта
+     */
+    async handleLogout() {
+      try {
+        // Вызываем logout из store
+        await this.$store.dispatch('auth/logOut')
+        
+        // Перенаправляем на страницу входа
+        this.$router.push('/client/signin')
+      } catch (error) {
+        console.error('Ошибка при выходе из аккаунта:', error)
+        // В любом случае перенаправляем на страницу входа
+        this.$router.push('/client/signin')
+      }
+    },
+    handleAvatarUpload({ file, imageUrl }) {
+      // Здесь будет логика загрузки аватара на сервер
+      console.log('Avatar upload:', file)
+      // Временно сохраняем URL для предпросмотра
+      this.avatarUrl = imageUrl
+    },
+    handleAvatarEditClick() {
+      console.log('Avatar edit clicked')
     }
   }
 }
@@ -590,10 +1310,17 @@ export default {
     gap: 16px;
     align-items: start;
 
+    // Когда выбраны Объекты, убираем левую колонку
+    &--objects {
+      grid-template-columns: 1fr;
+    }
+
     @media (max-width: 768px) {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      align-items: center;
+      background: #ffffff; // По умолчанию белый фон
     }
   }
 
@@ -611,6 +1338,12 @@ export default {
     background: transparent;
     overflow-x: hidden;
     min-width: 0;
+
+    // Когда выбраны Объекты, контент занимает всю ширину
+    &--full-width {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 
   &__content-title {
@@ -628,6 +1361,12 @@ export default {
     gap: 16px;
     overflow-x: hidden;
     min-width: 0;
+
+    // Когда выбраны Объекты, контент занимает всю ширину
+    &--full-width {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 
   &__documents-content {
@@ -663,29 +1402,119 @@ export default {
       display: none;
     }
   }
-}
 
-@media (max-width: 1200px) {
-  .ui-profile {
-    &__layout {
-      grid-template-columns: 1fr;
-      gap: 24px;
+  &__mobile-header {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+      box-sizing: border-box;
+    }
+  }
+
+  &__mobile-back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  &__mobile-back-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+
+  &__mobile-title {
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 24px;
+    color: #263043;
+    margin: 0;
+    flex: 1;
+    text-align: left;
+    padding-left: 8px;
+  }
+
+  &__mobile-header-spacer {
+    width: 32px;
+    flex-shrink: 0;
+  }
+
+  &__mobile-content {
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 16px;
+      padding-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
   }
 }
 
 @media (max-width: 768px) {
   .ui-profile {
-    padding: 16px;
-    padding-top: 24px; /* Отступ сверху для статус-бара */
+    padding: 0;
+    padding-top: 0;
     padding-bottom: 88px; /* 16px отступ + 72px для мобильного меню */
-    margin-top: 64px; /* Отступ сверху для header */
+    background: #ffffff;
+  }
+
+  // Фон #DADADA только когда показывается меню (activeContent === null)
+  .ui-profile__layout--show-menu {
+    background: #DADADA;
   }
 
   // Скрываем обычный Sidebar на мобильных
   :deep(.sidebar) {
     display: none;
+  }
+
+  // Скрываем AppHeader на мобильных
+  .ui-profile :deep(.app-header) {
+    display: none;
+  }
+
+  // Стили для мобильного контента
+  .ui-profile__content-block {
+    background: transparent;
+    padding: 0;
+  }
+
+  .ui-profile__documents-content {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .ui-profile__mobile-content :deep(.electronic-signature-content) {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .ui-profile__mobile-content :deep(.electronic-signature-content__tabs-wrapper) {
+    margin: 0;
+    padding: 0;
+    padding-top: 0;
   }
 }
 </style>

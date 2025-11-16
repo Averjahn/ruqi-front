@@ -166,7 +166,7 @@ export default {
     },
     handleProfileMenuClick(item) {
       if (item.id === 'account') {
-        this.$router.push('/ui-new/profile/account')
+        this.$router.push('/ui-new/profile')
       } else if (item.id === 'organization') {
         this.$router.push('/ui-new/organisation-data')
       } else if (item.id === 'doc-platform' || item.id === 'platform-documents') {

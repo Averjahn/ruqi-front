@@ -64,9 +64,19 @@ instance.interceptors.response.use(
         text: `Ошибка сервера. "${error?.response?.data?.message}"`,
       })
     } else if (status === 401 || status === 403) {
-      store.dispatch('notifications/showNotification', {
-        text: 'Отказано в доступе',
-      })
+      // Если пользователь был авторизован, делаем logout
+      if (store.getters['auth/isLogged']) {
+        store.dispatch('auth/logOut').then(() => {
+          // Перенаправляем на страницу входа только если мы не на странице входа
+          if (window.location.pathname !== '/client/signin') {
+            window.location.href = '/client/signin'
+          }
+        })
+      } else {
+        store.dispatch('notifications/showNotification', {
+          text: 'Отказано в доступе',
+        })
+      }
     } else if (status === 422) {
       store.dispatch('notifications/showNotification', {
         text: 'Некорректно сформированный запрос',
