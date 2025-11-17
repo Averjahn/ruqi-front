@@ -193,6 +193,7 @@ import { formatPhone } from '@/constants/masks'
 import { rules, rulesSets } from '@/constants/validations'
 import useTimer from '@/composables/useSnackbarTimer'
 import authApi from '@/services/authApi'
+const SIGNUP_STATE_KEY = 'signup_state_v1'
 
 export default {
   name: 'SignUp',
@@ -230,6 +231,9 @@ export default {
       passwordRules: [(v) => !!v || 'Заполните поле']
     }
   },
+  created () {
+    this.restoreSignupState()
+  },
   computed: {
     remainingTimeString () {
       return getStringFromSeconds(this.remaining)
@@ -250,8 +254,80 @@ export default {
       ]
     }
   },
+  watch: {
+    step () {
+      this.persistSignupState()
+    },
+    phone () {
+      this.persistSignupState()
+    },
+    code () {
+      this.persistSignupState()
+    },
+    onceToken () {
+      this.persistSignupState()
+    },
+    authToken () {
+      this.persistSignupState()
+    },
+    clientUuid () {
+      this.persistSignupState()
+    },
+    accountUuid () {
+      this.persistSignupState()
+    },
+    termAgree () {
+      this.persistSignupState()
+    },
+    agree () {
+      this.persistSignupState()
+    }
+  },
   methods: {
     ...mapActions('notifications', ['showNotification']),
+
+    persistSignupState () {
+      if (typeof window === 'undefined') return
+      const state = {
+        step: this.step,
+        phone: this.phone,
+        code: this.code,
+        onceToken: this.onceToken,
+        authToken: this.authToken,
+        clientUuid: this.clientUuid,
+        accountUuid: this.accountUuid,
+        termAgree: this.termAgree,
+        agree: this.agree,
+      }
+      try {
+        localStorage.setItem(SIGNUP_STATE_KEY, JSON.stringify(state))
+      } catch (error) {
+        // ignore
+      }
+    },
+    restoreSignupState () {
+      if (typeof window === 'undefined') return
+      const rawState = localStorage.getItem(SIGNUP_STATE_KEY)
+      if (!rawState) return
+      try {
+        const state = JSON.parse(rawState)
+        if (state.step) this.step = state.step
+        if (typeof state.phone === 'string') this.phone = state.phone
+        if (typeof state.code === 'string') this.code = state.code
+        if (typeof state.onceToken === 'string') this.onceToken = state.onceToken
+        if (typeof state.authToken === 'string') this.authToken = state.authToken
+        if (typeof state.clientUuid === 'string') this.clientUuid = state.clientUuid
+        if (typeof state.accountUuid === 'string') this.accountUuid = state.accountUuid
+        if (typeof state.termAgree === 'boolean') this.termAgree = state.termAgree
+        if (typeof state.agree === 'boolean') this.agree = state.agree
+      } catch (error) {
+        localStorage.removeItem(SIGNUP_STATE_KEY)
+      }
+    },
+    clearSignupState () {
+      if (typeof window === 'undefined') return
+      localStorage.removeItem(SIGNUP_STATE_KEY)
+    },
 
 
     onPhone (event) {
@@ -503,6 +579,7 @@ export default {
           })
           
           // Переходим в organisationData
+          this.clearSignupState()
           this.$router.push('/client/organisationData')
         } else {
           this.showNotification({
@@ -522,6 +599,7 @@ export default {
     },
 
     goToSignIn () {
+      this.clearSignupState()
       this.$router.push('/client/signin')
     },
 

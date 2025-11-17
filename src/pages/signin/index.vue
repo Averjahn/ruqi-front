@@ -197,6 +197,7 @@ const tabs = [
   { text: 'Вход по паролю', value: 'by_password' },
   { text: 'Вход по звонку', value: 'by_phone_call' },
 ]
+const SIGNIN_STATE_KEY = 'signin_state_v1'
 
 export default {
   components: { AuthTabs, AuthLogoHeader, MainButton, Input, ResendCodeTimer, CodeInput, Checkbox, AgreementCheck, InputGroup, InputBlock, FormField, FooterInfo },
@@ -234,7 +235,8 @@ export default {
       isDevelopment: process.env.NODE_ENV === 'development',
     }
   },
-  mounted () {
+  created () {
+    this.restoreSigninState()
     try {
       // Инициализируем loginClient из useAuth
       const { loginClient, loading: authLoading, error: authError, getErrorMessage } = useAuth()
@@ -259,6 +261,32 @@ export default {
   async mounted () {
     if (this.$route.query.once_token) await this.loginByToken(this.$route.query.once_token)
   },
+  watch: {
+    currentTab () {
+      this.persistSigninState()
+    },
+    callRequested () {
+      this.persistSigninState()
+    },
+    phone () {
+      this.persistSigninState()
+    },
+    onceToken () {
+      this.persistSigninState()
+    },
+    oldMethod () {
+      this.persistSigninState()
+    },
+    smsCode () {
+      this.persistSigninState()
+    },
+    termAgree () {
+      this.persistSigninState()
+    },
+    agree () {
+      this.persistSigninState()
+    }
+  },
   async beforeUnmount () {
     if (this.authInterval) clearInterval(this.authInterval)
   },
@@ -266,6 +294,47 @@ export default {
     ...mapActions('auth', ['signIn', 'auth']),
     ...mapActions('notifications', ['showNotification']),
     ...mapActions('user', ['fetchUser']),
+
+    persistSigninState () {
+      if (typeof window === 'undefined') return
+      const state = {
+        currentTab: this.currentTab,
+        callRequested: this.callRequested,
+        phone: this.phone,
+        onceToken: this.onceToken,
+        oldMethod: this.oldMethod,
+        smsCode: this.smsCode,
+        termAgree: this.termAgree,
+        agree: this.agree,
+      }
+      try {
+        localStorage.setItem(SIGNIN_STATE_KEY, JSON.stringify(state))
+      } catch (error) {
+        // ignore
+      }
+    },
+    restoreSigninState () {
+      if (typeof window === 'undefined') return
+      const rawState = localStorage.getItem(SIGNIN_STATE_KEY)
+      if (!rawState) return
+      try {
+        const state = JSON.parse(rawState)
+        if (state.currentTab) this.currentTab = state.currentTab
+        if (typeof state.callRequested === 'boolean') this.callRequested = state.callRequested
+        if (typeof state.phone === 'string') this.phone = state.phone
+        if (typeof state.onceToken === 'string') this.onceToken = state.onceToken
+        if (typeof state.oldMethod === 'boolean') this.oldMethod = state.oldMethod
+        if (typeof state.smsCode === 'string') this.smsCode = state.smsCode
+        if (typeof state.termAgree === 'boolean') this.termAgree = state.termAgree
+        if (typeof state.agree === 'boolean') this.agree = state.agree
+      } catch (error) {
+        localStorage.removeItem(SIGNIN_STATE_KEY)
+      }
+    },
+    clearSigninState () {
+      if (typeof window === 'undefined') return
+      localStorage.removeItem(SIGNIN_STATE_KEY)
+    },
 
 
     changeTab (value) {
@@ -307,6 +376,7 @@ export default {
           this.authInterval = null
         }
         await this.auth(response.data.data?.token)
+        this.clearSigninState()
         this.$router.push('/')
       }
     },
@@ -414,6 +484,7 @@ export default {
             const success = await this.loginClient(cleanPhone, password)
             
             if (success) {
+              this.clearSigninState()
               this.$router.push('/')
             } else {
               // Ошибка уже обработана в useAuth
@@ -438,6 +509,7 @@ export default {
                 const success = await this.loginClient(cleanPhone, password)
                 
                 if (success) {
+                  this.clearSigninState()
                   this.$router.push('/')
                 } else {
                   const errorMsg = this.getErrorMessage(this.authError?.value || this.authError)
@@ -471,6 +543,7 @@ export default {
       this.loading = true
       const response = await this.signIn({ once_token })
       if (response?.data?.success) {
+        this.clearSigninState()
         this.$router.push('/')
       } else {
         this.showNotification({
@@ -577,10 +650,12 @@ export default {
             if (response.data.data?.token || response.data.data?.authToken) {
               const token = response.data.data?.token || response.data.data?.authToken
               await this.auth(token)
+              this.clearSigninState()
               this.$router.push('/')
             } else {
               // Если токена нет, возможно нужно установить пароль
               // Пока что просто переходим на главную
+              this.clearSigninState()
               this.$router.push('/')
             }
           } else {
