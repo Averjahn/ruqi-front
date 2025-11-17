@@ -71,6 +71,7 @@
         :objects="objects"
         :total-count="objectsTotalCount"
         :active-tab="activeTab"
+        default-view-mode="map"
         @create-object="handleCreateObject"
         @object-action="handleObjectAction"
         @page-change="handleObjectsPageChange"

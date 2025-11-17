@@ -1,6 +1,4 @@
 const path = require('path')
-const fs = require('fs')
-
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
@@ -8,7 +6,6 @@ const { DefinePlugin } = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const Dotenv = require('dotenv-webpack')
 
-const yandexMetrika = fs.readFileSync('./config/build/yandexMetrika.html', 'utf8')
 console.log('Webpack API_URL:', process.env.API_URL)
 module.exports = () => ({
   mode: 'production',
@@ -57,7 +54,6 @@ module.exports = () => ({
       template: 'public/index.html',
       filename: 'index.html',
       inject: 'body',
-      yandexMetrika,
     }),
     new Dotenv({
       path: './.env.stage2',

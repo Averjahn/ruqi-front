@@ -1068,9 +1068,9 @@ padding-left: 24px;
   }
 
   &--partial {
-    background: #FEF5E7;
-    border-color: #F6AD55;
-    color: #F6AD55;
+    background: #FFF2E8;
+    border-color: #FFBB96;
+    color: #EB4D3D;
   }
 
   &--full {
@@ -1093,7 +1093,7 @@ padding-left: 24px;
 }
 
 .object-detail-content__filling--partial .object-detail-content__filling-icon {
-  filter: brightness(0) saturate(100%) invert(70%) sepia(50%) saturate(500%);
+  filter: brightness(0) saturate(100%) invert(54%) sepia(33%) saturate(3434%) hue-rotate(336deg) brightness(101%) contrast(97%);
 }
 
 .object-detail-content__filling--full .object-detail-content__filling-icon {

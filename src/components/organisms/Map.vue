@@ -46,6 +46,19 @@ export default {
       this._map.controls.remove('routeButtonControl')
       this._map.controls.remove('RulerButton')
       this._map.behaviors.disable(['scrollZoom'])
+      // Убеждаемся, что карта занимает всю высоту контейнера
+      this.$nextTick(() => {
+        if (this._map) {
+          // Принудительно устанавливаем размеры карты
+          const container = this.$refs.map
+          if (container) {
+            const height = container.offsetHeight || 600
+            // eslint-disable-next-line no-undef
+            this._map.container.getElement().style.height = height + 'px'
+            this._map.container.fitToViewport()
+          }
+        }
+      })
       this.setGeoObjects()
     },
     setGeoObjects () {
@@ -178,6 +191,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.map_tasks_container {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  position: relative;
+  
+  :deep(.ymaps-2-1-79-map) {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 400px;
+  }
+}
+
 .ymap-container {
   width: 100%;
   height: 100%;

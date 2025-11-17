@@ -257,13 +257,17 @@ export default {
     activeTab: {
       type: String,
       default: 'active'
+    },
+    defaultViewMode: {
+      type: String,
+      default: 'list'
     }
   },
   emits: ['create-object', 'object-action', 'page-change', 'filter-change'],
   data() {
     return {
       searchQuery: '',
-      viewMode: 'list', // 'grid' | 'list' | 'map'
+      viewMode: this.defaultViewMode || 'list', // 'grid' | 'list' | 'map'
       selectedObjects: [],
       currentPage: 1,
       itemsPerPage: 10,
