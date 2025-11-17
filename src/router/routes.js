@@ -10,6 +10,7 @@ export const routes = [
   { path: '/ui-new/document-templates', component: i('/ui-new/document-templates/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/organisation-data', component: i('/ui-new/organisation-data/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/platform-documents', component: i('/ui-new/platform-documents/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-new/objects', component: i('/ui-new/objects/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/notifications', component: i('/client/notifications/index.vue'), meta: { layout: 'EmptyLayout' } },
   
   // client routes - всегда доступны без авторизации

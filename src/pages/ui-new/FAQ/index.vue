@@ -121,7 +121,7 @@ export default {
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
-        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: null },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: '/ui-new/objects' },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), route: '/ui-new/FAQ' },
         { id: 5, title: 'Чат', iconPath: require('@/assets/icons/profile/chat-icon.svg'), route: null, badge: 11 },
@@ -132,7 +132,7 @@ export default {
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
-        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: null },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: '/ui-new/objects' },
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
@@ -235,6 +235,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-x: hidden; // Предотвращаем горизонтальную прокрутку
+  width: 100%;
+  box-sizing: border-box;
 
   @media (min-width: 769px) {
     padding: 20px;
@@ -302,6 +305,8 @@ export default {
     gap: 32px;
     align-items: stretch; /* Для ПК: растягиваем элементы на всю ширину */
     padding-top: 24px; /* Отступ сверху для статус-бара на мобильной */
+    overflow-x: hidden; // Предотвращаем горизонтальную прокрутку
+    box-sizing: border-box;
 
     @media (min-width: 769px) {
       padding-top: 0;
@@ -335,6 +340,9 @@ export default {
 
 .ui-faq__content {
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Desktop: Cards */
@@ -344,6 +352,9 @@ export default {
   gap: 24px;
   align-items: stretch;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Mobile: Accordion */
@@ -357,6 +368,8 @@ export default {
   border-bottom: 1px solid #0000001A; /* Общий бордер для всего блока */
   overflow: hidden; /* Для корректного отображения border-radius с внутренними бордерами */
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .faq-accordion-item--bordered {

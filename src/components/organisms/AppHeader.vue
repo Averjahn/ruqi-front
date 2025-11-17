@@ -1,9 +1,35 @@
 <template>
   <header class="app-header">
     <div class="app-header__content">
-      <!-- Left side: Title -->
+      <!-- Left side: Title or Breadcrumbs -->
       <div class="app-header__left">
-        <h1 class="app-header__title">{{ title }}</h1>
+        <!-- Breadcrumbs -->
+        <nav v-if="breadcrumbs && breadcrumbs.length" class="app-header__breadcrumbs">
+          <span
+            v-for="(crumb, index) in breadcrumbs"
+            :key="index"
+            class="app-header__breadcrumb-item"
+          >
+            <span
+              v-if="crumb.path"
+              class="app-header__breadcrumb-link"
+              @click="handleBreadcrumbClick(crumb.path)"
+            >
+              {{ crumb.text }}
+            </span>
+            <span v-else class="app-header__breadcrumb-text">
+              {{ crumb.text }}
+            </span>
+            <span
+              v-if="index < breadcrumbs.length - 1"
+              class="app-header__breadcrumb-separator"
+            >
+              >
+            </span>
+          </span>
+        </nav>
+        <!-- Title (if no breadcrumbs) -->
+        <h1 v-else class="app-header__title">{{ title }}</h1>
       </div>
 
       <!-- Right side: User actions -->
@@ -47,6 +73,17 @@ export default {
     showDocuments: {
       type: Boolean,
       default: true
+    },
+    breadcrumbs: {
+      type: Array,
+      default: null
+    }
+  },
+  methods: {
+    handleBreadcrumbClick(path) {
+      if (path) {
+        this.$router.push(path)
+      }
     }
   }
 }
@@ -89,6 +126,43 @@ export default {
     letter-spacing: 0%;
     color: #03123a;
     margin: 0;
+  }
+
+  &__breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #666666;
+  }
+
+  &__breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__breadcrumb-link {
+    color: #666666;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #1735F5;
+    }
+  }
+
+  &__breadcrumb-text {
+    color: #263043;
+    font-weight: 500;
+  }
+
+  &__breadcrumb-separator {
+    color: #666666;
+    margin: 0 4px;
   }
 
   &__right {

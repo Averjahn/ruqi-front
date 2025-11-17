@@ -65,6 +65,11 @@ export default {
   min-width: 0; /* Позволяет карточке сжиматься меньше минимального размера контента */
   box-shadow: none;
   width: 100%; /* Карточка занимает всю доступную ширину в grid ячейке */
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .faq-card__title {

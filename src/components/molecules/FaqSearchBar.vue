@@ -82,6 +82,10 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .faq-search-bar__title {
@@ -101,6 +105,9 @@ export default {
   gap: 16px; /* Для ПК: отступ между инпутом и кнопкой */
   flex-wrap: wrap;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .faq-search-bar__input-wrapper {

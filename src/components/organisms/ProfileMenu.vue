@@ -30,11 +30,6 @@ export default {
           text: 'Учетная запись'
         },
         {
-          id: 'objects',
-          icon: require('@/assets/icons/profile/objects-icon.svg'),
-          text: 'Объекты'
-        },
-        {
           id: 'organization',
           icon: require('@/assets/icons/profile/tabs/Info.svg'),
           text: 'Об организации'

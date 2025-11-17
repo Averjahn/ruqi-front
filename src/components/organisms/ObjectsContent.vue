@@ -1,75 +1,50 @@
 <template>
   <div class="objects-content">
-    <!-- Tabs: Активные / Архив -->
-    <div class="objects-content__tabs">
-      <button
-        class="objects-content__tab"
-        :class="{ 'objects-content__tab--active': activeTab === 'active' }"
-        @click="activeTab = 'active'"
-      >
-        Активные
-      </button>
-      <button
-        class="objects-content__tab"
-        :class="{ 'objects-content__tab--active': activeTab === 'archive' }"
-        @click="activeTab = 'archive'"
-      >
-        Архив
-      </button>
-    </div>
-
     <!-- Search and Actions Bar -->
     <div class="objects-content__toolbar">
-      <div class="objects-content__search">
-        <Input
-          v-model="searchQuery"
-          placeholder="Поиск"
-          class="objects-content__search-input"
-          clearable
-        >
-          <template #left>
-            <img src="@/assets/icon_deprecated/search.svg" alt="Search" class="objects-content__search-icon" />
-          </template>
-        </Input>
-      </div>
+      <div class="objects-content__toolbar-top">
+        <div class="objects-content__search">
+          <Input
+            v-model="searchQuery"
+            placeholder="Поиск"
+            class="objects-content__search-input"
+            clearable
+          >
+            <template #left>
+              <img src="@/assets/icon_deprecated/search.svg" alt="Search" class="objects-content__search-icon" />
+            </template>
+          </Input>
+        </div>
 
-      <div class="objects-content__view-toggles">
-        <button
-          class="objects-content__view-toggle"
-          :class="{ 'objects-content__view-toggle--active': viewMode === 'grid' }"
-          @click="viewMode = 'grid'"
-          title="Сетка"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <rect x="9" y="2" width="5" height="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <rect x="2" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <rect x="9" y="9" width="5" height="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          </svg>
-        </button>
-        <button
-          class="objects-content__view-toggle"
-          :class="{ 'objects-content__view-toggle--active': viewMode === 'list' }"
-          @click="viewMode = 'list'"
-          title="Список"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-        </button>
-        <button
-          class="objects-content__view-toggle"
-          :class="{ 'objects-content__view-toggle--active': viewMode === 'map' }"
-          @click="viewMode = 'map'"
-          title="Карта"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 2L6 4L10 2L14 4V12L10 14L6 12L2 14V2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <circle cx="8" cy="7" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          </svg>
-        </button>
+        <div class="objects-content__view-toggles">
+          <!-- Table (List) - скрыто на мобильных -->
+          <button
+            class="objects-content__view-toggle objects-content__view-toggle--desktop"
+            :class="{ 'objects-content__view-toggle--active': viewMode === 'list' }"
+            @click="viewMode = 'list'"
+            title="Таблица"
+          >
+            <img src="@/assets/icons/profile/Table.svg" alt="Table" class="objects-content__view-toggle-icon" />
+          </button>
+          <!-- Grid -->
+          <button
+            class="objects-content__view-toggle"
+            :class="{ 'objects-content__view-toggle--active': viewMode === 'grid' }"
+            @click="viewMode = 'grid'"
+            title="Сетка"
+          >
+            <img src="@/assets/icons/profile/Grid.svg" alt="Grid" class="objects-content__view-toggle-icon" />
+          </button>
+          <!-- Map -->
+          <button
+            class="objects-content__view-toggle"
+            :class="{ 'objects-content__view-toggle--active': viewMode === 'map' }"
+            @click="viewMode = 'map'"
+            title="Карта"
+          >
+            <img src="@/assets/icons/profile/Map.svg" alt="Map" class="objects-content__view-toggle-icon" />
+          </button>
+        </div>
       </div>
 
       <Button
@@ -78,13 +53,86 @@
         class="objects-content__create-button"
         @click="handleCreateObject"
       >
-        <img src="@/assets/icon_deprecated/plus.svg" alt="Plus" class="objects-content__create-icon" />
+        <img src="@/assets/icons/profile/Add.svg" alt="Add" class="objects-content__create-icon" />
         Создать объект
       </Button>
     </div>
 
-    <!-- Table -->
-    <div class="objects-content__table-wrapper">
+    <!-- Grid View -->
+    <div v-if="viewMode === 'grid'" class="objects-content__grid">
+      <div
+        v-for="object in filteredObjects"
+        :key="object.id"
+        class="objects-content__grid-card"
+        :class="{ 'objects-content__grid-card--selected': selectedObjects.includes(object.id) }"
+        @click="handleObjectClick(object, $event)"
+      >
+        <div class="objects-content__grid-card-header">
+          <input
+            type="checkbox"
+            :checked="selectedObjects.includes(object.id)"
+            @change.stop="handleSelectObject(object.id)"
+            class="objects-content__grid-card-checkbox"
+          />
+          <h3 class="objects-content__grid-card-title">{{ object.name }}</h3>
+          <button
+            class="objects-content__grid-card-actions"
+            @click="handleObjectActions(object)"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="4" r="1.5" fill="currentColor"/>
+              <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+              <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        <div class="objects-content__grid-card-body">
+          <div class="objects-content__grid-card-info">
+            <div class="objects-content__grid-card-info-item">
+              <span class="objects-content__grid-card-label">Заявки:</span>
+              <span class="objects-content__grid-card-value">{{ object.applications || 0 }}</span>
+            </div>
+            <div class="objects-content__grid-card-info-item">
+              <span class="objects-content__grid-card-label">Расположен:</span>
+              <span class="objects-content__grid-card-value">{{ object.location }}</span>
+            </div>
+            <div class="objects-content__grid-card-info-item">
+              <span class="objects-content__grid-card-label">Ср. выход:</span>
+              <span class="objects-content__grid-card-value">{{ object.avgOutput || 0 }}</span>
+            </div>
+            <div class="objects-content__grid-card-info-item">
+              <span class="objects-content__grid-card-label">Выход:</span>
+              <span class="objects-content__grid-card-value">{{ object.output || 0 }}</span>
+            </div>
+            <div class="objects-content__grid-card-info-item">
+              <span class="objects-content__grid-card-label">% выхода:</span>
+              <span
+                class="objects-content__grid-card-value"
+                :class="getExitPercentClass(object.exitPercent)"
+              >
+                {{ object.exitPercent || 0 }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="filteredObjects.length === 0" class="objects-content__grid-empty">
+        Нет объектов для отображения
+      </div>
+    </div>
+
+    <!-- Map View -->
+    <div v-else-if="viewMode === 'map'" class="objects-content__map-wrapper">
+      <Map
+        :markers="mapMarkers"
+        :center_coords="mapCenter"
+        :zoom="10"
+        @action="handleObjectClick"
+      />
+    </div>
+
+    <!-- Table View -->
+    <div v-else-if="viewMode === 'list'" class="objects-content__table-wrapper">
       <table class="objects-content__table">
         <thead>
           <tr>
@@ -116,8 +164,9 @@
             :key="object.id"
             class="objects-content__row"
             :class="{ 'objects-content__row--selected': selectedObjects.includes(object.id) }"
+            @click="handleObjectClick(object, $event)"
           >
-            <td class="objects-content__td objects-content__td--checkbox">
+            <td class="objects-content__td objects-content__td--checkbox" @click.stop>
               <input
                 type="checkbox"
                 :checked="selectedObjects.includes(object.id)"
@@ -145,10 +194,10 @@
                 class="objects-content__exit-percent"
                 :class="getExitPercentClass(object.exitPercent)"
               >
-                {{ object.exitPercent || 0 }}%
+                {{ object.exitPercent || 0 }}
               </span>
             </td>
-            <td class="objects-content__td objects-content__td--actions">
+            <td class="objects-content__td objects-content__td--actions" @click.stop>
               <button
                 class="objects-content__actions-button"
                 @click="handleObjectActions(object)"
@@ -183,15 +232,18 @@
 
 <script>
 import Input from '@/components/atoms/Input.vue'
+import Tabs from '@/components/atoms/Tabs.vue'
 import Button from '@/components/atoms/Button.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
+import Map from '@/components/organisms/Map.vue'
 
 export default {
   name: 'ObjectsContent',
   components: {
     Input,
     Button,
-    Pagination
+    Pagination,
+    Map
   },
   props: {
     objects: {
@@ -201,12 +253,15 @@ export default {
     totalCount: {
       type: Number,
       default: 0
+    },
+    activeTab: {
+      type: String,
+      default: 'active'
     }
   },
   emits: ['create-object', 'object-action', 'page-change', 'filter-change'],
   data() {
     return {
-      activeTab: 'active', // 'active' | 'archive'
       searchQuery: '',
       viewMode: 'list', // 'grid' | 'list' | 'map'
       selectedObjects: [],
@@ -270,6 +325,48 @@ export default {
     allSelected() {
       return this.filteredObjects.length > 0 &&
         this.filteredObjects.every(obj => this.selectedObjects.includes(obj.id))
+    },
+    mapMarkers() {
+      // Преобразуем объекты в формат маркеров для карты
+      // Предполагаем, что объекты имеют координаты lat/lon или location с координатами
+      return this.filteredObjects
+        .filter(obj => {
+          // Проверяем наличие координат
+          return (obj.lat && obj.lon) || 
+                 (obj.location && typeof obj.location === 'object' && obj.location.lat && obj.location.lon)
+        })
+        .map(obj => {
+          const lat = obj.lat || obj.location?.lat
+          const lon = obj.lon || obj.location?.lon
+          
+          return {
+            geometry: {
+              coordinates: [parseFloat(lat), parseFloat(lon)]
+            },
+            properties: {
+              hintContent: obj.name,
+              name: obj.name,
+              address: obj.location || ''
+            },
+            uuid: obj.id || obj.uuid,
+            is_subscribe: obj.is_subscribe || false,
+            logo: obj.logo || obj.logo_thumb_48x48 || ''
+          }
+        })
+    },
+    mapCenter() {
+      // Вычисляем центр карты на основе координат объектов
+      if (this.mapMarkers.length === 0) {
+        return [55.7708, 37.5967] // Москва по умолчанию
+      }
+      
+      const lats = this.mapMarkers.map(m => m.geometry.coordinates[0])
+      const lons = this.mapMarkers.map(m => m.geometry.coordinates[1])
+      
+      const avgLat = lats.reduce((a, b) => a + b, 0) / lats.length
+      const avgLon = lons.reduce((a, b) => a + b, 0) / lons.length
+      
+      return [avgLat, avgLon]
     }
   },
   watch: {
@@ -319,6 +416,14 @@ export default {
     handleObjectActions(object) {
       this.$emit('object-action', object)
     },
+    handleObjectClick(object, event) {
+      // Предотвращаем клик, если кликнули на чекбокс или кнопку действий
+      if (event && (event.target.type === 'checkbox' || event.target.closest('button'))) {
+        return
+      }
+      // Обработка клика на объект (карточка или строка)
+      this.$emit('object-action', object)
+    },
     handlePageChange(page) {
       this.currentPage = page
       this.$emit('page-change', page)
@@ -342,6 +447,9 @@ export default {
   border-radius: 10px;
   padding: 24px;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 
   @media (max-width: 768px) {
     padding: 16px;
@@ -350,32 +458,20 @@ export default {
 }
 
 .objects-content__tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid #E3E5E4;
-}
-
-.objects-content__tab {
-  padding: 12px 24px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 22px;
-  color: #666666;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: #1735F5;
-  }
-
-  &--active {
-    color: #1735F5;
-    border-bottom-color: #1735F5;
-    font-weight: 600;
+  width: max-content;
+  align-self: flex-start; // Прижимаем к левому краю
+  
+  :deep(.tabs_container) {
+    width: max-content;
+    
+    &.wide {
+      width: max-content;
+      
+      .tab {
+        justify-content: flex-start;
+        padding: 0px 24px;
+      }
+    }
   }
 }
 
@@ -388,12 +484,31 @@ export default {
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+}
+
+.objects-content__toolbar-top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-wrap: nowrap;
+    gap: 12px;
   }
 }
 
 .objects-content__search {
   flex: 1;
   min-width: 200px;
+
+  @media (max-width: 768px) {
+    min-width: 0;
+    flex: 1;
+  }
 }
 
 .objects-content__search-input {
@@ -407,39 +522,72 @@ export default {
 
 .objects-content__view-toggles {
   display: flex;
-  gap: 8px;
+  gap: 2px; // Как у табов (contained type)
   align-items: center;
+  border-radius: 8px;
+  background-color: #f3f3f3; // Фон как у табов
+  padding: 2px; // Отступ как у табов
+  height: 40px; // Высота как у табов
+  width: 112px; // Общая ширина как в Figma
+
+  @media (max-width: 768px) {
+    width: auto; // Автоматическая ширина на мобильных
+    flex-shrink: 0;
+    min-width: 152px; // Минимальная ширина для двух табов (76px * 2)
+  }
 }
 
 .objects-content__view-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  flex: 1; // Равномерное распределение внутри контейнера 112px
+  height: 36px; // Высота внутри контейнера (40px - 4px padding)
   padding: 0;
-  border: 1px solid #dadada;
+  border: none;
   border-radius: 8px;
-  background: #ffffff;
+  background: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #666666;
 
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-
   &:hover {
-    border-color: #1735F5;
-    background: #F2F8FF;
-    color: #1735F5;
+    background: #f9f9f9;
   }
 
   &--active {
-    border-color: #1735F5;
-    background: #F2F8FF;
-    color: #1735F5;
+    font-weight: 600;
+    background-color: white; // Белый фон для активного
+    color: #263043;
+    box-shadow:
+      0px 8px 48px 4px #0234e30a,
+      0px 0px 10px 0px #1735f508; // Тень как у активного таба
+  }
+
+  &--desktop {
+    @media (max-width: 768px) {
+      display: none; // Скрываем кнопку list на мобильных
+    }
+  }
+
+  @media (max-width: 768px) {
+    min-width: 76px; // Минимальная ширина таба в мобильной версии
+  }
+}
+
+.objects-content__view-toggle-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  
+  // Изменяем цвет иконок через filter для неактивного состояния
+  .objects-content__view-toggle:not(.objects-content__view-toggle--active) & {
+    filter: brightness(0) saturate(100%) invert(40%); // Серый цвет #666666
+  }
+  
+  // Для активного состояния - темный цвет #263043
+  .objects-content__view-toggle--active & {
+    filter: brightness(0) saturate(100%) invert(15%); // Темный цвет #263043
   }
 }
 
@@ -455,14 +603,175 @@ export default {
   height: 16px;
 }
 
+.objects-content__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.objects-content__grid-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 24px;
+  border: 1px solid #dadada;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #1735F5;
+    box-shadow: 0px 4px 12px rgba(23, 53, 245, 0.1);
+  }
+
+  &--selected {
+    border-color: #1735F5;
+    background: #F2F8FF;
+  }
+}
+
+.objects-content__grid-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E3E5E4;
+}
+
+.objects-content__grid-card-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #1735F5;
+}
+
+.objects-content__grid-card-title {
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 24px;
+  color: #263043;
+  margin: 0;
+  flex: 1;
+}
+
+.objects-content__grid-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #666666;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #F2F8FF;
+    color: #1735F5;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.objects-content__grid-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.objects-content__grid-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.objects-content__grid-card-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.objects-content__grid-card-label {
+  color: #666666;
+  font-weight: 400;
+  min-width: 100px;
+}
+
+.objects-content__grid-card-value {
+  color: #263043;
+  font-weight: 400;
+  flex: 1;
+}
+
+.objects-content__grid-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #666666;
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-size: 16px;
+}
+
+.objects-content__map-wrapper {
+  width: 100%;
+  height: 600px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #dadada;
+  background: #ffffff;
+
+  @media (max-width: 768px) {
+    height: 400px;
+  }
+}
+
 .objects-content__table-wrapper {
   overflow-x: auto;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  
+  // Скрываем скроллбар, но оставляем возможность прокрутки
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #F6F8FB;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #dadada;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #9ca3af;
+    }
+  }
 }
 
 .objects-content__table {
   width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
+  table-layout: auto; // Автоматическая ширина колонок
 }
 
 .objects-content__th {
@@ -508,6 +817,7 @@ export default {
 .objects-content__row {
   border-bottom: 1px solid #F6F8FB;
   transition: background-color 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     background-color: #F6F8FB;

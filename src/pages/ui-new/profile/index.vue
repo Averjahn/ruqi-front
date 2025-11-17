@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-profile">
+  <div class="ui-profile" :class="{ 'ui-profile--objects': activeContent === 'objects' }">
     <!-- Sidebar Component - Fixed to left -->
     <Sidebar 
       :icon-button="require('@/assets/icons/profile/sidebar.svg')"
@@ -18,7 +18,7 @@
       :show-documents="true"
     />
     
-    <div class="ui-profile__main-content">
+    <div class="ui-profile__main-content" :class="{ 'ui-profile__main-content--objects': activeContent === 'objects' }">
       <div class="ui-profile__layout" :class="{ 
         'ui-profile__layout--show-menu': isMobileView && activeContent === null,
         'ui-profile__layout--objects': !isMobileView && activeContent === 'objects'
@@ -373,7 +373,7 @@ export default {
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: null },
-        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: null },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: false, route: '/ui-new/objects' },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
         { id: 5, title: 'Чат', iconPath: require('@/assets/icons/profile/chat-icon.svg'), active: false, route: null, badge: 11 },
@@ -384,7 +384,7 @@ export default {
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
-        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: null },
+        { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: '/ui-new/objects' },
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
@@ -571,17 +571,7 @@ export default {
     },
     handleSidebarItemClick(item) {
       // Обработка клика по элементу меню Sidebar
-      if (item.id === 2 && item.title === 'Объекты') {
-        // При клике на "Объекты" в Sidebar открываем вкладку объектов в профиле
-        // Предотвращаем переход на другую страницу, если route === null
-        this.activeContent = 'objects'
-        this.activeProfileMenuItem = 'objects'
-        // Загружаем объекты при открытии вкладки
-        this.loadObjects()
-        // Не переходим на другую страницу, остаемся на странице профиля
-        return
-      }
-      // Для остальных пунктов меню логика остается стандартной
+      // Если есть route, переход произойдет автоматически через Sidebar компонент
       console.log('Sidebar item clicked:', item)
     },
     handleProfileMenuClick(item) {
@@ -1288,19 +1278,37 @@ export default {
   padding-top: 100px; // 80px header + 20px margin
   min-height: 100vh;
   background: #F6F8FB;
+  overflow-x: hidden; // Предотвращаем горизонтальную прокрутку
+
+  // Когда выбраны Объекты, оставляем стандартный padding (контент будет справа от sidebar)
+  // padding-left остается 306px
 
   @media (max-width: 768px) {
     background: #F6F8FB;
+    padding-left: 20px;
   }
 
   &__main-content {
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
+    overflow-x: hidden; // Предотвращаем горизонтальную прокрутку
+
+    // Когда выбраны Объекты, убираем ограничение max-width, но оставляем width: 100%
+    // Контент автоматически займет всю доступную ширину справа от sidebar
+    &--objects {
+      max-width: none;
+      margin: 0;
+      width: 100%;
+    }
 
     @media (max-width: 768px) {
       width: 100%;
       padding: 0;
+      
+      &--objects {
+        width: 100%;
+      }
     }
   }
 
@@ -1338,6 +1346,8 @@ export default {
     background: transparent;
     overflow-x: hidden;
     min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 
     // Когда выбраны Объекты, контент занимает всю ширину
     &--full-width {
@@ -1361,11 +1371,14 @@ export default {
     gap: 16px;
     overflow-x: hidden;
     min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 
     // Когда выбраны Объекты, контент занимает всю ширину
     &--full-width {
       width: 100%;
       max-width: 100%;
+      box-sizing: border-box;
     }
   }
 
