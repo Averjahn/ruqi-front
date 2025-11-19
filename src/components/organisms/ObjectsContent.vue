@@ -247,6 +247,8 @@ import Pagination from '@/components/atoms/Pagination.vue'
 import Map from '@/components/organisms/Map.vue'
 import ObjectMapModal from '@/components/organisms/popups/ObjectMapModal.vue'
 
+const VIEW_MODE_STORAGE_KEY = 'uiObjects.viewMode'
+
 export default {
   name: 'ObjectsContent',
   components: {
@@ -278,7 +280,7 @@ export default {
   data() {
     return {
       searchQuery: '',
-      viewMode: this.defaultViewMode || 'list', // 'grid' | 'list' | 'map'
+      viewMode: this.getInitialViewMode(),
       selectedObjects: [],
       currentPage: 1,
       itemsPerPage: 10,
@@ -390,6 +392,11 @@ export default {
       return [avgLat, avgLon]
     }
   },
+  mounted() {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, this.viewMode)
+    }
+  },
   watch: {
     activeTab() {
       this.currentPage = 1
@@ -405,9 +412,23 @@ export default {
         tab: this.activeTab,
         search: this.searchQuery
       })
+    },
+    viewMode(newVal) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, newVal)
+      }
     }
   },
   methods: {
+    getInitialViewMode() {
+      if (typeof window !== 'undefined') {
+        const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+        if (stored && ['grid', 'list', 'map'].includes(stored)) {
+          return stored
+        }
+      }
+      return this.defaultViewMode || 'list'
+    },
     handleSelectAll(event) {
       if (event.target.checked) {
         this.selectedObjects = [...this.filteredObjects.map(obj => obj.id)]

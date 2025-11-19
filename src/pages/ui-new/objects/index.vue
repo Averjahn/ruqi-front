@@ -71,7 +71,7 @@
         :objects="objects"
         :total-count="objectsTotalCount"
         :active-tab="activeTab"
-        default-view-mode="map"
+        :default-view-mode="objectsDefaultViewMode"
         @create-object="handleCreateObject"
         @object-action="handleObjectAction"
         @page-change="handleObjectsPageChange"
@@ -91,6 +91,10 @@ import ObjectsContent from '@/components/organisms/ObjectsContent.vue'
 import ObjectDetailContent from '@/components/organisms/ObjectDetailContent.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
 import Tabs from '@/components/atoms/Tabs.vue'
+
+const ACTIVE_TAB_STORAGE_KEY = 'uiObjects.activeTab'
+const DETAIL_TAB_STORAGE_KEY = 'uiObjects.detailTab'
+const SELECTED_OBJECT_STORAGE_KEY = 'uiObjects.selectedObjectId'
 
 export default {
   name: 'UIObjects',
@@ -153,17 +157,69 @@ export default {
     // Для Sidebar используем ПК меню
     sidebarMenuItems() {
       return this.desktopMenuItems
+    },
+    objectsDefaultViewMode() {
+      return this.isMobile ? 'map' : 'list'
     }
   },
   mounted() {
     this.checkMobile()
     window.addEventListener('resize', this.checkMobile)
-    this.loadObjects()
+    this.restoreTabsState()
+    this.loadObjects().then(() => {
+      this.restoreSelectedObject()
+    })
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.checkMobile)
   },
+  watch: {
+    activeTab(newVal) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, newVal)
+      }
+    },
+    activeObjectTab(newVal) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(DETAIL_TAB_STORAGE_KEY, newVal)
+      }
+    },
+    selectedObject(newVal) {
+      if (typeof window !== 'undefined') {
+        if (newVal && newVal.id) {
+          window.localStorage.setItem(SELECTED_OBJECT_STORAGE_KEY, String(newVal.id))
+        } else {
+          window.localStorage.removeItem(SELECTED_OBJECT_STORAGE_KEY)
+        }
+      }
+    }
+  },
   methods: {
+    restoreTabsState() {
+      if (typeof window === 'undefined') return
+      const savedActiveTab = window.localStorage.getItem(ACTIVE_TAB_STORAGE_KEY)
+      if (savedActiveTab && ['active', 'archive'].includes(savedActiveTab)) {
+        this.activeTab = savedActiveTab
+      }
+      const savedDetailTab = window.localStorage.getItem(DETAIL_TAB_STORAGE_KEY)
+      if (savedDetailTab && this.objectDetailTabs.some(tab => tab.value === savedDetailTab)) {
+        this.activeObjectTab = savedDetailTab
+      }
+    },
+    restoreSelectedObject() {
+      if (typeof window === 'undefined') return
+      const savedObjectId = window.localStorage.getItem(SELECTED_OBJECT_STORAGE_KEY)
+      if (savedObjectId && this.objects.length > 0) {
+        const objectId = parseInt(savedObjectId, 10)
+        const foundObject = this.objects.find(obj => obj.id === objectId)
+        if (foundObject) {
+          this.selectedObject = foundObject
+        } else {
+          // Если объект не найден, очищаем сохраненное значение
+          window.localStorage.removeItem(SELECTED_OBJECT_STORAGE_KEY)
+        }
+      }
+    },
     checkMobile() {
       this.isMobile = window.innerWidth <= 768
     },
@@ -214,6 +270,7 @@ export default {
         { id: 10, name: 'Ашан', applications: 9, location: 'Россия, Москва ул. Примерная, 7', avgOutput: 7, output: 3, exitPercent: 100, lat: 55.7540, lon: 37.6200, archived: false }
       ]
       this.objectsTotalCount = 10
+      return Promise.resolve()
     }
   }
 }
