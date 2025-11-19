@@ -128,6 +128,7 @@
         :center_coords="mapCenter"
         :zoom="10"
         @action="handleObjectClick"
+        @marker-click="handleMarkerClick"
       />
     </div>
 
@@ -184,10 +185,10 @@
               {{ object.location }}
             </td>
             <td class="objects-content__td">
-              {{ object.avgExit || 0 }}
+              {{ object.avgOutput || 0 }}
             </td>
             <td class="objects-content__td">
-              {{ object.exit || 0 }}
+              {{ object.output || 0 }}
             </td>
             <td class="objects-content__td">
               <span
@@ -227,6 +228,14 @@
         @page-change="handlePageChange"
       />
     </div>
+
+    <!-- Object Map Modal -->
+    <ObjectMapModal
+      :show="showObjectModal"
+      :object-data="selectedObjectData"
+      @close="showObjectModal = false"
+      @menu-click="handleObjectMenuClick"
+    />
   </div>
 </template>
 
@@ -236,6 +245,7 @@ import Tabs from '@/components/atoms/Tabs.vue'
 import Button from '@/components/atoms/Button.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
 import Map from '@/components/organisms/Map.vue'
+import ObjectMapModal from '@/components/organisms/popups/ObjectMapModal.vue'
 
 export default {
   name: 'ObjectsContent',
@@ -243,7 +253,8 @@ export default {
     Input,
     Button,
     Pagination,
-    Map
+    Map,
+    ObjectMapModal
   },
   props: {
     objects: {
@@ -272,7 +283,9 @@ export default {
       currentPage: 1,
       itemsPerPage: 10,
       sortField: null,
-      sortOrder: 'asc' // 'asc' | 'desc'
+      sortOrder: 'asc', // 'asc' | 'desc'
+      showObjectModal: false,
+      selectedObjectData: null
     }
   },
   computed: {
@@ -350,7 +363,11 @@ export default {
             properties: {
               hintContent: obj.name,
               name: obj.name,
-              address: obj.location || ''
+              address: obj.location || '',
+              applications: obj.applications || 0,
+              avgOutput: obj.avgOutput || 0,
+              output: obj.output || 0,
+              exitPercent: obj.exitPercent || 0
             },
             uuid: obj.id || obj.uuid,
             is_subscribe: obj.is_subscribe || false,
@@ -428,6 +445,42 @@ export default {
       // Обработка клика на объект (карточка или строка)
       this.$emit('object-action', object)
     },
+    handleMarkerClick(marker) {
+      // Если это location маркер (для дизайна)
+      if (marker.isLocation) {
+        this.selectedObjectData = {
+          name: marker.properties?.name || marker.properties?.address || 'Объект',
+          address: marker.properties?.address || 'Адрес не указан',
+          applications: 0,
+          avgOutput: 0,
+          output: 0,
+          exitPercent: 0
+        }
+        this.showObjectModal = true
+        return
+      }
+      
+      // Находим объект по uuid маркера
+      const object = this.objects.find(obj => 
+        (obj.id || obj.uuid) === marker.uuid
+      )
+      if (object) {
+        this.selectedObjectData = {
+          name: object.name,
+          address: object.location || marker.properties?.address || '',
+          applications: marker.properties?.applications || object.applications || 0,
+          avgOutput: marker.properties?.avgOutput || object.avgOutput || 0,
+          output: marker.properties?.output || object.output || 0,
+          exitPercent: marker.properties?.exitPercent || object.exitPercent || 0
+        }
+        this.showObjectModal = true
+      }
+    },
+    handleObjectMenuClick(objectData) {
+      // Обработка клика на меню в модальном окне
+      console.log('Menu clicked for object:', objectData)
+      // Можно добавить дополнительную логику
+    },
     handlePageChange(page) {
       this.currentPage = page
       this.$emit('page-change', page)
@@ -498,6 +551,7 @@ export default {
   align-items: center;
   flex: 1;
   flex-wrap: wrap;
+  justify-content: space-between;
 
   @media (max-width: 768px) {
     flex-wrap: nowrap;
@@ -508,9 +562,11 @@ export default {
 .objects-content__search {
   flex: 1;
   min-width: 200px;
+  max-width: 280px;
 
   @media (max-width: 768px) {
     min-width: 0;
+    max-width: none;
     flex: 1;
   }
 }
@@ -742,7 +798,7 @@ export default {
   background: #ffffff;
 
   @media (max-width: 768px) {
-    height: 400px;
+    height: 55dvh;
   }
 }
 

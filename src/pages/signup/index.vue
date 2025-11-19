@@ -228,7 +228,13 @@ export default {
       userId: null,
       clientUuid: null,
       accountUuid: null,
-      passwordRules: [(v) => !!v || 'Заполните поле']
+      passwordRules: [
+        (v) => !!v || 'Заполните поле',
+        (v) => (v && v.length >= 4) || 'Пароль должен содержать минимум 4 символа',
+        (v) => (v && /[A-ZА-Я]/.test(v)) || 'Пароль должен содержать минимум одну заглавную букву',
+        (v) => (v && /[0-9]/.test(v)) || 'Пароль должен содержать минимум одну цифру',
+        (v) => (v && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v)) || 'Пароль должен содержать минимум один специальный символ (!, @, #, и т.д.)'
+      ]
     }
   },
   created () {
@@ -245,7 +251,26 @@ export default {
       return this.phone
     },
     isPasswordValid () {
-      return this.password && this.confirmPassword && this.password === this.confirmPassword
+      if (!this.password || !this.confirmPassword) {
+        return false
+      }
+      if (this.password !== this.confirmPassword) {
+        return false
+      }
+      // Проверяем все правила валидации
+      if (this.password.length < 4) {
+        return false
+      }
+      if (!/[A-ZА-Я]/.test(this.password)) {
+        return false
+      }
+      if (!/[0-9]/.test(this.password)) {
+        return false
+      }
+      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(this.password)) {
+        return false
+      }
+      return true
     },
     confirmPasswordRules () {
       return [

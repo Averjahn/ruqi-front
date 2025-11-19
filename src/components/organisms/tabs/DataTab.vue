@@ -33,22 +33,6 @@
               <span class="object-detail-content__data-value">{{ objectData.type || '-' }}</span>
             </div>
             <div class="object-detail-content__data-field">
-              <span class="object-detail-content__data-label">Адрес</span>
-              <span class="object-detail-content__data-value">{{ objectData.address || objectData.location || '-' }}</span>
-            </div>
-            <div class="object-detail-content__data-field">
-              <span class="object-detail-content__data-label">ИНН</span>
-              <span class="object-detail-content__data-value">{{ objectData.inn || '-' }}</span>
-            </div>
-            <div class="object-detail-content__data-field">
-              <span class="object-detail-content__data-label">КПП</span>
-              <span class="object-detail-content__data-value">{{ objectData.kpp || '-' }}</span>
-            </div>
-            <div class="object-detail-content__data-field">
-              <span class="object-detail-content__data-label">ОГРН</span>
-              <span class="object-detail-content__data-value">{{ objectData.ogrn || '-' }}</span>
-            </div>
-            <div class="object-detail-content__data-field">
               <span class="object-detail-content__data-label">Описание</span>
               <span class="object-detail-content__data-value">{{ objectData.description || '-' }}</span>
             </div>
@@ -73,14 +57,10 @@ export default {
       // Тестовые данные для вкладки "Данные"
       const testData = {
         name: 'Объект',
-        performerName: 'Магнит косметик',
-        workSchedule: '-',
-        type: '-',
-        address: 'Россия, Санкт-Петербург пр. Невский, 85',
-        inn: '-',
-        kpp: '-',
-        ogrn: '-',
-        description: '-'
+        performerName: 'Дандер Мифлин',
+        workSchedule: '12ч',
+        type: 'Производство',
+        description: 'Текст описания'
       }
       
       // Объединяем пропс с тестовыми данными (пропс имеет приоритет)

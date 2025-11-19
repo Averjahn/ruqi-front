@@ -15,12 +15,11 @@
               </template>
             </Input>
           </div>
+          <button class="object-detail-content__filter-button" @click="handleFilterClick">
+            <img src="@/assets/icons/profile/Filter.svg" alt="Filter" class="object-detail-content__filter-icon" />
+          </button>
           <button class="object-detail-content__filter-button-mobile" @click="handleFilterClick">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
+            <img src="@/assets/icons/profile/Filter.svg" alt="Filter" class="object-detail-content__filter-icon" />
             Фильтры
           </button>
         </div>

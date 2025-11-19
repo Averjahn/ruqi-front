@@ -9,6 +9,7 @@ import { loadPlacemarkIcon, getDisplayedNumber } from '@/constants/helpers'
 export default {
   name: 'YaMap',
   props: ['center_coords', 'markers', 'zoom', 'placemark_size', 'entity'],
+  emits: ['action', 'marker-click'],
   data () {
     return {
       actionUUId: null,
@@ -64,6 +65,8 @@ export default {
     setGeoObjects () {
       const self = this
       this._map.geoObjects.removeAll()
+      
+      // Добавляем основные маркеры объектов
       this.markers.forEach((item) => {
         if (item.geometry?.coordinates) {
           // eslint-disable-next-line no-undef
@@ -87,6 +90,12 @@ export default {
               balloonPanelMaxMapArea: 0,
             },
           )
+          
+          // Добавляем обработчик клика на маркер
+          myPlacemark.events.add('click', function () {
+            self.$emit('marker-click', item)
+          })
+          
           self._map.geoObjects.add(myPlacemark)
           self._map.events.add('click', function () {
             self._map.balloon.close()
@@ -104,6 +113,73 @@ export default {
             }
           })
         }
+      })
+      
+      // Добавляем дополнительные маркеры с иконками location.svg для дизайна
+      // Координаты для тестовых маркеров (можно будет заменить на реальные координаты)
+      // Координаты разнесены на расстояние в 5 раз больше для лучшей видимости
+      const locationIconHref = require('@/assets/icons/profile/location.svg')
+      const additionalLocations = [
+        { 
+          coords: [55.7558, 37.6173], 
+          name: 'Красная площадь, 1',
+          address: 'Россия, Москва, Красная площадь, 1'
+        },
+        { 
+          coords: [55.7450, 37.6000], 
+          name: 'ул. Тверская, 10',
+          address: 'Россия, Москва, ул. Тверская, 10'
+        },
+        { 
+          coords: [55.7650, 37.6350], 
+          name: 'ул. Генерала Горбатого, 34',
+          address: 'Россия, Москва, ул. Генерала Горбатого, 34'
+        },
+        { 
+          coords: [55.7400, 37.6400], 
+          name: 'пр. Невский, 85',
+          address: 'Россия, Москва, пр. Невский, 85'
+        },
+        { 
+          coords: [55.7700, 37.5950], 
+          name: 'ул. Ленина, 12',
+          address: 'Россия, Москва, ул. Ленина, 12'
+        }
+      ]
+      
+      additionalLocations.forEach((location, index) => {
+        // eslint-disable-next-line no-undef
+        const locationPlacemark = new ymaps.Placemark(
+          location.coords,
+          {
+            hintContent: location.address,
+          },
+          {
+            iconLayout: 'default#image',
+            iconImageHref: locationIconHref,
+            iconImageSize: [32, 32],
+            iconImageOffset: [-16, -32],
+          },
+        )
+        
+        locationPlacemark.events.add('click', function () {
+          // Эмитим событие для обработки клика на location маркер
+          const markerData = {
+            geometry: {
+              coordinates: location.coords
+            },
+            properties: {
+              hintContent: location.address,
+              name: location.name,
+              address: location.address
+            },
+            uuid: `location_${index}`,
+            isLocation: true
+          }
+          self.$emit('marker-click', markerData)
+        })
+        
+        self._map.geoObjects.add(locationPlacemark)
       })
     },
 

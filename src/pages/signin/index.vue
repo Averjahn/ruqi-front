@@ -217,12 +217,12 @@ export default {
       phone: '',
       requestHandler: '',
       tabs: [
-        { text: 'Вход по звонку', value: 'by_phone_call' },
         { text: 'Вход по паролю', value: 'by_password' },
+        { text: 'Вход по звонку', value: 'by_phone_call' },
       ],
       inputRules: [(v) => !!v || 'Заполните поле'],
       passwordRules: [(v) => !!v || 'Заполните поле'],
-      currentTab: 'by_phone_call',
+      currentTab: 'by_password',
       callRequested: false,
       oldMethod: false,
       authInterval: null,
@@ -695,7 +695,7 @@ export default {
   min-height: 100%;
   width: 100%;
   padding: 24px 16px;
-  background: #f8f9fa;
+  background: linear-gradient(90.3deg, #edf2ff -1.79%, #ffffff 99.73%);
 
   display: flex;
   align-items: center;
@@ -781,7 +781,7 @@ export default {
     max-width: none;
   }
   .get_in_button{
-    font-weight: 500;
+    font-weight: 600;
   }
   .password_forgot {
     cursor: pointer;

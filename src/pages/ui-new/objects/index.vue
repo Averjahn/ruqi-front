@@ -202,18 +202,18 @@ export default {
       // TODO: Replace with actual API call
       // Mock data for now
       this.objects = [
-        { id: 1, name: 'Магнит косметик', applications: 5, location: 'Россия, Санкт-Петербург пр. Невский, 85', avgOutput: 3, output: 2, exitPercent: 70 },
-        { id: 2, name: 'Пятёрочка', applications: 11, location: 'Россия, Екатеринбург ул. Ленина, 12', avgOutput: 5, output: 3, exitPercent: 100 },
-        { id: 3, name: 'Озон фреш', applications: 0, location: 'Россия, Москва ул. Генерала Горбатого 34', avgOutput: 0, output: 0, exitPercent: 0 },
-        { id: 4, name: 'Карусель', applications: 3, location: 'Россия, Москва ул. Примерная, 1', avgOutput: 2, output: 1, exitPercent: 50 },
-        { id: 5, name: 'Билла', applications: 7, location: 'Россия, Санкт-Петербург ул. Примерная, 2', avgOutput: 4, output: 2, exitPercent: 40 },
-        { id: 6, name: 'Твой дом', applications: 2, location: 'Россия, Москва ул. Примерная, 3', avgOutput: 1, output: 1, exitPercent: 1 },
-        { id: 7, name: 'Дикси', applications: 4, location: 'Россия, Екатеринбург ул. Примерная, 4', avgOutput: 2, output: 1, exitPercent: 2 },
-        { id: 8, name: 'Лента', applications: 8, location: 'Россия, Москва ул. Примерная, 5', avgOutput: 6, output: 2, exitPercent: 100 },
-        { id: 9, name: 'Светофор', applications: 1, location: 'Россия, Санкт-Петербург ул. Примерная, 6', avgOutput: 0, output: 0, exitPercent: 0 },
-        { id: 10, name: 'Ашан', applications: 9, location: 'Россия, Москва ул. Примерная, 7', avgOutput: 7, output: 3, exitPercent: 100 }
+        { id: 1, name: 'Магнит косметик', applications: 5, location: 'Россия, Санкт-Петербург пр. Невский, 85', avgOutput: 3, output: 2, exitPercent: 70, lat: 59.9343, lon: 30.3351, archived: false },
+        { id: 2, name: 'Пятёрочка', applications: 11, location: 'Россия, Екатеринбург ул. Ленина, 12', avgOutput: 5, output: 3, exitPercent: 100, lat: 56.8431, lon: 60.6454, archived: false },
+        { id: 3, name: 'Озон фреш', applications: 0, location: 'Россия, Москва ул. Генерала Горбатого 34', avgOutput: 0, output: 0, exitPercent: 0, lat: 55.7650, lon: 37.6350, archived: false },
+        { id: 4, name: 'Карусель', applications: 3, location: 'Россия, Москва ул. Примерная, 1', avgOutput: 2, output: 1, exitPercent: 50, lat: 55.7558, lon: 37.6173, archived: false },
+        { id: 5, name: 'Билла', applications: 7, location: 'Россия, Санкт-Петербург ул. Примерная, 2', avgOutput: 4, output: 2, exitPercent: 40, lat: 59.9343, lon: 30.3351, archived: false },
+        { id: 6, name: 'Твой дом', applications: 2, location: 'Россия, Москва ул. Примерная, 3', avgOutput: 1, output: 1, exitPercent: 1, lat: 55.7512, lon: 37.6184, archived: false },
+        { id: 7, name: 'Дикси', applications: 4, location: 'Россия, Екатеринбург ул. Примерная, 4', avgOutput: 2, output: 1, exitPercent: 2, lat: 56.8431, lon: 60.6454, archived: false },
+        { id: 8, name: 'Лента', applications: 8, location: 'Россия, Москва ул. Примерная, 5', avgOutput: 6, output: 2, exitPercent: 100, lat: 55.7520, lon: 37.6156, archived: false },
+        { id: 9, name: 'Светофор', applications: 1, location: 'Россия, Санкт-Петербург ул. Примерная, 6', avgOutput: 0, output: 0, exitPercent: 0, lat: 59.9343, lon: 30.3351, archived: false },
+        { id: 10, name: 'Ашан', applications: 9, location: 'Россия, Москва ул. Примерная, 7', avgOutput: 7, output: 3, exitPercent: 100, lat: 55.7540, lon: 37.6200, archived: false }
       ]
-      this.objectsTotalCount = 22
+      this.objectsTotalCount = 10
     }
   }
 }
@@ -400,6 +400,9 @@ export default {
     padding-top: 0;
     padding-bottom: 72px; // Отступ снизу для мобильного меню
     background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   // Скрываем обычный Sidebar на мобильных
