@@ -223,6 +223,71 @@ export function isSnilsValid (value) {
   return 'Неверная контрольная сумма в СНИЛС'
 }
 
+// Валидация полного наименования организации - не может быть латинских символов
+export const validateFullName = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация КПП - только цифры
+export const validateKppDigits = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (!/^[0-9]+$/.test(v)) return 'КПП может состоять только из цифр'
+  return true
+}
+
+// Валидация ОГРН - только цифры
+export const validateOgrn = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (!/^[0-9]+$/.test(v)) return 'ОГРН может состоять только из цифр'
+  return true
+}
+
+// Валидация ОКАТО - только цифры
+export const validateOkato = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (!/^[0-9]+$/.test(v)) return 'ОКАТО может состоять только из цифр'
+  return true
+}
+
+// Валидация ФИО - только русские буквы, 2 или 3 слова
+export const validateFullNamePerson = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (!/^[а-яёА-ЯЁ\s-]+$/.test(v)) return 'ФИО может состоять только из русских букв'
+  const words = v.trim().split(/\s+/).filter(w => w.length > 0)
+  if (words.length < 2 || words.length > 3) return 'ФИО должно состоять из 2 или 3 слов'
+  return true
+}
+
+// Валидация должности - только русские буквы и запятые
+export const validatePosition = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (!/^[а-яёА-ЯЁ\s-,]+$/.test(v)) return 'Должность может состоять только из русских букв и запятых'
+  return true
+}
+
+// Валидация "На основании чего" - не может быть латинских символов
+export const validateBasis = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация почтового адреса - не может быть латинских символов
+export const validateMailingAddress = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация юридического адреса - не может быть латинских символов
+export const validateLegalAddress = (v) => {
+  if (!v) return 'Обязательное поле'
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
 export const rules = {
   isSnilsValid: (v) => !v || isSnilsValid(v),
   cyrillic: (v) => !v || /^[а-яё\s]*$/gi.test(v) || 'Только кириллица',
@@ -255,6 +320,15 @@ export const rules = {
   adult: (v) => dayjs().diff(dayjs(v, 'DD.MM.YYYY', true), 'year') >= 18 || 'Несовершеннолетний',
   notInFuture: (v) => dayjs(v, 'DD.MM.YYYY', true) <= dayjs() || 'Не позже текущей',
   validateInn,
+  validateFullName,
+  validateKppDigits,
+  validateOgrn,
+  validateOkato,
+  validateFullNamePerson,
+  validatePosition,
+  validateBasis,
+  validateMailingAddress,
+  validateLegalAddress,
 }
 
 export const rulesSets = {

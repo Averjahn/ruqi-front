@@ -24,6 +24,9 @@
           </button>
         </div>
         <div class="object-detail-content__toolbar-bottom">
+          <div class="object-detail-content__vat-info">
+            ндс текущий: <strong>0%</strong>
+          </div>
           <Button
             type="contained"
             color="blue"
@@ -34,9 +37,6 @@
             <img src="@/assets/icons/profile/Add.svg" alt="Add" class="object-detail-content__add-icon" />
             Добавить вакансию
           </Button>
-          <div class="object-detail-content__vat-info">
-            ндс текущий: 0%
-          </div>
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@
             <th class="object-detail-content__th">Ставка текущая</th>
             <th class="object-detail-content__th">Ставка плановая</th>
             <th class="object-detail-content__th">Юнит</th>
-            <th class="object-detail-content__th">Статус</th>
+            <th class="object-detail-content__th object-detail-content__th--status">Статус</th>
             <th class="object-detail-content__th object-detail-content__th--actions">
               <input type="checkbox" class="object-detail-content__checkbox" />
             </th>

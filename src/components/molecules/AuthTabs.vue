@@ -18,8 +18,8 @@ export default {
   computed: {
     computedTabs() {
       return [
-        { text: 'Вход по паролю', value: 'by_password' },
-        { text: this.oldMethod ? 'Вход по смс' : 'Вход по звонку', value: 'by_phone_call' }
+        { text: this.oldMethod ? 'Вход по смс' : 'Вход по звонку', value: 'by_phone_call' },
+        { text: 'Вход по паролю', value: 'by_password' }
       ]
     }
   }

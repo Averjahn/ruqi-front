@@ -134,24 +134,23 @@ export default {
         { id: 2, title: 'Документы', description: 'Для подтверждения подлинности введенных вами данных, пожалуйста прикрепите скан-фото оригиналов документов' }
       ],
       canGoBack: true,
-      canGoNext: true,
       formData: {
         logo: null,
         counterpartyType: 'legal',
-        inn: '1047712345678',
-        fullName: 'Общество с ограниченной ответственностью «Солюшен Про Интерпрайсес»',
-        kpp: '1047712345678',
-        ogrn: '1047712345678',
-        okato: '1047712345678',
-        fullNamePerson: 'Петров Сергей Петрович',
+        inn: '',
+        fullName: '',
+        kpp: '',
+        ogrn: '',
+        okato: '',
+        fullNamePerson: '',
         position: null,
         basis: null,
-        mailingAddress: '123456, г. Москва, ул. Подвойского, д. 14, стр. 7',
-        legalAddress: '123456, г. Москва, ул. Подвойского, д. 14, стр. 7',
-        settlementAccount: '1047712345678',
-        correspondentAccount: '1047712345678',
-        bic: '1047712345678',
-        bank: 'Московский банк ПАО Сбербанк г. Москва',
+        mailingAddress: '',
+        legalAddress: '',
+        settlementAccount: '',
+        correspondentAccount: '',
+        bic: '',
+        bank: '',
         // Documents
         innCertificate: {
           file: null,
@@ -192,6 +191,59 @@ export default {
       }
       
       return '@/assets/imgs/document.png' // Образец по умолчанию
+    },
+
+    canGoNext() {
+      // На первом шаге проверяем заполненность всех обязательных полей
+      if (this.currentStep === 0) {
+        const requiredFields = [
+          'counterpartyType',
+          'vatRate',
+          'fullName',
+          'inn',
+          'kpp',
+          'ogrn',
+          'okato',
+          'fullNamePerson',
+          'position',
+          'basis',
+          'mailingAddress',
+          'legalAddress'
+        ]
+
+        // Проверяем, что все обязательные поля заполнены
+        const allFieldsFilled = requiredFields.every(field => {
+          const value = this.formData[field]
+          if (!value) return false
+          if (typeof value === 'string') {
+            return value.trim() !== ''
+          }
+          return true
+        })
+
+        // Дополнительно проверяем валидность ИНН (должен быть 10 или 12 цифр и только цифры)
+        const innValid = this.formData.inn && 
+          /^[0-9]+$/.test(this.formData.inn) &&
+          (this.formData.inn.length === 10 || this.formData.inn.length === 12)
+
+        // Проверяем валидность формы через валидацию компонента
+        let formValid = true
+        if (this.$refs.form) {
+          // Проверяем валидность формы, но не показываем ошибки
+          formValid = this.$refs.form.validate ? this.$refs.form.validate() : true
+        }
+
+        return allFieldsFilled && innValid && formValid
+      }
+
+      // На втором шаге проверяем наличие документов
+      if (this.currentStep === 1) {
+        const hasInnCertificate = !!this.formData.innCertificate?.file
+        const hasOgrnCertificate = !!this.formData.ogrnCertificate?.file
+        return hasInnCertificate && hasOgrnCertificate
+      }
+
+      return true
     },
 
     canFinish() {
@@ -237,16 +289,55 @@ export default {
 
     async handleNextStep(stepIndex) {
       // Валидация для первого шага (форма)
-      if (this.currentStep === 0 && this.$refs.form && !this.$refs.form.validate()) {
-        return
+      if (this.currentStep === 0) {
+        // Проверяем валидацию формы
+        if (this.$refs.form && !this.$refs.form.validate()) {
+          this.showNotification({
+            type: 'error',
+            text: 'Пожалуйста, заполните все обязательные поля корректно'
+          })
+          return
+        }
+
+        // Проверяем, что все обязательные поля заполнены
+        const requiredFields = [
+          'counterpartyType',
+          'fullName',
+          'inn',
+          'kpp',
+          'ogrn',
+          'okato',
+          'fullNamePerson',
+          'position',
+          'basis',
+          'mailingAddress',
+          'legalAddress'
+        ]
+
+        const emptyFields = requiredFields.filter(field => {
+          const value = this.formData[field]
+          return !value || (typeof value === 'string' && value.trim() === '')
+        })
+
+        if (emptyFields.length > 0) {
+          this.showNotification({
+            type: 'error',
+            text: 'Пожалуйста, заполните все обязательные поля перед переходом к следующему шагу'
+          })
+          return
+        }
       }
 
       // Валидация для второго шага (документы)
       if (this.currentStep === 1) {
         const requiredDocuments = ['innCertificate', 'ogrnCertificate']
-        const missingDocuments = requiredDocuments.filter(doc => !this.formData[doc])
+        const missingDocuments = requiredDocuments.filter(doc => !this.formData[doc]?.file)
         
         if (missingDocuments.length > 0) {
+          this.showNotification({
+            type: 'error',
+            text: 'Пожалуйста, загрузите все необходимые документы'
+          })
           return
         }
       }

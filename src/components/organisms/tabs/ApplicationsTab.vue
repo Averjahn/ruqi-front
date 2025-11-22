@@ -2,56 +2,60 @@
   <div class="object-detail-content__tab-content">
     <!-- Toolbar -->
     <div class="object-detail-content__toolbar">
-      <div class="object-detail-content__search">
-        <Input
-          v-model="applicationsSearchQuery"
-          placeholder="Поиск"
-          class="object-detail-content__search-input"
+      <div class="object-detail-content__toolbar-left">
+        <div class="object-detail-content__search">
+          <Input
+            v-model="applicationsSearchQuery"
+            placeholder="Поиск"
+            class="object-detail-content__search-input"
+            clearable
+          >
+            <template #left>
+              <img src="@/assets/icon_deprecated/search.svg" alt="Search" class="object-detail-content__search-icon" />
+            </template>
+          </Input>
+        </div>
+        <Select
+          v-model="applicationsStatusFilter"
+          :options="statusFilterOptions"
+          placeholder="Статус"
           clearable
-        >
-          <template #left>
-            <img src="@/assets/icon_deprecated/search.svg" alt="Search" class="object-detail-content__search-icon" />
-          </template>
-        </Input>
+          class="object-detail-content__status-filter"
+          item-value="value"
+          item-text="label"
+        />
+        <div class="object-detail-content__date-filter">
+          <Input
+            v-model="applicationsDateFilter"
+            placeholder="Даты"
+            class="object-detail-content__date-input"
+            readonly
+          >
+            <template #right>
+              <img src="@/assets/icon_deprecated/calendar.svg" alt="Calendar" class="object-detail-content__calendar-icon" />
+            </template>
+          </Input>
+        </div>
+        <button class="object-detail-content__filter-button" @click="handleApplicationsFilterClick">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
       </div>
-      <Select
-        v-model="applicationsStatusFilter"
-        :options="statusFilterOptions"
-        placeholder="Статус"
-        clearable
-        class="object-detail-content__status-filter"
-        item-value="value"
-        item-text="label"
-      />
-      <div class="object-detail-content__date-filter">
-        <Input
-          v-model="applicationsDateFilter"
-          placeholder="Даты"
-          class="object-detail-content__date-input"
-          readonly
+      <div class="object-detail-content__toolbar-right">
+        <Button
+          type="contained"
+          color="blue"
+          size="m"
+          @click="handleNewApplication"
+          class="object-detail-content__add-button"
         >
-          <template #right>
-            <img src="@/assets/icon_deprecated/calendar.svg" alt="Calendar" class="object-detail-content__calendar-icon" />
-          </template>
-        </Input>
+          <img src="@/assets/icons/profile/Add.svg" alt="Add" class="object-detail-content__add-icon" />
+          Новая заявка
+        </Button>
       </div>
-      <button class="object-detail-content__filter-button" @click="handleApplicationsFilterClick">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      </button>
-      <Button
-        type="contained"
-        color="blue"
-        size="m"
-        @click="handleNewApplication"
-        class="object-detail-content__add-button"
-      >
-        <img src="@/assets/icons/profile/Add.svg" alt="Add" class="object-detail-content__add-icon" />
-        Новая заявка
-      </Button>
     </div>
 
     <!-- Applications Table -->

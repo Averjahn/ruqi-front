@@ -259,8 +259,8 @@ export default {
 <style lang="scss" scoped>
 .logo-upload {
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
 
   &__card {
     position: relative;
@@ -291,6 +291,7 @@ export default {
     display: flex;
     align-items: flex-start;
     gap: 20px;
+    width: 100%;
   }
 
   &__upload-area {

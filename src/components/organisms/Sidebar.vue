@@ -1,15 +1,26 @@
 <template>
-  <aside class="sidebar" :class="{ 'sidebar--relative': !fixed }">
+  <aside class="sidebar" :class="{ 'sidebar--relative': !fixed, 'sidebar--collapsed': isCollapsed }">
     <!-- Header with Logo and Icon Button -->
     <div class="sidebar__header">
       <div class="sidebar__logo">
-        <img src="@/assets/icons/profile/Logo.svg" alt="Ruqi" class="sidebar__logo-img" />
+        <img 
+          v-if="!isCollapsed"
+          src="@/assets/icons/profile/Logo.svg" 
+          alt="Ruqi" 
+          class="sidebar__logo-img" 
+        />
+        <img 
+          v-else
+          src="@/assets/icons/profile/mini-logo.svg" 
+          alt="Ruqi" 
+          class="sidebar__logo-img sidebar__logo-img--mini" 
+        />
       </div>
       <ButtonIcon 
-        v-if="iconButton"
+        v-if="iconButton && !isCollapsed"
         :type="iconButtonType"
         :size="iconButtonSize"
-        @click="$emit('icon-click')"
+        @click="handleToggleCollapse"
         class="sidebar__icon-button"
       >
         <img :src="iconButton" alt="Icon" />
@@ -25,6 +36,7 @@
           class="sidebar-nav__item"
           :class="{ 'sidebar-nav__item--active': item.active || isActiveRoute(item.route) }"
           @click="handleItemClick(item)"
+          :title="isCollapsed ? item.title : ''"
         >
           <img 
             v-if="item.iconPath" 
@@ -32,22 +44,31 @@
             alt="" 
             class="sidebar-nav__icon"
           />
-          <span class="sidebar-nav__text">{{ item.title }}</span>
-          <span v-if="item.badge" class="sidebar-nav__badge">{{ item.badge }}</span>
+          <span v-if="!isCollapsed" class="sidebar-nav__text">{{ item.title }}</span>
+          <span v-if="item.badge && !isCollapsed" class="sidebar-nav__badge">{{ item.badge }}</span>
         </div>
       </div>
       <slot v-else />
     </div>
 
-    <!-- Sidebar Footer (optional) -->
-    <div v-if="$slots.footer" class="sidebar__footer">
-      <slot name="footer" />
+    <!-- Collapse Button at Bottom -->
+    <div v-if="isCollapsed" class="sidebar__footer">
+      <ButtonIcon 
+        :type="iconButtonType"
+        :size="iconButtonSize"
+        @click="handleToggleCollapse"
+        class="sidebar__collapse-button"
+      >
+        <img :src="iconButton" alt="Expand" />
+      </ButtonIcon>
     </div>
   </aside>
 </template>
 
 <script>
 import ButtonIcon from '@/components/atoms/ButtonIcon.vue'
+
+const SIDEBAR_COLLAPSED_KEY = 'sidebar.collapsed'
 
 export default {
   name: 'Sidebar',
@@ -77,6 +98,39 @@ export default {
     }
   },
   emits: ['icon-click', 'item-click'],
+  data() {
+    // Загружаем состояние из localStorage синхронно при инициализации
+    let isCollapsed = false
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+      if (saved !== null) {
+        isCollapsed = saved === 'true'
+      }
+    }
+    return {
+      isCollapsed
+    }
+  },
+  mounted() {
+    // Обновляем класс body после монтирования
+    this.updateBodyClass()
+  },
+  beforeUnmount() {
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('sidebar-collapsed')
+    }
+  },
+  watch: {
+    isCollapsed(newVal) {
+      // Сохраняем состояние в localStorage
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newVal))
+      }
+      this.updateBodyClass()
+      // Эмитим событие для родительского компонента
+      this.$emit('icon-click')
+    }
+  },
   methods: {
     isActiveRoute(route) {
       if (!route) return false
@@ -95,6 +149,18 @@ export default {
       if (item.route) {
         this.$router.push(item.route)
       }
+    },
+    handleToggleCollapse() {
+      this.isCollapsed = !this.isCollapsed
+    },
+    updateBodyClass() {
+      if (typeof document !== 'undefined') {
+        if (this.isCollapsed) {
+          document.body.classList.add('sidebar-collapsed')
+        } else {
+          document.body.classList.remove('sidebar-collapsed')
+        }
+      }
     }
   }
 }
@@ -111,10 +177,34 @@ export default {
   display: flex;
   flex-direction: column;
   z-index: 100;
+  transition: width 0.3s ease;
+
+  // Устанавливаем CSS переменную для ширины sidebar
+  --sidebar-width: 286px;
 
   &--relative {
     position: relative;
     height: 100%;
+  }
+
+  &--collapsed {
+    width: 64px;
+    --sidebar-width: 64px;
+
+    .sidebar__header {
+      padding: 24px 12px;
+      justify-content: center;
+    }
+
+    .sidebar__logo {
+      justify-content: center;
+    }
+
+    .sidebar-nav__item {
+      width: 48px;
+      padding: 9px;
+      justify-content: center;
+    }
   }
 
   &__header {
@@ -129,12 +219,18 @@ export default {
     display: flex;
     align-items: center;
     flex: 1;
+    justify-content: flex-start;
   }
 
   &__logo-img {
     height: 30px;
     width: 90px;
     object-fit: contain;
+
+    &--mini {
+      width: 24px;
+      height: 24px;
+    }
   }
 
   &__icon-button {
@@ -152,6 +248,43 @@ export default {
     }
   }
 
+  &__collapse-button {
+    width: 270px;
+    height: 42px;
+    padding: 9px 16px;
+    margin: 0 auto;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.18);
+    }
+    
+    :deep(.slot_wrapper) {
+      box-shadow: none;
+      background: transparent;
+      
+      img {
+        width: 20px;
+        height: 20px;
+        opacity: 0.7;
+      }
+    }
+    
+    &:hover :deep(.slot_wrapper img) {
+      opacity: 1;
+    }
+  }
+  
+  &--collapsed &__collapse-button {
+    width: 48px;
+    padding: 9px;
+  }
+
   &__content {
     flex: 1;
     overflow-y: auto;
@@ -160,9 +293,14 @@ export default {
   }
 
   &__footer {
-    padding: 20px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 0 8px 0;
+    /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
     flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -222,6 +360,8 @@ export default {
   
   &__text {
     flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
   }
   
   &__badge {
@@ -239,6 +379,13 @@ export default {
     line-height: 16px;
     color: #263043;
     flex-shrink: 0;
+  }
+}
+
+.sidebar--collapsed {
+  .sidebar-nav__text,
+  .sidebar-nav__badge {
+    display: none;
   }
 }
 

@@ -393,9 +393,8 @@ export default {
     }
   },
   mounted() {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, this.viewMode)
-    }
+    // Не сохраняем viewMode при инициализации, чтобы при переходе через sidebar всегда был 'list'
+    // Сохранение происходит только при явном изменении пользователем (через watch)
   },
   watch: {
     activeTab() {
@@ -421,6 +420,13 @@ export default {
   },
   methods: {
     getInitialViewMode() {
+      // Для десктопа всегда используем 'list' по умолчанию при переходе через sidebar
+      // Для мобильных устройств используем defaultViewMode или проверяем localStorage
+      if (this.defaultViewMode === 'list') {
+        // Для десктопа всегда 'list', игнорируем localStorage
+        return 'list'
+      }
+      // Для мобильных устройств (map) проверяем localStorage
       if (typeof window !== 'undefined') {
         const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
         if (stored && ['grid', 'list', 'map'].includes(stored)) {
@@ -677,6 +683,14 @@ export default {
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+
+  :deep(.rq_button .slot) {
+    font-family: sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 24px;
+    letter-spacing: 0px;
+  }
 }
 
 .objects-content__create-icon {
@@ -855,6 +869,10 @@ export default {
   table-layout: auto; // Автоматическая ширина колонок
 }
 
+.objects-content__table thead tr {
+  border-bottom: 1px solid #E3E5E4;
+}
+
 .objects-content__th {
   padding: 12px 16px;
   text-align: left;
@@ -863,7 +881,6 @@ export default {
   font-weight: 600;
   line-height: 20px;
   color: #666666;
-  border-bottom: 1px solid #E3E5E4;
   cursor: default;
 
   &--name {
@@ -899,6 +916,10 @@ export default {
   border-bottom: 1px solid #F6F8FB;
   transition: background-color 0.2s ease;
   cursor: pointer;
+
+  &:first-child {
+    border-top: none;
+  }
 
   &:hover {
     background-color: #F6F8FB;

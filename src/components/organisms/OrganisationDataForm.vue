@@ -36,6 +36,7 @@
           @update:model-value="updateField('vatRate', $event)"
           :options="vatRateOptions"
           placeholder="Выберите значение"
+          :rules="[rules.required]"
           class="organisation-data-form__input"
           item-value="value"
           item-text="label"
@@ -68,6 +69,7 @@
           @update:model-value="updateField('vatRate', $event)"
           :options="vatRateOptions"
           placeholder="Выберите значение"
+          :rules="[rules.required]"
           class="organisation-data-form__input"
           item-value="value"
           item-text="label"
@@ -84,7 +86,7 @@
         :model-value="modelValue.fullName"
         @update:model-value="updateField('fullName', $event)"
         placeholder="Введите полное наименование"
-        :rules="[rules.required]"
+        :rules="[rules.validateFullName]"
         class="organisation-data-form__input"
       />
     </div>
@@ -99,7 +101,7 @@
           :model-value="modelValue.inn"
           @update:model-value="handleInnUpdate"
           placeholder="Введите ИНН"
-          :rules="[rules.required]"
+          :rules="[rules.required, rules.validateInn]"
           class="organisation-data-form__input"
         />
       </div>
@@ -119,7 +121,7 @@
           :model-value="modelValue.kpp"
           @update:model-value="updateField('kpp', $event)"
           placeholder="Введите КПП"
-          :rules="[rules.required]"
+          :rules="[rules.validateKppDigits]"
           class="organisation-data-form__input"
         />
       </div>
@@ -131,7 +133,7 @@
           :model-value="modelValue.ogrn"
           @update:model-value="updateField('ogrn', $event)"
           placeholder="Введите ОГРН"
-          :rules="[rules.required]"
+          :rules="[rules.validateOgrn]"
           class="organisation-data-form__input"
         />
       </div>
@@ -143,7 +145,7 @@
           :model-value="modelValue.okato"
           @update:model-value="updateField('okato', $event)"
           placeholder="Введите ОКАТО"
-          :rules="[rules.required]"
+          :rules="[rules.validateOkato]"
           class="organisation-data-form__input"
         />
       </div>
@@ -159,7 +161,7 @@
           :model-value="modelValue.okato"
           @update:model-value="updateField('okato', $event)"
           placeholder="Введите ОКАТО"
-          :rules="[rules.required]"
+          :rules="[rules.validateOkato]"
           class="organisation-data-form__input"
         />
       </div>
@@ -172,7 +174,7 @@
             :model-value="modelValue.inn"
             @update:model-value="handleInnUpdate"
             placeholder="Введите ИНН"
-            :rules="[rules.required]"
+            :rules="[rules.required, rules.validateInn]"
             class="organisation-data-form__input"
           />
         </div>
@@ -192,7 +194,7 @@
           :model-value="modelValue.kpp"
           @update:model-value="updateField('kpp', $event)"
           placeholder="Введите КПП"
-          :rules="[rules.required]"
+          :rules="[rules.validateKppDigits]"
           class="organisation-data-form__input"
         />
       </div>
@@ -204,7 +206,7 @@
           :model-value="modelValue.ogrn"
           @update:model-value="updateField('ogrn', $event)"
           placeholder="Введите ОГРН"
-          :rules="[rules.required]"
+          :rules="[rules.validateOgrn]"
           class="organisation-data-form__input"
         />
       </div>
@@ -217,9 +219,9 @@
       </label>
       <Input
         :model-value="modelValue.fullNamePerson"
-        @update:model-value="updateField('fullNamePerson', $event)"
+        @update:model-value="handleFullNamePersonUpdate"
         placeholder="Введите ФИО"
-        :rules="[rules.required]"
+        :rules="[rules.validateFullNamePerson]"
         class="organisation-data-form__input"
       />
     </div>
@@ -233,7 +235,7 @@
         :model-value="modelValue.position"
         @update:model-value="updateField('position', $event)"
         placeholder="Введите должность"
-        :rules="[rules.required]"
+        :rules="[rules.validatePosition]"
         class="organisation-data-form__input"
       />
     </div>
@@ -247,7 +249,7 @@
         :model-value="modelValue.basis"
         @update:model-value="updateField('basis', $event)"
         placeholder="Введите основание"
-        :rules="[rules.required]"
+        :rules="[rules.validateBasis]"
         class="organisation-data-form__input"
       />
     </div>
@@ -261,7 +263,7 @@
         :model-value="modelValue.mailingAddress"
         @update:model-value="updateField('mailingAddress', $event)"
         placeholder="Введите почтовый адрес"
-        :rules="[rules.required]"
+        :rules="[rules.validateMailingAddress]"
         class="organisation-data-form__input"
       />
     </div>
@@ -275,7 +277,7 @@
         :model-value="modelValue.legalAddress"
         @update:model-value="updateField('legalAddress', $event)"
         placeholder="Введите юридический адрес"
-        :rules="[rules.required]"
+        :rules="[rules.validateLegalAddress]"
         class="organisation-data-form__input"
       />
     </div>
@@ -439,6 +441,14 @@ export default {
         return
       }
       
+      // Проверяем валидность ИНН перед обновлением
+      const innValidation = rules.validateInn(value)
+      if (innValidation !== true) {
+        // ИНН невалиден, но все равно обновляем поле для отображения ошибки
+        this.updateField('inn', value)
+        return
+      }
+      
       // Обновляем поле ИНН
       this.updateField('inn', value)
       
@@ -458,6 +468,14 @@ export default {
       } else {
         this.currentSearchInn = null
       }
+    },
+
+    handleFullNamePersonUpdate(value) {
+      // Обновляем поле ФИО
+      this.updateField('fullNamePerson', value)
+      
+      // TODO: Добавить проверку ФИО через DaData API при необходимости
+      // Пока валидация выполняется через правила формы
     },
 
     async searchByInn(inn = null) {

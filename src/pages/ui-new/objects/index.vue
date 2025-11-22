@@ -38,7 +38,7 @@
       :show-notifications="true"
       :title="selectedObject ? null : 'Объекты'"
       :breadcrumbs="selectedObject ? [
-        { text: 'Объекты', path: '/ui-new/objects' },
+        { text: 'Объекты', onClick: handleBackToObjects },
         { text: selectedObject.name || 'Объект' }
       ] : null"
       :show-documents="false"
@@ -111,7 +111,7 @@ export default {
       isMobile: false,
       // ПК меню (8 пунктов) - для Sidebar
       desktopMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: null },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: '/ui-new/applications' },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), active: true, route: '/ui-new/objects' },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), active: false, route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), active: false, route: '/ui-new/FAQ' },
@@ -122,7 +122,7 @@ export default {
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: '/ui-new/applications' },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: '/ui-new/objects' },
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
@@ -235,8 +235,7 @@ export default {
       }
     },
     handleCreateObject() {
-      console.log('Create object clicked')
-      // TODO: Implement create object logic
+      this.$router.push('/ui-new/objects/create')
     },
     handleObjectAction(object) {
       // При клике на объект показываем детальную информацию
@@ -245,6 +244,9 @@ export default {
     handleBackToObjects() {
       // Возвращаемся к списку объектов
       this.selectedObject = null
+      if (this.$route.path !== '/ui-new/objects') {
+        this.$router.push('/ui-new/objects')
+      }
     },
     handleObjectsPageChange(page) {
       console.log('Page changed to:', page)

@@ -120,7 +120,7 @@ export default {
       isMobile: false,
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: '/ui-new/applications' },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: '/ui-new/objects' },
         { id: 3, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 4, title: 'Поддержка', iconPath: require('@/assets/icons/profile/help.svg'), route: '/ui-new/FAQ' },
@@ -131,7 +131,7 @@ export default {
       ],
       // Мобильное меню (5 пунктов) - для MobileBottomNav
       mobileMenuItems: [
-        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: null },
+        { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), route: '/ui-new/applications' },
         { id: 2, title: 'Объекты', iconPath: require('@/assets/icons/profile/objects-icon.svg'), route: '/ui-new/objects' },
         { id: 3, title: 'Финансы', iconPath: require('@/assets/icons/profile/wallet.svg'), route: null },
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },

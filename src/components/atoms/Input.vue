@@ -25,7 +25,10 @@
         <img class="icon" src="@/assets/icons/cross.svg" />
       </ButtonIconGhost>
       <ButtonIconGhost v-if="type === 'password'" @click="togglePassword">
-        <img class="icon" src="@/assets/icons/input/Eye.svg" />
+        <img 
+          class="icon" 
+          :src="currentType === 'password' ? require('@/assets/icons/input/Eye.svg') : require('@/assets/icons/eye_open.svg')" 
+        />
       </ButtonIconGhost>
       <slot name="right" />
       <ThinLineLoading class="progress_wrap" :show="loading" />
@@ -97,6 +100,16 @@ export default {
       errorMessage: null,
     }
   },
+  mounted () {
+    this.silentValidate()
+    // Загружаем состояние видимости пароля из localStorage
+    if (this.type === 'password' && typeof window !== 'undefined') {
+      const savedPasswordVisibility = window.localStorage.getItem('password.visible')
+      if (savedPasswordVisibility === 'true') {
+        this.currentType = 'text'
+      }
+    }
+  },
   watch: {
     value () {
       this.silentValidate()
@@ -116,9 +129,6 @@ export default {
         this.shakeIt()
       }
     },
-  },
-  mounted () {
-    this.silentValidate()
   },
   computed: {
     filteredAttrs () {
@@ -175,6 +185,10 @@ export default {
     },
     togglePassword () {
       this.currentType = this.currentType === 'password' ? 'text' : 'password'
+      // Сохраняем состояние видимости пароля в localStorage
+      if (this.type === 'password' && typeof window !== 'undefined') {
+        window.localStorage.setItem('password.visible', String(this.currentType === 'text'))
+      }
     },
     resetError () {
       this.isValid = true

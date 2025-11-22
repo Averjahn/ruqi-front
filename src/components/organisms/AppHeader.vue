@@ -11,21 +11,21 @@
             class="app-header__breadcrumb-item"
           >
             <span
-              v-if="crumb.path"
+              v-if="crumb.path || crumb.onClick"
               class="app-header__breadcrumb-link"
-              @click="handleBreadcrumbClick(crumb.path)"
+              @click="handleBreadcrumbClick(crumb)"
             >
               {{ crumb.text }}
             </span>
             <span v-else class="app-header__breadcrumb-text">
               {{ crumb.text }}
             </span>
-            <span
+            <img
               v-if="index < breadcrumbs.length - 1"
               class="app-header__breadcrumb-separator"
-            >
-              >
-            </span>
+              :src="chevronIcon"
+              alt=""
+            />
           </span>
         </nav>
         <!-- Title (if no breadcrumbs) -->
@@ -54,6 +54,8 @@ import UserMenu from '@/components/organisms/userMenu.vue'
 import UserNotifications from '@/components/organisms/UserNotifications.vue'
 import IconText from '@/components/molecules/IconText.vue'
 
+const OBJECTS_SELECTED_KEY = 'uiObjects.selectedObjectId'
+
 export default {
   name: 'AppHeader',
   components: {
@@ -79,10 +81,23 @@ export default {
       default: null
     }
   },
+  data() {
+    return {
+      chevronIcon: require('@/assets/icons/profile/Chevron.svg')
+    }
+  },
   methods: {
-    handleBreadcrumbClick(path) {
-      if (path) {
-        this.$router.push(path)
+    handleBreadcrumbClick(crumb) {
+      if (!crumb) return
+      if (typeof crumb.onClick === 'function') {
+        crumb.onClick()
+        return
+      }
+      if (crumb.path) {
+        if (crumb.path === '/ui-new/objects' && typeof window !== 'undefined') {
+          window.localStorage.removeItem(OBJECTS_SELECTED_KEY)
+        }
+        this.$router.push(crumb.path)
       }
     }
   }
@@ -93,7 +108,7 @@ export default {
 .app-header {
   position: fixed;
   top: 0;
-  left: 286px; // Sidebar width
+  left: var(--sidebar-width, 286px); // Используем CSS переменную, fallback на 286px
   right: 0;
   height: 64px;
   background: #ffffff;
@@ -101,6 +116,7 @@ export default {
   z-index: 90;
   display: flex;
   align-items: center;
+  transition: left 0.3s ease;
 
   &__content {
     width: 100%;
@@ -161,8 +177,10 @@ export default {
   }
 
   &__breadcrumb-separator {
-    color: #666666;
+    width: 12px;
+    height: 12px;
     margin: 0 4px;
+    object-fit: contain;
   }
 
   &__right {
@@ -223,5 +241,7 @@ export default {
     }
   }
 }
+
+// Стили для collapsed sidebar теперь не нужны, так как используется CSS переменная
 </style>
 
