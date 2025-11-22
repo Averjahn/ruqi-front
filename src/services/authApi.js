@@ -20,7 +20,7 @@ class AuthApiService {
         phone: phone,
         user_type: userType
       })
-      
+
       return {
         success: true,
         data: response.data

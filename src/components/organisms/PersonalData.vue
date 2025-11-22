@@ -45,6 +45,7 @@
               class="personal-data__input"
               placeholder="Введите фамилию"
             />
+            <p v-if="errors.lastName" class="error-text">{{ errors.lastName }}</p>
           </div>
           <div class="personal-data__input-field">
             <label class="personal-data__input-label">Имя</label>
@@ -54,6 +55,7 @@
               class="personal-data__input"
               placeholder="Введите имя"
             />
+            <p v-if="errors.firstName" class="error-text">{{ errors.firstName }}</p>
           </div>
           <div class="personal-data__input-field">
             <label class="personal-data__input-label">Отчество</label>
@@ -63,6 +65,7 @@
               class="personal-data__input"
               placeholder="Введите отчество"
             />
+            <p v-if="errors.middleName" class="error-text">{{ errors.middleName }}</p>
           </div>
           <div class="personal-data__actions">
             <button 
@@ -178,6 +181,11 @@ export default {
         firstName: '',
         middleName: ''
       },
+      errors: {
+        lastName: '',
+        firstName: '',
+        middleName: ''
+      },
       isPhoneModalOpen: false,
       isConfirmCodeModalOpen: false,
       pendingPhone: ''
@@ -217,6 +225,24 @@ export default {
       this.$emit('cancel')
     },
     handleSave() {
+      this.errors = { lastName: '', firstName: '', middleName: '' }
+
+      if (!this.validateFIO(this.editedData.lastName)) {
+        this.errors.lastName = 'Введите корректную фамилию'
+      }
+
+      if (!this.validateFIO(this.editedData.firstName)) {
+        this.errors.firstName = 'Введите корректное имя'
+      }
+
+      if (this.editedData.middleName && !this.validateFIO(this.editedData.middleName)) {
+        this.errors.middleName = 'Введите корректное отчество'
+      }
+
+      if (this.errors.lastName || this.errors.firstName || this.errors.middleName) {
+        return
+      }
+
       this.isEditing = false
       this.$emit('save', { ...this.editedData })
     },
@@ -242,6 +268,10 @@ export default {
     },
     handleTelegramLink() {
       this.$emit('telegram-link')
+    },
+    validateFIO(value) {
+      const fioRegex = /^[А-ЯЁ][а-яё-]{1,}$/;
+      return fioRegex.test(value.trim());
     }
   }
 }
@@ -430,5 +460,12 @@ export default {
     cursor: pointer;
   }
 }
+
+.error-text {
+  color: #E63946;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
 </style>
 
