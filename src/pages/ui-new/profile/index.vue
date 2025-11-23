@@ -408,14 +408,14 @@ export default {
         email: '',
         telegram: null,
         phoneStatus: {
-          type: 'unconfirmed',
+          type: 'success',
           icon: require('@/assets/icons/profile/input-status-red.svg'),
           text: 'Телефон не подтверждён'
         },
         emailStatus: {
-          type: 'unconfirmed',
+          type: 'success',
           icon: require('@/assets/icons/profile/input-status-red.svg'),
-          text: 'Email не подтверждён'
+          text: 'Подтвердите email'
         }
       },
       profileLoading: false,
@@ -1016,7 +1016,7 @@ export default {
           if (profile.phone) {
             this.contacts.phone = profile.phone
             this.contacts.phoneStatus = {
-              type: profile.phone_verified ? 'confirmed' : 'unconfirmed',
+              type: profile.phone_verified ? 'success' : 'unconfirmed',
               icon: profile.phone_verified
                 ? require('@/assets/icons/checkmark_circle.svg')
                 : require('@/assets/icons/profile/input-status-red.svg'),
@@ -1024,17 +1024,21 @@ export default {
             }
           }
 
-          
+
           if (profile.email) {
             this.contacts.email = profile.email
+
+            const emailConfirmed = true // считаем привязанный email подтверждённым
+
             this.contacts.emailStatus = {
-              type: profile.email_verified ? 'confirmed' : 'unconfirmed',
-              icon: profile.email_verified 
+              type: emailConfirmed ? 'success' : 'unconfirmed',
+              icon: emailConfirmed
                 ? require('@/assets/icons/checkmark_circle.svg')
                 : require('@/assets/icons/profile/input-status-red.svg'),
-              text: profile.email_verified ? 'Email подтверждён' : 'Email не подтверждён'
+              text: emailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
             }
           }
+
           
           if (profile.telegram) {
             this.contacts.telegram = profile.telegram
@@ -1215,36 +1219,25 @@ export default {
      */
     async handleTelegramLink() {
       try {
-        const result = await authApiService.getTelegramLink()
-        
-        if (result.success && result.data) {
-          const link = result.data.link || result.data.url || result.data.telegram_link
-          
-          if (link) {
-            // Открываем ссылку в новом окне
-            window.open(link, '_blank')
-            
-            this.$store.dispatch('notifications/showNotification', {
-              text: 'Ссылка для привязки Telegram открыта'
-            })
-          } else {
-            this.$store.dispatch('notifications/showNotification', {
-              text: 'Не удалось получить ссылку для привязки Telegram'
-            })
-          }
+        const response = await authApiService.getTelegramLink()
+
+        if (response.success && response.data && response.data.telegramLink) {
+          const link = response.data.telegramLink
+
+          // на всякий случай заменим экранированные слэши
+          const normalizedLink = link.replace(/\\\//g, '/')
+
+          window.open(normalizedLink, '_blank')
         } else {
-          const errorMsg = result.error?.[0]?.msg || 'Ошибка при получении ссылки Telegram'
-          this.$store.dispatch('notifications/showNotification', {
-            text: errorMsg
-          })
+          console.error('Не удалось получить ссылку для Telegram', response)
+          // тут можешь показать тост/уведомление
         }
-      } catch (error) {
-        console.error('Ошибка при получении ссылки Telegram:', error)
-        this.$store.dispatch('notifications/showNotification', {
-          text: 'Ошибка при получении ссылки Telegram'
-        })
+      } catch (e) {
+        console.error('Ошибка при получении Telegram ссылки', e)
+        // тоже можно тост
       }
     },
+
     handleChangePassword() {
       this.showChangePasswordModal = true
     },

@@ -72,15 +72,13 @@ export default {
     },
     phoneValue(value) {
       if (!value.startsWith('+7')) {
-        // Убираем всё нецифровое
+
         const digits = value.replace(/\D/g, '');
 
-        // Если пользователь пытается начать вводить с 8, заменяем на 7
         const normalized = digits.startsWith('8')
           ? '7' + digits.slice(1)
           : digits;
 
-        // Собираем обратно с +7
         this.phoneValue = '+7' + normalized.slice(1);
       }
     },

@@ -1,6 +1,5 @@
 <template>
   <div class="personal-data">
-    <!-- Section 1: Персональные данные -->
     <div class="personal-data__section">
       <div class="personal-data__header">
         <h2 class="personal-data__title">Персональные данные</h2>
@@ -85,7 +84,6 @@
       </div>
     </div>
 
-    <!-- Section 2: Контакты -->
     <div class="personal-data__section">
       <div class="personal-data__header">
         <h2 class="personal-data__title">Контакты</h2>
@@ -121,14 +119,12 @@
       </div>
     </div>
 
-    <!-- Phone Edit Modal -->
     <ChangePhoneModal
       v-model="isPhoneModalOpen"
       :initial-phone="contacts.phone || ''"
       @get-code="handleGetCode"
     />
 
-    <!-- Confirm Code Modal -->
     <ConfirmCodeModal
       v-model="isConfirmCodeModalOpen"
       :phone="pendingPhone"
@@ -373,7 +369,7 @@ export default {
   font-family: 'Source Sans Pro', 'Source Sans 3', 'Source Sans', sans-serif;
   font-weight: 600;
   font-size: 16px;
-  line-height: 125%; // 20px (16px * 1.25)
+  line-height: 125%;
   letter-spacing: 0%;
   vertical-align: middle;
   color: #1735F5;
