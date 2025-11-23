@@ -43,6 +43,7 @@
             type="primary"
             text="Получить код"
             @click="handleGetCode"
+            :disabled="isLoading"
             class="change-email-modal__button"
           />
         </div>
@@ -142,6 +143,7 @@ export default {
   }
 }
 </script>
+
 
 
 <style lang="scss" scoped>

@@ -493,7 +493,7 @@ export default {
     isMobileView() {
       return this.isMobile
     },
-    // Для Sidebar используем ПК меню (7 пунктов)
+
     sidebarMenuItems() {
       return this.desktopMenuItems
     }
@@ -507,10 +507,8 @@ export default {
       }
     }
 
-    // Сначала профиль (ФИО, email и т.п.)
     await this.loadClientProfile()
 
-    // Потом подстраховываемся данными из /status
     this.initContactsFromStatus()
   },
 
@@ -525,14 +523,13 @@ export default {
           return
         }
 
-        // --- Телефон ---
         if (status.phone) {
           const raw = String(status.phone)
           const digits = raw.replace(/\D/g, '')
 
           let formatted = raw
 
-          // Пытаемся привести к виду +7 (XXX) XXX-XX-XX
+
           if (digits.length === 11 && digits.charAt(0) === '7') {
             formatted =
               '+7 (' +
@@ -546,7 +543,7 @@ export default {
 
           this.contacts.phone = formatted
 
-          // Считаем, что если номер есть в /status — он подтверждён
+
           var isConfirmed = true
 
           this.contacts.phoneStatus = {
@@ -558,7 +555,6 @@ export default {
           }
         }
 
-        // --- Email (если хочешь тоже подтянуть из /status) ---
         if (status.email) {
           this.contacts.email = status.email
 
@@ -575,19 +571,16 @@ export default {
       },
 
     initMobileTracking() {
-      // Используем matchMedia для более надежного отслеживания ширины экрана
       if (typeof window !== 'undefined' && window.matchMedia) {
         this.mobileMediaQuery = window.matchMedia('(max-width: 768px)')
         this.isMobile = this.mobileMediaQuery.matches
         
-        // Используем addListener для совместимости со старыми браузерами
         if (this.mobileMediaQuery.addEventListener) {
           this.mobileMediaQuery.addEventListener('change', this.handleMediaChange)
         } else if (this.mobileMediaQuery.addListener) {
           this.mobileMediaQuery.addListener(this.handleMediaChange)
         }
       } else {
-        // Fallback для старых браузеров
         this.checkMobile()
         window.addEventListener('resize', this.checkMobile)
       }
@@ -629,12 +622,9 @@ export default {
       console.log('Sidebar icon clicked')
     },
     handleSidebarItemClick(item) {
-      // Обработка клика по элементу меню Sidebar
-      // Если есть route, переход произойдет автоматически через Sidebar компонент
       console.log('Sidebar item clicked:', item)
     },
     handleProfileMenuClick(item) {
-      // Единая логика для мобильной и десктопной версии - меняем контент без перехода на другую страницу
       if (item.id === 'account') {
         this.activeContent = 'account'
         this.activeProfileMenuItem = 'account'

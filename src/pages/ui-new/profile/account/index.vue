@@ -2,13 +2,13 @@
   <div class="ui-profile-account">
     <!-- Mobile Header -->
     <div v-if="isMobileView" class="ui-profile-account__mobile-header">
-      <button 
+      <button
         class="ui-profile-account__back-button"
         @click="handleBack"
       >
-        <img 
-          :src="require('@/assets/icons/profile/arrow-left.svg')" 
-          alt="Back" 
+        <img
+          :src="require('@/assets/icons/profile/arrow-left.svg')"
+          alt="Back"
           class="ui-profile-account__back-icon"
         />
       </button>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Desktop Header -->
-    <AppHeader 
+    <AppHeader
       v-if="!isMobileView"
       :show-notifications="true"
       title="Учётная запись"
@@ -27,15 +27,15 @@
     <!-- Content -->
     <div class="ui-profile-account__content">
       <!-- Mobile: Profile Avatar -->
-      <ProfileAvatar 
+      <ProfileAvatar
         v-if="isMobileView"
         :name="userName"
         :avatar-url="avatarUrl"
         @avatar-upload="handleAvatarUpload"
         @edit-click="handleAvatarEditClick"
       />
-      
-      <PersonalData 
+
+      <PersonalData
         :personal-data="personalData"
         :contacts="{
           phone: '+7 (999) 999-99-99',
@@ -59,8 +59,8 @@
         @email-click="handleEmailClick"
         @telegram-link="handleTelegramLink"
       />
-      
-      <ProfileActions 
+
+      <ProfileActions
         @change-password="handleChangePassword"
         @logout="handleLogout"
       />

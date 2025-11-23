@@ -57,6 +57,7 @@
 
 <script>
 import MainButton from '@/components/atoms/MainButton.vue'
+import authApi from '@/services/authApi'   // <-- вот сюда идет импорт
 
 export default {
   name: 'ChangePasswordEmailCodeModal',
@@ -82,6 +83,8 @@ export default {
     return {
       code: '',
       codeTouched: false,
+      isLoading: false,
+      apiErrorMessage: ''
     }
   },
   computed: {
@@ -93,6 +96,7 @@ export default {
     handleCancel() {
       this.code = ''
       this.codeTouched = false
+      this.apiErrorMessage = ''
       this.$emit('cancel')
       this.$emit('update:modelValue', false)
     },
@@ -101,19 +105,46 @@ export default {
         this.handleCancel()
       }
     },
-    handleSubmitCode() {
-      this.codeTouched = true
-      if (!this.isValidCode) return
 
-      this.$emit('submit-code', {
-        email: this.email,
-        code: this.code.trim(),
-      })
-      this.$emit('update:modelValue', false)
+    async handleSubmitCode() {
+      this.codeTouched = true
+      this.apiErrorMessage = ''
+
+      if (!this.isValidCode || this.isLoading) return
+
+      this.isLoading = true
+
+      const result = await authApi.confirmEmailBind(
+        this.code.trim(),
+        this.email
+      )
+
+      this.isLoading = false
+
+      if (result.success) {
+        this.$emit('submit-code', {
+          email: this.email,
+          code: this.code.trim(),
+          data: result.data
+        })
+        this.$emit('update:modelValue', false)
+      } else {
+        const err = result.error
+
+        if (Array.isArray(err)) {
+          const first = err[0] || {}
+          this.apiErrorMessage = first.msg || 'Неверный код'
+        } else if (err && err.msg) {
+          this.apiErrorMessage = err.msg
+        } else {
+          this.apiErrorMessage = 'Неверный код'
+        }
+      }
     },
   },
 }
 </script>
+
 
 <style scoped lang="scss">
 .change-email-code-modal-overlay {
