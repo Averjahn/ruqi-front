@@ -500,21 +500,80 @@ export default {
   },
   async mounted() {
     this.initMobileTracking()
-    
-    // Мок для глобальных функций
+
     if (typeof window !== 'undefined') {
       window.RqloggerError = window.RqloggerError || function() {
         console.warn('RqloggerError called:', arguments)
       }
     }
-    
-    // Загружаем профиль клиента при монтировании
+
+    // Сначала профиль (ФИО, email и т.п.)
     await this.loadClientProfile()
+
+    // Потом подстраховываемся данными из /status
+    this.initContactsFromStatus()
   },
+
   beforeUnmount() {
     this.cleanupMobileTracking()
   },
   methods: {
+      initContactsFromStatus() {
+        const status = this.$store.getters['auth/clientStatus']
+
+        if (!status) {
+          return
+        }
+
+        // --- Телефон ---
+        if (status.phone) {
+          const raw = String(status.phone)
+          const digits = raw.replace(/\D/g, '')
+
+          let formatted = raw
+
+          // Пытаемся привести к виду +7 (XXX) XXX-XX-XX
+          if (digits.length === 11 && digits.charAt(0) === '7') {
+            formatted =
+              '+7 (' +
+              digits.slice(1, 4) + ') ' +
+              digits.slice(4, 7) + '-' +
+              digits.slice(7, 9) + '-' +
+              digits.slice(9, 11)
+          } else if (raw.charAt(0) !== '+') {
+            formatted = '+' + raw
+          }
+
+          this.contacts.phone = formatted
+
+          // Считаем, что если номер есть в /status — он подтверждён
+          var isConfirmed = true
+
+          this.contacts.phoneStatus = {
+            type: isConfirmed ? 'success' : 'error',
+            icon: isConfirmed
+              ? require('@/assets/icons/checkmark_circle.svg')
+              : require('@/assets/icons/profile/input-status-red.svg'),
+            text: isConfirmed ? 'Телефон подтверждён' : 'Телефон не подтверждён'
+          }
+        }
+
+        // --- Email (если хочешь тоже подтянуть из /status) ---
+        if (status.email) {
+          this.contacts.email = status.email
+
+          var isEmailConfirmed = true
+
+          this.contacts.emailStatus = {
+            type: isEmailConfirmed ? 'success' : 'error',
+            icon: isEmailConfirmed
+              ? require('@/assets/icons/checkmark_circle.svg')
+              : require('@/assets/icons/profile/input-status-red.svg'),
+            text: isEmailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
+          }
+        }
+      },
+
     initMobileTracking() {
       // Используем matchMedia для более надежного отслеживания ширины экрана
       if (typeof window !== 'undefined' && window.matchMedia) {
@@ -963,18 +1022,18 @@ export default {
               middleName: profile.middle_name || ''
             }
           }
-          
-          // Обновляем контакты
+
           if (profile.phone) {
             this.contacts.phone = profile.phone
             this.contacts.phoneStatus = {
               type: profile.phone_verified ? 'confirmed' : 'unconfirmed',
-              icon: profile.phone_verified 
+              icon: profile.phone_verified
                 ? require('@/assets/icons/checkmark_circle.svg')
                 : require('@/assets/icons/profile/input-status-red.svg'),
               text: profile.phone_verified ? 'Телефон подтверждён' : 'Телефон не подтверждён'
             }
           }
+
           
           if (profile.email) {
             this.contacts.email = profile.email

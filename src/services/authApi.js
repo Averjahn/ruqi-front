@@ -627,7 +627,8 @@ class AuthApiService {
       const cleanPhone = phone.replace(/\D/g, '')
       
       const response = await axios.post('/api/v2/auth/client/phone/request-change', {
-        phone: cleanPhone
+        new_phone: cleanPhone,
+        verification_by: "sms"
       })
       
       // Проверяем успешность ответа от API
@@ -658,10 +659,6 @@ class AuthApiService {
   async confirmPhoneChange(code, phone = null) {
     try {
       const requestData = { code }
-      if (phone) {
-        const cleanPhone = phone.replace(/\D/g, '')
-        requestData.phone = cleanPhone
-      }
       
       const response = await axios.post('/api/v2/auth/client/phone/confirm-change', requestData)
       
