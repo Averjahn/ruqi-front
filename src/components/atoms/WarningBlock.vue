@@ -37,6 +37,7 @@ export default {
   align-items: flex-start;
   gap: 0;
   padding: 16px 12px 16px 16px;
+  margin-bottom: 32px;
   background: #F2F8FF;
   border: 1px solid #B0BAFF;
   border-radius: 8px;

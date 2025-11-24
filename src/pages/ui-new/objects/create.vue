@@ -276,6 +276,7 @@ export default {
       }
     },
     addContact() {
+      if (this.contacts.length >= 10) return
       const nextId = Date.now()
       this.contacts.push({ id: nextId, fullName: '', position: '', phone: '', email: '' })
     },
@@ -502,6 +503,11 @@ export default {
       width: 20px;
       height: 20px;
       filter: grayscale(1);
+      transition: filter 0.2s ease;
+    }
+
+    &:hover img {
+      filter: brightness(0) saturate(100%) invert(58%) sepia(59%) saturate(4717%) hue-rotate(341deg) brightness(99%) contrast(92%);
     }
   }
 

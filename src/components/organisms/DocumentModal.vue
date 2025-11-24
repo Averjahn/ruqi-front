@@ -9,7 +9,7 @@
         <div class="document-modal__header">
           <h3 class="document-modal__title">{{ title }}</h3>
           <button class="document-modal__close" @click="close">
-            <img src="@/assets/icons/cross_white.svg" alt="Close" class="document-modal__close-icon" />
+            <img src="@/assets/icons/cross.svg" alt="Close" class="document-modal__close-icon" />
           </button>
         </div>
         <div class="document-modal__content">
@@ -86,7 +86,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: none;
 }
 
 .document-modal__title {
@@ -105,13 +105,14 @@ export default {
   transition: background-color 0.2s ease;
 
   &:hover {
-    background: #f3f4f6;
+    background: transparent;
   }
 }
 
 .document-modal__close-icon {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) saturate(100%) invert(41%) sepia(0%) saturate(0%) hue-rotate(345deg) brightness(95%) contrast(87%);
 }
 
 .document-modal__content {
