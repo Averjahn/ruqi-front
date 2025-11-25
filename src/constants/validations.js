@@ -1,6 +1,23 @@
 import dayjs from '@/plugins/dayjs'
 export const EMAIL_REGEXP = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
+// Валидация ИНН при вводе (без проверки длины)
+export const validateInnFormat = (inn) => {
+  if (typeof inn === 'number') {
+    inn = inn.toString()
+  } else if (typeof inn !== 'string') {
+    inn = ''
+  }
+  if (inn.length === 0) {
+    return true // Пустое значение валидно при вводе
+  }
+  if (/[^0-9]/.test(inn)) {
+    return 'ИНН может состоять только из цифр'
+  }
+  return true
+}
+
+// Валидация ИНН с проверкой длины (для blur)
 export const validateInn = (inn) => {
   if (typeof inn === 'number') {
     inn = inn.toString()
@@ -223,35 +240,70 @@ export function isSnilsValid (value) {
   return 'Неверная контрольная сумма в СНИЛС'
 }
 
-// Валидация полного наименования организации - не может быть латинских символов
+// Валидация полного наименования организации - только формат (при вводе)
+export const validateFullNameFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация полного наименования организации - полная (при blur)
 export const validateFullName = (v) => {
   if (!v) return 'Обязательное поле'
   if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
   return true
 }
 
-// Валидация КПП - только цифры
+// Валидация КПП - только формат (при вводе)
+export const validateKppDigitsFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (!/^[0-9]+$/.test(v)) return 'КПП может состоять только из цифр'
+  return true
+}
+
+// Валидация КПП - полная (при blur)
 export const validateKppDigits = (v) => {
   if (!v) return 'Обязательное поле'
   if (!/^[0-9]+$/.test(v)) return 'КПП может состоять только из цифр'
   return true
 }
 
-// Валидация ОГРН - только цифры
+// Валидация ОГРН - только формат (при вводе)
+export const validateOgrnFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (!/^[0-9]+$/.test(v)) return 'ОГРН может состоять только из цифр'
+  return true
+}
+
+// Валидация ОГРН - полная (при blur)
 export const validateOgrn = (v) => {
   if (!v) return 'Обязательное поле'
   if (!/^[0-9]+$/.test(v)) return 'ОГРН может состоять только из цифр'
   return true
 }
 
-// Валидация ОКАТО - только цифры
+// Валидация ОКАТО - только формат (при вводе)
+export const validateOkatoFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (!/^[0-9]+$/.test(v)) return 'ОКАТО может состоять только из цифр'
+  return true
+}
+
+// Валидация ОКАТО - полная (при blur)
 export const validateOkato = (v) => {
   if (!v) return 'Обязательное поле'
   if (!/^[0-9]+$/.test(v)) return 'ОКАТО может состоять только из цифр'
   return true
 }
 
-// Валидация ФИО - только русские буквы, 2 или 3 слова
+// Валидация ФИО - только формат (при вводе)
+export const validateFullNamePersonFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (!/^[а-яёА-ЯЁ\s-]+$/.test(v)) return 'ФИО может состоять только из русских букв'
+  return true
+}
+
+// Валидация ФИО - полная (при blur)
 export const validateFullNamePerson = (v) => {
   if (!v) return 'Обязательное поле'
   if (!/^[а-яёА-ЯЁ\s-]+$/.test(v)) return 'ФИО может состоять только из русских букв'
@@ -260,28 +312,56 @@ export const validateFullNamePerson = (v) => {
   return true
 }
 
-// Валидация должности - только русские буквы и запятые
+// Валидация должности - только формат (при вводе)
+export const validatePositionFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (!/^[а-яёА-ЯЁ\s-,]+$/.test(v)) return 'Должность может состоять только из русских букв и запятых'
+  return true
+}
+
+// Валидация должности - полная (при blur)
 export const validatePosition = (v) => {
   if (!v) return 'Обязательное поле'
   if (!/^[а-яёА-ЯЁ\s-,]+$/.test(v)) return 'Должность может состоять только из русских букв и запятых'
   return true
 }
 
-// Валидация "На основании чего" - не может быть латинских символов
+// Валидация "На основании чего" - только формат (при вводе)
+export const validateBasisFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация "На основании чего" - полная (при blur)
 export const validateBasis = (v) => {
   if (!v) return 'Обязательное поле'
   if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
   return true
 }
 
-// Валидация почтового адреса - не может быть латинских символов
+// Валидация почтового адреса - только формат (при вводе)
+export const validateMailingAddressFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация почтового адреса - полная (при blur)
 export const validateMailingAddress = (v) => {
   if (!v) return 'Обязательное поле'
   if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
   return true
 }
 
-// Валидация юридического адреса - не может быть латинских символов
+// Валидация юридического адреса - только формат (при вводе)
+export const validateLegalAddressFormat = (v) => {
+  if (!v || v.length === 0) return true // Пустое значение валидно при вводе
+  if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'
+  return true
+}
+
+// Валидация юридического адреса - полная (при blur)
 export const validateLegalAddress = (v) => {
   if (!v) return 'Обязательное поле'
   if (/[a-zA-Z]/.test(v)) return 'Не может содержать латинские символы'

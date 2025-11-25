@@ -47,7 +47,7 @@
       <!-- Иконка глаза для показа/скрытия -->
       <div v-if="type === 'password'" class="eye_icon" @click="togglePasswordVisibility">
         <img 
-          :src="showPassword ? '@/assets/icons/eye_open.svg' : '@/assets/icons/eye_closed.svg'" 
+          :src="showPassword ? require('@/assets/icons/input/Eye.svg') : require('@/assets/icons/eye-off.svg')" 
           :alt="showPassword ? 'Скрыть' : 'Показать'"
           class="eye_icon_img"
         />

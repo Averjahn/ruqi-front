@@ -192,6 +192,17 @@ export default {
           window.localStorage.removeItem(SELECTED_OBJECT_STORAGE_KEY)
         }
       }
+    },
+    '$route.params.objectId': {
+      handler(objectId) {
+        this.setSelectedObjectById(objectId)
+      }
+    },
+    objects() {
+      const routeObjectId = this.$route.params?.objectId
+      if (routeObjectId) {
+        this.setSelectedObjectById(routeObjectId)
+      }
     }
   },
   methods: {
@@ -207,15 +218,34 @@ export default {
       }
     },
     restoreSelectedObject() {
+      const routeObjectId = this.$route.params?.objectId
+      if (routeObjectId) {
+        this.setSelectedObjectById(routeObjectId)
+        return
+      }
       if (typeof window === 'undefined') return
       const savedObjectId = window.localStorage.getItem(SELECTED_OBJECT_STORAGE_KEY)
       if (savedObjectId && this.objects.length > 0) {
-        const objectId = parseInt(savedObjectId, 10)
-        const foundObject = this.objects.find(obj => obj.id === objectId)
-        if (foundObject) {
-          this.selectedObject = foundObject
-        } else {
-          // Если объект не найден, очищаем сохраненное значение
+        this.setSelectedObjectById(savedObjectId)
+      }
+    },
+    setSelectedObjectById(objectId) {
+      if (!objectId) {
+        this.selectedObject = null
+        return
+      }
+      const numericId = parseInt(objectId, 10)
+      if (Number.isNaN(numericId)) {
+        this.selectedObject = null
+        return
+      }
+      const foundObject = this.objects.find(obj => obj.id === numericId)
+      if (foundObject) {
+        this.selectedObject = foundObject
+      } else {
+        this.selectedObject = null
+        if (typeof window !== 'undefined' && this.objects.length > 0) {
+          // Если объект не найден в текущем списке, очищаем сохраненное значение
           window.localStorage.removeItem(SELECTED_OBJECT_STORAGE_KEY)
         }
       }
@@ -238,8 +268,13 @@ export default {
       this.$router.push('/ui-new/objects/create')
     },
     handleObjectAction(object) {
-      // При клике на объект показываем детальную информацию
+      if (!object || !object.id) return
+      // При клике на объект показываем детальную информацию и переходим на route
       this.selectedObject = object
+      const targetPath = `/ui-new/objects/${object.id}`
+      if (this.$route.path !== targetPath) {
+        this.$router.push(targetPath)
+      }
     },
     handleBackToObjects() {
       // Возвращаемся к списку объектов

@@ -11,6 +11,7 @@ export const routes = [
   { path: '/ui-new/organisation-data', component: i('/ui-new/organisation-data/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/platform-documents', component: i('/ui-new/platform-documents/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/objects', component: i('/ui-new/objects/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
+  { path: '/ui-new/objects/:objectId', component: i('/ui-new/objects/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/objects/create', component: i('/ui-new/objects/create.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/objects/create-vacancy', component: i('/ui-new/objects/create-vacancy.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
   { path: '/ui-new/applications', component: i('/ui-new/applications/index.vue'), meta: { requiresAuth: false, layout: 'EmptyLayout' } },
