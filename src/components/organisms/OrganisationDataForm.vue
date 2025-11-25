@@ -36,7 +36,6 @@
           @update:model-value="updateField('vatRate', $event)"
           :options="vatRateOptions"
           placeholder="Выберите значение"
-          :rules="[rules.required]"
           class="organisation-data-form__input"
           item-value="value"
           item-text="label"
@@ -69,7 +68,6 @@
           @update:model-value="updateField('vatRate', $event)"
           :options="vatRateOptions"
           placeholder="Выберите значение"
-          :rules="[rules.required]"
           class="organisation-data-form__input"
           item-value="value"
           item-text="label"
@@ -83,10 +81,12 @@
         Полное наименование организации*
       </label>
       <Input
+        ref="fullNameInput"
         :model-value="modelValue.fullName"
         @update:model-value="updateField('fullName', $event)"
+        @blur="handleFieldBlur('fullName')"
         placeholder="Введите полное наименование"
-        :rules="[rules.validateFullName]"
+        :rules="fullNameValidationRules"
         class="organisation-data-form__input"
       />
     </div>
@@ -97,13 +97,15 @@
         ИНН*
       </label>
       <div class="organisation-data-form__inn-search">
-        <Input
-          :model-value="modelValue.inn"
-          @update:model-value="handleInnUpdate"
-          placeholder="Введите ИНН"
-          :rules="[rules.required, rules.validateInn]"
-          class="organisation-data-form__input"
-        />
+          <Input
+            ref="innInputDesktop"
+            :model-value="modelValue.inn"
+            @update:model-value="handleInnUpdate"
+            @blur="handleInnBlur"
+            placeholder="Введите ИНН"
+            :rules="innValidationRules"
+            class="organisation-data-form__input"
+          />
       </div>
       <div v-if="dadataError" class="organisation-data-form__error">
         {{ dadataError }}
@@ -118,10 +120,12 @@
           КПП*
         </label>
         <Input
+          ref="kppInputDesktop"
           :model-value="modelValue.kpp"
           @update:model-value="updateField('kpp', $event)"
+          @blur="handleFieldBlur('kpp')"
           placeholder="Введите КПП"
-          :rules="[rules.validateKppDigits]"
+          :rules="kppValidationRules"
           class="organisation-data-form__input"
         />
       </div>
@@ -130,10 +134,12 @@
           ОГРН*
         </label>
         <Input
+          ref="ogrnInputDesktop"
           :model-value="modelValue.ogrn"
           @update:model-value="updateField('ogrn', $event)"
+          @blur="handleFieldBlur('ogrn')"
           placeholder="Введите ОГРН"
-          :rules="[rules.validateOgrn]"
+          :rules="ogrnValidationRules"
           class="organisation-data-form__input"
         />
       </div>
@@ -142,10 +148,12 @@
           ОКАТО*
         </label>
         <Input
+          ref="okatoInputDesktop"
           :model-value="modelValue.okato"
           @update:model-value="updateField('okato', $event)"
+          @blur="handleFieldBlur('okato')"
           placeholder="Введите ОКАТО"
-          :rules="[rules.validateOkato]"
+          :rules="okatoValidationRules"
           class="organisation-data-form__input"
         />
       </div>
@@ -158,10 +166,12 @@
           ОКАТО*
         </label>
         <Input
+          ref="okatoInputMobile"
           :model-value="modelValue.okato"
           @update:model-value="updateField('okato', $event)"
+          @blur="handleFieldBlur('okato')"
           placeholder="Введите ОКАТО"
-          :rules="[rules.validateOkato]"
+          :rules="okatoValidationRules"
           class="organisation-data-form__input"
         />
       </div>
@@ -171,10 +181,12 @@
         </label>
         <div class="organisation-data-form__inn-search">
           <Input
+            ref="innInputMobile"
             :model-value="modelValue.inn"
             @update:model-value="handleInnUpdate"
+            @blur="handleInnBlur"
             placeholder="Введите ИНН"
-            :rules="[rules.required, rules.validateInn]"
+            :rules="innValidationRules"
             class="organisation-data-form__input"
           />
         </div>
@@ -191,10 +203,12 @@
           КПП*
         </label>
         <Input
+          ref="kppInputMobile"
           :model-value="modelValue.kpp"
           @update:model-value="updateField('kpp', $event)"
+          @blur="handleFieldBlur('kpp')"
           placeholder="Введите КПП"
-          :rules="[rules.validateKppDigits]"
+          :rules="kppValidationRules"
           class="organisation-data-form__input"
         />
       </div>
@@ -203,10 +217,12 @@
           ОГРН*
         </label>
         <Input
+          ref="ogrnInputMobile"
           :model-value="modelValue.ogrn"
           @update:model-value="updateField('ogrn', $event)"
+          @blur="handleFieldBlur('ogrn')"
           placeholder="Введите ОГРН"
-          :rules="[rules.validateOgrn]"
+          :rules="ogrnValidationRules"
           class="organisation-data-form__input"
         />
       </div>
@@ -218,10 +234,12 @@
         ФИО*
       </label>
       <Input
+        ref="fullNamePersonInput"
         :model-value="modelValue.fullNamePerson"
         @update:model-value="handleFullNamePersonUpdate"
+        @blur="handleFieldBlur('fullNamePerson')"
         placeholder="Введите ФИО"
-        :rules="[rules.validateFullNamePerson]"
+        :rules="fullNamePersonValidationRules"
         class="organisation-data-form__input"
       />
     </div>
@@ -232,10 +250,12 @@
         Должность*
       </label>
       <Input
+        ref="positionInput"
         :model-value="modelValue.position"
         @update:model-value="updateField('position', $event)"
+        @blur="handleFieldBlur('position')"
         placeholder="Введите должность"
-        :rules="[rules.validatePosition]"
+        :rules="positionValidationRules"
         class="organisation-data-form__input"
       />
     </div>
@@ -246,10 +266,12 @@
         На основании чего*
       </label>
       <Input
+        ref="basisInput"
         :model-value="modelValue.basis"
         @update:model-value="updateField('basis', $event)"
+        @blur="handleFieldBlur('basis')"
         placeholder="Введите основание"
-        :rules="[rules.validateBasis]"
+        :rules="basisValidationRules"
         class="organisation-data-form__input"
       />
     </div>
@@ -260,10 +282,12 @@
         Почтовый адрес*
       </label>
       <Input
+        ref="mailingAddressInput"
         :model-value="modelValue.mailingAddress"
         @update:model-value="updateField('mailingAddress', $event)"
+        @blur="handleFieldBlur('mailingAddress')"
         placeholder="Введите почтовый адрес"
-        :rules="[rules.validateMailingAddress]"
+        :rules="mailingAddressValidationRules"
         class="organisation-data-form__input"
       />
     </div>
@@ -274,10 +298,12 @@
         Юридический адрес*
       </label>
       <Input
+        ref="legalAddressInput"
         :model-value="modelValue.legalAddress"
         @update:model-value="updateField('legalAddress', $event)"
+        @blur="handleFieldBlur('legalAddress')"
         placeholder="Введите юридический адрес"
-        :rules="[rules.validateLegalAddress]"
+        :rules="legalAddressValidationRules"
         class="organisation-data-form__input"
       />
     </div>
@@ -292,7 +318,6 @@
           :model-value="modelValue.settlementAccount"
           @update:model-value="updateField('settlementAccount', $event)"
           placeholder="Введите расчётный счёт"
-          :rules="[rules.required]"
           class="organisation-data-form__input"
         />
       </div>
@@ -304,7 +329,6 @@
           :model-value="modelValue.correspondentAccount"
           @update:model-value="updateField('correspondentAccount', $event)"
           placeholder="Введите корреспондентский счёт"
-          :rules="[rules.required]"
           class="organisation-data-form__input"
         />
       </div>
@@ -320,7 +344,6 @@
           :model-value="modelValue.bic"
           @update:model-value="updateField('bic', $event)"
           placeholder="Введите БИК"
-          :rules="[rules.required]"
           class="organisation-data-form__input"
         />
       </div>
@@ -332,7 +355,6 @@
           :model-value="modelValue.bank"
           @update:model-value="updateField('bank', $event)"
           placeholder="Введите банк"
-          :rules="[rules.required]"
           class="organisation-data-form__input"
         />
       </div>
@@ -346,8 +368,28 @@ import Select from '@/components/atoms/Select.vue'
 import Form from '@/components/atoms/Form.vue'
 import FieldsRow from '@/components/atoms/FieldsRow.vue'
 import LogoUpload from '@/components/atoms/LogoUpload.vue'
-import { rules } from '@/constants/validations'
+import { 
+  rules, 
+  validateInnFormat, 
+  validateInn,
+  validateFullNameFormat,
+  validateKppDigitsFormat,
+  validateOgrnFormat,
+  validateOkatoFormat,
+  validateFullNamePersonFormat,
+  validatePositionFormat,
+  validateBasisFormat,
+  validateMailingAddressFormat,
+  validateLegalAddressFormat
+} from '@/constants/validations'
 import dadataApi from '@/services/dadataApi'
+
+const makeOptionalRule = (validator) => (value) => {
+  if (value === null || value === undefined) return true
+  if (typeof value === 'string' && value.trim() === '') return true
+  if (Array.isArray(value) && value.length === 0) return true
+  return validator(value)
+}
 
 export default {
   name: 'OrganisationDataForm',
@@ -376,6 +418,31 @@ export default {
   data() {
     return {
       rules,
+      optionalRules: {
+        validateFullName: makeOptionalRule(validateFullNameFormat), // При вводе проверяем только формат
+        validateInn: makeOptionalRule(validateInnFormat), // При вводе проверяем только формат
+        validateInnOnBlur: makeOptionalRule(validateInn), // При blur проверяем полную валидацию
+        validateKppDigits: makeOptionalRule(validateKppDigitsFormat), // При вводе проверяем только формат
+        validateOgrn: makeOptionalRule(validateOgrnFormat), // При вводе проверяем только формат
+        validateOkato: makeOptionalRule(validateOkatoFormat), // При вводе проверяем только формат
+        validateFullNamePerson: makeOptionalRule(validateFullNamePersonFormat), // При вводе проверяем только формат
+        validatePosition: makeOptionalRule(validatePositionFormat), // При вводе проверяем только формат
+        validateBasis: makeOptionalRule(validateBasisFormat), // При вводе проверяем только формат
+        validateMailingAddress: makeOptionalRule(validateMailingAddressFormat), // При вводе проверяем только формат
+        validateLegalAddress: makeOptionalRule(validateLegalAddressFormat), // При вводе проверяем только формат
+      },
+      // Правила валидации для каждого поля (переключаются при blur)
+      fullNameValidationRules: [makeOptionalRule(validateFullNameFormat)],
+      kppValidationRules: [makeOptionalRule(validateKppDigitsFormat)],
+      ogrnValidationRules: [makeOptionalRule(validateOgrnFormat)],
+      okatoValidationRules: [makeOptionalRule(validateOkatoFormat)],
+      fullNamePersonValidationRules: [makeOptionalRule(validateFullNamePersonFormat)],
+      positionValidationRules: [makeOptionalRule(validatePositionFormat)],
+      basisValidationRules: [makeOptionalRule(validateBasisFormat)],
+      mailingAddressValidationRules: [makeOptionalRule(validateMailingAddressFormat)],
+      legalAddressValidationRules: [makeOptionalRule(validateLegalAddressFormat)],
+      innValidationRules: [makeOptionalRule(validateInnFormat)], // По умолчанию только формат
+      innValidationRules: [makeOptionalRule(validateInnFormat)], // По умолчанию только формат
       dadataLoading: false,
       dadataError: null,
       searchTimeout: null,
@@ -403,6 +470,9 @@ export default {
     },
 
     handleInnUpdate(value) {
+      // При вводе используем только проверку формата (без длины)
+      this.innValidationRules = [makeOptionalRule(validateInnFormat)]
+      
       // Очищаем предыдущий таймер, если он есть
       if (this.searchTimeout) {
         clearTimeout(this.searchTimeout)
@@ -441,14 +511,6 @@ export default {
         return
       }
       
-      // Проверяем валидность ИНН перед обновлением
-      const innValidation = rules.validateInn(value)
-      if (innValidation !== true) {
-        // ИНН невалиден, но все равно обновляем поле для отображения ошибки
-        this.updateField('inn', value)
-        return
-      }
-      
       // Обновляем поле ИНН
       this.updateField('inn', value)
       
@@ -470,12 +532,112 @@ export default {
       }
     },
 
+    handleInnBlur() {
+      // При blur переключаем на полную валидацию с проверкой длины
+      this.innValidationRules = [makeOptionalRule(validateInn)]
+      // Принудительно валидируем поле после смены правил
+      this.$nextTick(() => {
+        // Валидируем оба инпута (десктопный и мобильный)
+        if (this.$refs.innInputDesktop && typeof this.$refs.innInputDesktop.validate === 'function') {
+          this.$refs.innInputDesktop.validate(true)
+        }
+        if (this.$refs.innInputMobile && typeof this.$refs.innInputMobile.validate === 'function') {
+          this.$refs.innInputMobile.validate(true)
+        }
+      })
+    },
+
     handleFullNamePersonUpdate(value) {
       // Обновляем поле ФИО
       this.updateField('fullNamePerson', value)
       
       // TODO: Добавить проверку ФИО через DaData API при необходимости
       // Пока валидация выполняется через правила формы
+    },
+
+    handleFieldBlur(fieldName) {
+      // Переключаем правила валидации на полную проверку при blur
+      const validationRulesMap = {
+        fullName: {
+          rules: 'fullNameValidationRules',
+          fullValidator: rules.validateFullName
+        },
+        kpp: {
+          rules: 'kppValidationRules',
+          fullValidator: rules.validateKppDigits
+        },
+        ogrn: {
+          rules: 'ogrnValidationRules',
+          fullValidator: rules.validateOgrn
+        },
+        okato: {
+          rules: 'okatoValidationRules',
+          fullValidator: rules.validateOkato
+        },
+        fullNamePerson: {
+          rules: 'fullNamePersonValidationRules',
+          fullValidator: rules.validateFullNamePerson
+        },
+        position: {
+          rules: 'positionValidationRules',
+          fullValidator: rules.validatePosition
+        },
+        basis: {
+          rules: 'basisValidationRules',
+          fullValidator: rules.validateBasis
+        },
+        mailingAddress: {
+          rules: 'mailingAddressValidationRules',
+          fullValidator: rules.validateMailingAddress
+        },
+        legalAddress: {
+          rules: 'legalAddressValidationRules',
+          fullValidator: rules.validateLegalAddress
+        }
+      }
+
+      const fieldConfig = validationRulesMap[fieldName]
+      if (fieldConfig) {
+        // Переключаем на полную валидацию
+        this[fieldConfig.rules] = [makeOptionalRule(fieldConfig.fullValidator)]
+        
+        // Принудительно валидируем поле после смены правил
+        this.$nextTick(() => {
+          // Пробуем найти ref для десктопной и мобильной версий
+          const desktopRefName = `${fieldName}InputDesktop`
+          const mobileRefName = `${fieldName}InputMobile`
+          const singleRefName = `${fieldName}Input`
+          
+          const desktopRef = this.$refs[desktopRefName]
+          const mobileRef = this.$refs[mobileRefName]
+          const singleRef = this.$refs[singleRefName]
+          
+          if (desktopRef && typeof desktopRef.validate === 'function') {
+            desktopRef.validate(true)
+          }
+          if (mobileRef && typeof mobileRef.validate === 'function') {
+            mobileRef.validate(true)
+          }
+          if (singleRef && typeof singleRef.validate === 'function') {
+            singleRef.validate(true)
+          }
+        })
+      }
+    },
+
+    handleInnBlur() {
+      // При blur переключаем на полную валидацию с проверкой длины
+      this.innValidationRules = [makeOptionalRule(validateInn)]
+      // Принудительно валидируем поле после смены правил
+      this.$nextTick(() => {
+        // Валидируем оба инпута (десктопный и мобильный)
+        if (this.$refs.innInputDesktop && typeof this.$refs.innInputDesktop.validate === 'function') {
+          this.$refs.innInputDesktop.validate(true)
+        }
+        if (this.$refs.innInputMobile && typeof this.$refs.innInputMobile.validate === 'function') {
+          this.$refs.innInputMobile.validate(true)
+        }
+      })
     },
 
     async searchByInn(inn = null) {

@@ -15,13 +15,6 @@
               </template>
             </Input>
           </div>
-          <button class="object-detail-content__filter-button" @click="handleFilterClick">
-            <img src="@/assets/icons/profile/Filter.svg" alt="Filter" class="object-detail-content__filter-icon" />
-          </button>
-          <button class="object-detail-content__filter-button-mobile" @click="handleFilterClick">
-            <img src="@/assets/icons/profile/Filter.svg" alt="Filter" class="object-detail-content__filter-icon" />
-            Фильтры
-          </button>
         </div>
         <div class="object-detail-content__toolbar-bottom">
           <div class="object-detail-content__vat-info">
@@ -205,13 +198,17 @@ export default {
     }
   },
   methods: {
-    handleFilterClick() {
-      console.log('Filter clicked')
-      // TODO: Implement filter logic
-    },
     handleAddVacancy() {
-      console.log('Add vacancy clicked')
-      // TODO: Implement add vacancy logic
+      // Получаем объект из родительского компонента или localStorage
+      const object = this.$parent?.object || {}
+      const objectId = object.id || (typeof window !== 'undefined' ? window.localStorage.getItem('uiObjects.selectedObjectId') : null)
+      const objectName = object.name || null
+      
+      const query = {}
+      if (objectId) query.objectId = objectId
+      if (objectName) query.objectName = objectName
+      
+      this.$router.push({ path: '/ui-new/objects/create-vacancy', query })
     },
     handleSelectAll(event) {
       if (event.target.checked) {

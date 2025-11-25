@@ -666,15 +666,13 @@ padding-left: 24px;
   gap: 16px;
   align-items: center;
   margin-bottom: 16px;
-  padding-left: 24px;
-  padding-right: 24px;
   justify-content: space-between;
 
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 12px;
     padding: 0;
-  margin-bottom: 16px;
+    margin-bottom: 16px;
   }
 }
 
