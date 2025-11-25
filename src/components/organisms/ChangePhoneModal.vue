@@ -1,10 +1,6 @@
 <template>
   <teleport to="body">
-    <div 
-      v-if="modelValue" 
-      class="change-phone-modal-overlay" 
-      @click="handleBackdropClick"
-    >
+    <div v-if="modelValue" class="change-phone-modal-overlay" @click="handleBackdropClick">
       <div class="change-phone-modal" @click.stop>
         <div class="change-phone-modal__header">
           <h3 class="change-phone-modal__title">Изменить телефон для входа</h3>
@@ -19,21 +15,15 @@
             type="phone"
             placeholder="+7 900 000-00-00"
             class="change-phone-modal__input"
+            :class="{ 'input-error': errorMessage }"
           />
+          <p v-if="errorMessage" class="change-phone-modal__error">
+            {{ errorMessage }}
+          </p>
         </div>
         <div class="change-phone-modal__footer">
-          <MainButton
-            type="primary-outline"
-            text="Отмена"
-            @click="close"
-            class="change-phone-modal__button"
-          />
-          <MainButton
-            type="primary"
-            text="Получить код"
-            @click="handleGetCode"
-            class="change-phone-modal__button"
-          />
+          <MainButton type="primary-outline" text="Отмена" @click="close" class="change-phone-modal__button" />
+          <MainButton type="primary" text="Получить код" @click="handleGetCode" class="change-phone-modal__button" />
         </div>
       </div>
     </div>
@@ -48,26 +38,27 @@ export default {
   name: 'ChangePhoneModal',
   components: {
     UnifiedInputField,
-    MainButton
+    MainButton,
   },
   props: {
     modelValue: {
       type: Boolean,
-      default: false
+      default: false,
     },
     initialPhone: {
       type: String,
-      default: '+7 900 000-00-00'
+      default: '+7 900 000-00-00',
     },
     closeOnBackdrop: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   emits: ['update:modelValue', 'get-code'],
   data() {
     return {
-      phoneValue: this.initialPhone
+      phoneValue: this.initialPhone,
+      errorMessage: '',
     }
   },
   watch: {
@@ -78,7 +69,19 @@ export default {
     },
     initialPhone(newVal) {
       this.phoneValue = newVal
-    }
+    },
+    phoneValue(value) {
+      if (!value.startsWith('+7')) {
+
+        const digits = value.replace(/\D/g, '');
+
+        const normalized = digits.startsWith('8')
+          ? '7' + digits.slice(1)
+          : digits;
+
+        this.phoneValue = '+7' + normalized.slice(1);
+      }
+    },
   },
   methods: {
     close() {
@@ -90,9 +93,19 @@ export default {
       }
     },
     handleGetCode() {
-      this.$emit('get-code', this.phoneValue)
-    }
-  }
+      const digits = this.phoneValue.replace(/\D/g, '')
+
+      const isValid = digits.length === 11 && digits.startsWith('7')
+
+      if (!isValid) {
+        this.errorMessage = 'Неверный номер, попробуйте еще раз'
+        return
+      }
+
+      this.errorMessage = ''
+      this.$emit('get-code', digits)
+    },
+  },
 }
 </script>
 
@@ -104,7 +117,7 @@ export default {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(0px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,7 +133,9 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   min-width: 359px;
   max-width: 560px;
   width: 100%;
@@ -190,14 +205,30 @@ export default {
     font-size: 18px;
     line-height: 24px;
   }
-  
+
   &.main-button--primary-outline :deep(.main-button__text) {
-    color: #1735F5;
+    color: #1735f5;
   }
-  
+
   &.main-button--primary :deep(.main-button__text) {
-    color: #FFFFFF;
+    color: #ffffff;
   }
+}
+
+.change-phone-modal__error {
+  font-size: 14px;
+  color: #e53935;
+  margin-top: -8px;
+}
+
+.input-error {
+  background: #fff6f6;
+  border-color: #ffb3b3 !important;
+}
+
+.input-error :deep(input) {
+  background: #fff6f6 !important;
+  border-color: #ffb3b3 !important;
 }
 
 @media (max-width: 768px) {
@@ -228,5 +259,5 @@ export default {
     }
   }
 }
-</style>
 
+</style>

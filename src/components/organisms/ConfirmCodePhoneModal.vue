@@ -1,8 +1,8 @@
 <template>
   <teleport to="body">
-    <div 
-      v-if="modelValue" 
-      class="confirm-code-modal-overlay" 
+    <div
+      v-if="modelValue"
+      class="confirm-code-modal-overlay"
       @click="handleBackdropClick"
     >
       <div class="confirm-code-modal" @click.stop>
@@ -39,9 +39,10 @@
             type="primary"
             text="Подтвердить"
             @click="handleConfirm"
-            :disabled="!isCodeComplete || !isCodeValid"
+            :disabled="!isCodeComplete || !isCodeValid || isLoading"
             class="confirm-code-modal__button"
           />
+
         </div>
       </div>
     </div>
@@ -53,6 +54,7 @@ import OtpInput from '@/components/atoms/OtpInput.vue'
 import MainButton from '@/components/atoms/MainButton.vue'
 import useTimer from '@/composables/useSnackbarTimer'
 import { getStringFromSeconds } from '@/constants/helpers'
+import authApi from '@/services/authApi'
 
 export default {
   name: 'ConfirmCodeModal',
@@ -79,7 +81,7 @@ export default {
     const { launchTimer, isTimerRunning, remaining, clearTimer } = useTimer({
       timerId: 'confirmCodeModal'
     })
-    
+
     return {
       launchTimer,
       isTimerRunning,
@@ -91,9 +93,11 @@ export default {
     return {
       code: '',
       isCodeValid: true,
-      isCodeComplete: false
+      isCodeComplete: false,
+      isLoading: false
     }
   },
+
   computed: {
     remainingTimeString() {
       if (!this.remaining) return '0 секунд'
@@ -133,12 +137,22 @@ export default {
     handleCodeChanged(code) {
       this.code = code
       this.isCodeComplete = code.length === 4
+      this.isCodeValid = true
     },
-    handleConfirm() {
-      if (this.isCodeComplete && this.isCodeValid) {
-        this.$emit('confirm', this.code)
-      }
-    },
+
+    async handleConfirm() {
+      if (!this.isCodeComplete || !this.isCodeValid || this.isLoading) return
+
+      this.isLoading = true
+      this.isCodeValid = true
+
+      // НИКАКИХ запросов из модалки
+      this.$emit('confirm', this.code)
+
+      this.isLoading = false
+    }
+,
+
     handleResend() {
       this.clearTimer()
       this.launchTimer()
@@ -259,7 +273,7 @@ export default {
 
 .confirm-code-modal__button {
   width: 240px;
-  
+
   :deep(.main-button__text) {
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
     font-weight: 600;
@@ -269,11 +283,11 @@ export default {
     letter-spacing: 0px;
     vertical-align: middle;
   }
-  
+
   &.main-button--primary-outline :deep(.main-button__text) {
     color: #1735F5;
   }
-  
+
   &.main-button--primary :deep(.main-button__text) {
     color: #FFFFFF;
   }

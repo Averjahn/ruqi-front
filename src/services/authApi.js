@@ -20,7 +20,7 @@ class AuthApiService {
         phone: phone,
         user_type: userType
       })
-      
+
       return {
         success: true,
         data: response.data
@@ -627,7 +627,8 @@ class AuthApiService {
       const cleanPhone = phone.replace(/\D/g, '')
       
       const response = await axios.post('/api/v2/auth/client/phone/request-change', {
-        phone: cleanPhone
+        new_phone: cleanPhone,
+        verification_by: "sms"
       })
       
       // Проверяем успешность ответа от API
@@ -658,10 +659,6 @@ class AuthApiService {
   async confirmPhoneChange(code, phone = null) {
     try {
       const requestData = { code }
-      if (phone) {
-        const cleanPhone = phone.replace(/\D/g, '')
-        requestData.phone = cleanPhone
-      }
       
       const response = await axios.post('/api/v2/auth/client/phone/confirm-change', requestData)
       
@@ -809,6 +806,46 @@ class AuthApiService {
       }]
     }
   }
+
+  /**
+   * Загрузка логотипа организации
+   * POST /api/v2/org/{uuid}/logo
+   * Требуется авторизация (Bearer токен)
+   * @param {string} orgUuid - UUID организации
+   * @param {File} file - Файл логотипа
+   * @returns {Promise<Object>} Ответ API
+   */
+// пример внутри класса AuthApiService
+  async uploadOrganizationLogo(orgUuid, file) {
+    try {
+      const formData = new FormData()
+      formData.append('file', file) // имя поля строго "file" как в доке
+
+      const response = await axios.post(`/api/v2/org/${orgUuid}/logo`, formData, {
+        headers: {
+          Accept: 'application/json',
+          // Content-Type для FormData axios сам поставит (с boundary)
+        },
+      })
+
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data,
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error,
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+
+
 
 }
 

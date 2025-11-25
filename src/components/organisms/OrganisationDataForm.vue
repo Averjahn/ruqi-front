@@ -2,7 +2,7 @@
   <Form ref="form" class="organisation-data-form">
     <!-- Logo Upload Section -->
     <div class="organisation-data-form__logo-section">
-      <LogoUpload 
+      <LogoUpload
         :model-value="modelValue.logo"
         @update:model-value="updateField('logo', $event)"
         :min-width="98"
