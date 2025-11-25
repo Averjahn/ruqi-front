@@ -418,13 +418,8 @@ export default {
         )
         if (response?.data?.success) {
           // Сохраняем телефон в store
-          this.$store.commit('user/setRegistrationData', { 
+          this.$store.commit('user/setRegistrationData', {
             phone,
-            firstname: 'Иван',
-            lastname: 'Петров',
-            middlename: 'Сергеевич',
-            email: 'test@example.com',
-            birthday: '1990-01-15',
             citizenship: 'RU'
           })
           

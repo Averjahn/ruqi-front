@@ -872,40 +872,6 @@ export default {
     }
   },
   mounted() {
-    // Мок для axios чтобы избежать ошибок API
-    if (!this.$axios) {
-      this.$axios = {
-        get: (url) => {
-          console.log('Mock axios.get called with:', url)
-          return Promise.resolve({ 
-            data: { 
-              success: true, 
-              data: {
-                bonus: 0,
-                referrals: [],
-                link: 'mock-referral-link'
-              }
-            } 
-          })
-        },
-        post: (url, data) => {
-          console.log('Mock axios.post called with:', url, data)
-          return Promise.resolve({ 
-            data: { 
-              success: true, 
-              data: {} 
-            } 
-          })
-        }
-      }
-    }
-    
-    // Мок для глобальных функций
-    if (typeof window !== 'undefined') {
-      window.RqloggerError = window.RqloggerError || function() {
-        console.warn('RqloggerError called:', arguments)
-      }
-    }
   }
 }
 </script>
