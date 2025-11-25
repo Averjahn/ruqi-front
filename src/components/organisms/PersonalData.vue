@@ -1,18 +1,17 @@
 <template>
   <div class="personal-data">
-    <!-- Section 1: Персональные данные -->
     <div class="personal-data__section">
       <div class="personal-data__header">
         <h2 class="personal-data__title">Персональные данные</h2>
-        <a 
+        <a
           v-if="showEdit && !isEditing"
-          href="#" 
+          href="#"
           class="personal-data__edit-link"
           @click.prevent="handleEdit"
         >
-          <img 
-            src="@/assets/icons/profile/Edit.svg" 
-            alt="Edit" 
+          <img
+            src="@/assets/icons/profile/Edit.svg"
+            alt="Edit"
             class="personal-data__edit-icon"
           />
           Изменить
@@ -20,17 +19,17 @@
       </div>
       <div class="personal-data__fields">
         <template v-if="!isEditing">
-          <DataField 
+          <DataField
             label="Фамилия"
             :value="personalData.lastName"
             placeholder="Введите фамилию"
           />
-          <DataField 
+          <DataField
             label="Имя"
             :value="personalData.firstName"
             placeholder="Введите имя"
           />
-          <DataField 
+          <DataField
             label="Отчество"
             :value="personalData.middleName"
             placeholder="Введите отчество"
@@ -39,39 +38,42 @@
         <template v-else>
           <div class="personal-data__input-field">
             <label class="personal-data__input-label">Фамилия</label>
-            <input 
+            <input
               v-model="editedData.lastName"
               type="text"
               class="personal-data__input"
               placeholder="Введите фамилию"
             />
+            <p v-if="errors.lastName" class="error-text">{{ errors.lastName }}</p>
           </div>
           <div class="personal-data__input-field">
             <label class="personal-data__input-label">Имя</label>
-            <input 
+            <input
               v-model="editedData.firstName"
               type="text"
               class="personal-data__input"
               placeholder="Введите имя"
             />
+            <p v-if="errors.firstName" class="error-text">{{ errors.firstName }}</p>
           </div>
           <div class="personal-data__input-field">
             <label class="personal-data__input-label">Отчество</label>
-            <input 
+            <input
               v-model="editedData.middleName"
               type="text"
               class="personal-data__input"
               placeholder="Введите отчество"
             />
+            <p v-if="errors.middleName" class="error-text">{{ errors.middleName }}</p>
           </div>
           <div class="personal-data__actions">
-            <button 
+            <button
               class="personal-data__button personal-data__button--outline"
               @click="handleCancel"
             >
               Отменить
             </button>
-            <button 
+            <button
               class="personal-data__button personal-data__button--primary"
               @click="handleSave"
             >
@@ -82,14 +84,13 @@
       </div>
     </div>
 
-    <!-- Section 2: Контакты -->
     <div class="personal-data__section">
       <div class="personal-data__header">
         <h2 class="personal-data__title">Контакты</h2>
       </div>
       <div class="personal-data__fields">
         <div class="personal-data__clickable-field" @click="handlePhoneClick">
-          <DataField 
+          <DataField
             label="Телефон"
             :value="contacts.phone"
             placeholder="Введите телефон"
@@ -98,15 +99,17 @@
             @action-click="handlePhoneClick"
           />
         </div>
-        <DataField 
-          label="Адрес электронной почты"
-          :value="contacts.email"
-          placeholder="Введите email"
-          :status="contacts.emailStatus"
-          :action="{ type: 'icon', icon: require('@/assets/icons/profile/arrow-icon.svg') }"
-          @action-click="handleEmailClick"
-        />
-        <DataField 
+        <div class="personal-data__clickable-field" @click="handleEmailClick">
+          <DataField
+            label="Адрес электронной почты"
+            :value="contacts.email"
+            placeholder="Введите email"
+            :status="contacts.emailStatus"
+            :action="{ type: 'icon', icon: require('@/assets/icons/profile/arrow-icon.svg') }"
+            @action-click="handleEmailClick"
+          />
+        </div>
+        <DataField
           label="Telegram"
           :value="contacts.telegram || 'Привяжите Telegram-аккаунт для уведомлений'"
           placeholder="Привяжите Telegram-аккаунт для уведомлений"
@@ -115,20 +118,30 @@
         />
       </div>
     </div>
-    
-    <!-- Phone Edit Modal -->
-    <ChangePhoneModal 
+
+    <ChangePhoneModal
       v-model="isPhoneModalOpen"
-      :initial-phone="contacts.phone || '+7 900 000-00-00'"
+      :initial-phone="contacts.phone || ''"
       @get-code="handleGetCode"
     />
-    
-    <!-- Confirm Code Modal -->
+
     <ConfirmCodeModal
       v-model="isConfirmCodeModalOpen"
       :phone="pendingPhone"
       @confirm="handleConfirmCode"
       @resend="handleResendCode"
+    />
+
+    <ChangeEmailModal
+      v-model="isEmailModalOpen"
+      :initial-email="contacts.email || ''"
+      @get-code="handleGetEmailCode"
+    />
+    <ConfirmCodeEmailModal
+      v-model="isConfirmEmailCodeModalOpen"
+      :email="pendingEmail"
+      @submit-code="handleConfirmEmailCode"
+      @cancel="handleConfirmEmailCancel"
     />
   </div>
 </template>
@@ -136,14 +149,18 @@
 <script>
 import DataField from '@/components/molecules/DataField.vue'
 import ChangePhoneModal from '@/components/organisms/ChangePhoneModal.vue'
-import ConfirmCodeModal from '@/components/organisms/ConfirmCodeModal.vue'
+import ConfirmCodePhoneModal from '@/components/organisms/ConfirmCodePhoneModal.vue'
+import ChangeEmailModal from '@/components/organisms/ChangeEmailModal.vue'
+import ConfirmCodeEmailModal from '@/components/organisms/ConfirmCodeEmailModal.vue'
 
 export default {
   name: 'PersonalData',
   components: {
     DataField,
     ChangePhoneModal,
-    ConfirmCodeModal
+    ConfirmCodeModal: ConfirmCodePhoneModal,
+    ChangeEmailModal,
+    ConfirmCodeEmailModal
   },
   props: {
     personalData: {
@@ -169,7 +186,19 @@ export default {
       default: true
     }
   },
-  emits: ['edit', 'phone-click', 'phone-get-code', 'phone-confirm-code', 'phone-resend-code', 'email-click', 'telegram-link', 'save', 'cancel'],
+  emits: [
+    'edit',
+    'phone-click',
+    'phone-get-code',
+    'phone-confirm-code',
+    'phone-resend-code',
+    'email-click',
+    'email-get-code',
+    'email-confirm-code',
+    'telegram-link',
+    'save',
+    'cancel'
+  ],
   data() {
     return {
       isEditing: false,
@@ -178,9 +207,17 @@ export default {
         firstName: '',
         middleName: ''
       },
+      errors: {
+        lastName: '',
+        firstName: '',
+        middleName: ''
+      },
       isPhoneModalOpen: false,
       isConfirmCodeModalOpen: false,
-      pendingPhone: ''
+      pendingPhone: '',
+      isEmailModalOpen: false,
+      pendingEmail: '',
+      isConfirmEmailCodeModalOpen: false
     }
   },
   watch: {
@@ -217,6 +254,24 @@ export default {
       this.$emit('cancel')
     },
     handleSave() {
+      this.errors = { lastName: '', firstName: '', middleName: '' }
+
+      if (!this.validateFIO(this.editedData.lastName)) {
+        this.errors.lastName = 'Введите корректную фамилию'
+      }
+
+      if (!this.validateFIO(this.editedData.firstName)) {
+        this.errors.firstName = 'Введите корректное имя'
+      }
+
+      if (this.editedData.middleName && !this.validateFIO(this.editedData.middleName)) {
+        this.errors.middleName = 'Введите корректное отчество'
+      }
+
+      if (this.errors.lastName || this.errors.firstName || this.errors.middleName) {
+        return
+      }
+
       this.isEditing = false
       this.$emit('save', { ...this.editedData })
     },
@@ -238,10 +293,28 @@ export default {
       this.$emit('phone-resend-code', this.pendingPhone)
     },
     handleEmailClick() {
+      this.isEmailModalOpen = true
       this.$emit('email-click')
+    },
+    handleGetEmailCode(email) {
+      this.pendingEmail = email
+      this.isEmailModalOpen = false
+      this.isConfirmEmailCodeModalOpen = true
+      this.$emit('email-get-code', email)
+    },
+    handleConfirmEmailCode({ email, code }) {
+      this.isConfirmEmailCodeModalOpen = false
+      this.$emit('email-confirm-code', { email, code })
+    },
+    handleConfirmEmailCancel() {
+      this.isConfirmEmailCodeModalOpen = false
     },
     handleTelegramLink() {
       this.$emit('telegram-link')
+    },
+    validateFIO(value) {
+      const fioRegex = /^[А-ЯЁ][а-яё-]{1,}$/;
+      return fioRegex.test(value.trim());
     }
   }
 }
@@ -296,7 +369,7 @@ export default {
   font-family: 'Source Sans Pro', 'Source Sans 3', 'Source Sans', sans-serif;
   font-weight: 600;
   font-size: 16px;
-  line-height: 125%; // 20px (16px * 1.25)
+  line-height: 125%;
   letter-spacing: 0%;
   vertical-align: middle;
   color: #1735F5;
@@ -425,10 +498,17 @@ export default {
 
 .personal-data__clickable-field {
   cursor: pointer;
-  
+
   :deep(.data-field__content) {
     cursor: pointer;
   }
 }
+
+.error-text {
+  color: #E63946;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
 </style>
 

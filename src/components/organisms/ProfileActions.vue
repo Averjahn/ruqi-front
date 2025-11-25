@@ -47,6 +47,7 @@ export default {
       this.$emit('change-password')
     },
     handleLogout() {
+      localStorage.clear()
       this.$emit('logout')
     }
   }
