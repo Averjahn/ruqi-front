@@ -144,7 +144,7 @@
       <div class="ui-organisms__subsection">
         <h3>ProfileHeader</h3>
         <div class="ui-organisms__item" style="width: 640px;">
-          <ProfileHeader name="Джон МакКлейн" />
+          <ProfileHeader name="Неизвестный" />
         </div>
       </div>
 

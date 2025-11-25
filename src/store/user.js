@@ -40,13 +40,25 @@ export const user = {
 
     async fetchUser ({ commit, dispatch }) {
       if (!this.getters['auth/isLogged']) return
+
       const response = await axios.get('v1/user/my')
-      if (response?.data?.data) {
-        commit('updateUserData', response.data.data)
-      } else {
+
+      const data = response?.data
+
+      // Если бэк вернул пользователя в ожидаемом поле
+      if (data?.data) {
+        commit('updateUserData', data.data)
+        return
+      }
+
+      // Если бэк явно сказал "success: false" — тогда уже ругаемся
+      if (data && data.success === false) {
         dispatch('showError', 'Не удалось получить пользователя')
       }
+
+      // во всех остальных случаях просто молчим и не пугаем пользователя
     },
+
 
     async fetchNotificationsCount ({ commit }) {
       // ВРЕМЕННО ОТКЛЮЧЕНО: запрос к API уведомлений

@@ -377,7 +377,7 @@ export default {
         }
         await this.auth(response.data.data?.token)
         this.clearSigninState()
-        this.$router.push('/')
+        this.$router.push('/client/profile')
       }
     },
 
@@ -485,7 +485,7 @@ export default {
             
             if (success) {
               this.clearSigninState()
-              this.$router.push('/')
+              this.$router.push('/client/profile')
             } else {
               // Ошибка уже обработана в useAuth
               const errorMsg = this.getErrorMessage(this.authError?.value || this.authError)
@@ -510,7 +510,7 @@ export default {
                 
                 if (success) {
                   this.clearSigninState()
-                  this.$router.push('/')
+                  this.$router.push('/client/profile')
                 } else {
                   const errorMsg = this.getErrorMessage(this.authError?.value || this.authError)
                   if (errorMsg && errorMsg !== 'Неизвестная ошибка') {
@@ -544,7 +544,7 @@ export default {
       const response = await this.signIn({ once_token })
       if (response?.data?.success) {
         this.clearSigninState()
-        this.$router.push('/')
+        this.$router.push('/client/profile')
       } else {
         this.showNotification({
           text: getAPIErrorMessage(response) || 'Ошибка при попытке авторизоваться',
@@ -578,7 +578,7 @@ export default {
         }
         if (this.callRequested && this.oldMethod) {
           // Имитация успешной авторизации после ввода кода
-          this.$router.push('/')
+          this.$router.push('/client/profile')
           return
         }
         // Иначе завершаем
@@ -586,7 +586,7 @@ export default {
         return
       }
       // Для вкладки по паролю — имитируем успешный вход
-      this.$router.push('/')
+      this.$router.push('/client/profile')
     },
 
     async sendCodeAgain () {
@@ -651,7 +651,7 @@ export default {
               const token = response.data.data?.token || response.data.data?.authToken
               await this.auth(token)
               this.clearSigninState()
-              this.$router.push('/')
+              this.$router.push('/client/profile')
             } else {
               // Если токена нет, возможно нужно установить пароль
               // Пока что просто переходим на главную

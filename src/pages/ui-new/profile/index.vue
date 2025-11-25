@@ -369,7 +369,7 @@ export default {
       isMobile: false,
       mobileMediaQuery: null,
       avatarUrl: null,
-      userName: 'Джон МакКлейн',
+      userName: 'Неизвестный',
       // ПК меню (7 пунктов) - для Sidebar
       desktopMenuItems: [
         { id: 1, title: 'Заявки', iconPath: require('@/assets/icons/profile/note.svg'), active: false, route: '/ui-new/applications' },

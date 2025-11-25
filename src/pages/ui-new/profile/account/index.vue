@@ -132,7 +132,7 @@ export default {
     return {
       isMobile: false,
       avatarUrl: null,
-      userName: 'Джон МакКлейн',
+      userName: "Неизвестный",
       showChangePasswordModal: false,
       showChangePasswordPhoneModal: false,
       showChangePasswordCodeModal: false,
