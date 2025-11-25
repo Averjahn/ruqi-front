@@ -31,9 +31,10 @@
             title="Свидетельство ИНН"
             :file="formData.innCertificate"
             sample-link-text="Смотреть образец"
+            :sample-image="require('@/assets/imgs/INN.jpg')"
             hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG"
             input-ref="innFileInput"
-            @view-sample="openDocumentModal"
+            @view-sample="openDocumentSample"
             @view-file="openDocumentModal('innCertificate')"
             @remove="removeInnCertificate"
             @upload="triggerInnFileInput"
@@ -51,9 +52,10 @@
             title="Свидетельство ОГРН"
             :file="formData.ogrnCertificate"
             sample-link-text="Смотреть образец"
+            :sample-image="require('@/assets/imgs/OGRN.jpg')"
             hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG"
             input-ref="ogrnFileInput"
-            @view-sample="openDocumentModal"
+            @view-sample="openDocumentSample"
             @view-file="openDocumentModal('ogrnCertificate')"
             @remove="removeOgrnCertificate"
             @upload="triggerOgrnFileInput"
@@ -129,6 +131,7 @@ export default {
       currentStep: 0,
       showDocumentModal: false,
       currentDocumentFile: null,
+      currentSampleImage: null,
       steps: [
         { id: 1, title: 'Данные об организации', description: 'Укажите основную информацию о вашей организации. Эти данные помогут нам создать ваш профиль, чтобы вы могли размещать вакансии и подработки. Пожалуйста, заполните все обязательные поля внимательно.' },
         { id: 2, title: 'Документы', description: 'Для подтверждения подлинности введенных вами данных, пожалуйста прикрепите скан-фото оригиналов документов' }
@@ -181,15 +184,17 @@ export default {
     },
 
     currentDocumentImage() {
-      if (!this.currentDocumentFile) {
-        return '@/assets/imgs/document.png' // Образец по умолчанию
+      if (this.currentSampleImage) {
+        return this.currentSampleImage
       }
-      
-      const document = this.formData[this.currentDocumentFile]
-      if (document && document.file) {
-        return document.preview || document.file
+
+      if (this.currentDocumentFile) {
+        const document = this.formData[this.currentDocumentFile]
+        if (document && document.file) {
+          return document.preview || document.file
+        }
       }
-      
+
       return '@/assets/imgs/document.png' // Образец по умолчанию
     },
 
@@ -268,13 +273,21 @@ export default {
   methods: {
     ...mapActions('notifications', ['showNotification']),
     openDocumentModal(documentType = null) {
+      this.currentSampleImage = null
       this.currentDocumentFile = documentType
+      this.showDocumentModal = true
+    },
+
+    openDocumentSample(sampleImage) {
+      this.currentSampleImage = sampleImage
+      this.currentDocumentFile = null
       this.showDocumentModal = true
     },
 
     closeDocumentModal() {
       this.showDocumentModal = false
       this.currentDocumentFile = null
+      this.currentSampleImage = null
     },
 
     handleStepChange(stepIndex) {

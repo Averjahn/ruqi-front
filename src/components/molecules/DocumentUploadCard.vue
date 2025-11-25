@@ -6,7 +6,7 @@
         v-if="sampleLinkText" 
         href="#" 
         class="document-upload-card__sample-link" 
-        @click.prevent="$emit('viewSample')"
+        @click.prevent="$emit('viewSample', sampleImage)"
       >
         {{ sampleLinkText }}
       </a>
@@ -60,6 +60,10 @@ export default {
     sampleLinkText: {
       type: String,
       default: 'Смотреть образец'
+    },
+    sampleImage: {
+      type: String,
+      default: null
     },
     hint: {
       type: String,

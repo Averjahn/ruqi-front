@@ -99,13 +99,15 @@
           </div>
           <div class="ui-object-create__field ui-object-create__field--full">
             <label>Описание</label>
-            <Textarea
-              v-model="form.description"
-              placeholder="Введите описание"
-              :height="'120px'"
-              :maxlength="200"
-            />
-            <div class="ui-object-create__counter">{{ descriptionRemaining }}</div>
+            <div class="ui-object-create__textarea-wrapper">
+              <Textarea
+                v-model="form.description"
+                placeholder="Введите описание"
+                :height="'120px'"
+                :maxlength="200"
+              />
+              <div class="ui-object-create__counter">{{ descriptionRemaining }}</div>
+            </div>
           </div>
           <div class="ui-object-create__field ui-object-create__field--full">
             <label>Адрес</label>
@@ -274,6 +276,7 @@ export default {
       }
     },
     addContact() {
+      if (this.contacts.length >= 10) return
       const nextId = Date.now()
       this.contacts.push({ id: nextId, fullName: '', position: '', phone: '', email: '' })
     },
@@ -410,8 +413,12 @@ export default {
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__field {
@@ -428,6 +435,22 @@ export default {
 
   &__field--full {
     grid-column: 1 / -1;
+  }
+
+  &__textarea-wrapper {
+    position: relative;
+
+    .ui-object-create__counter {
+      position: absolute;
+      bottom: 12px;
+      right: 16px;
+      pointer-events: none;
+      text-align: right;
+    }
+
+    :deep(.area_container .input_section) {
+      padding-bottom: 28px;
+    }
   }
 
   &__counter {
@@ -480,6 +503,11 @@ export default {
       width: 20px;
       height: 20px;
       filter: grayscale(1);
+      transition: filter 0.2s ease;
+    }
+
+    &:hover img {
+      filter: brightness(0) saturate(100%) invert(58%) sepia(59%) saturate(4717%) hue-rotate(341deg) brightness(99%) contrast(92%);
     }
   }
 

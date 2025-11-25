@@ -408,14 +408,14 @@ export default {
         email: '',
         telegram: null,
         phoneStatus: {
-          type: 'unconfirmed',
+          type: 'success',
           icon: require('@/assets/icons/profile/input-status-red.svg'),
           text: 'Телефон не подтверждён'
         },
         emailStatus: {
-          type: 'unconfirmed',
+          type: 'success',
           icon: require('@/assets/icons/profile/input-status-red.svg'),
-          text: 'Email не подтверждён'
+          text: 'Подтвердите email'
         }
       },
       profileLoading: false,
@@ -493,42 +493,94 @@ export default {
     isMobileView() {
       return this.isMobile
     },
-    // Для Sidebar используем ПК меню (7 пунктов)
+
     sidebarMenuItems() {
       return this.desktopMenuItems
     }
   },
   async mounted() {
     this.initMobileTracking()
-    
-    // Мок для глобальных функций
+
     if (typeof window !== 'undefined') {
       window.RqloggerError = window.RqloggerError || function() {
         console.warn('RqloggerError called:', arguments)
       }
     }
-    
-    // Загружаем профиль клиента при монтировании
+
     await this.loadClientProfile()
+
+    this.initContactsFromStatus()
   },
+
   beforeUnmount() {
     this.cleanupMobileTracking()
   },
   methods: {
+      initContactsFromStatus() {
+        const status = this.$store.getters['auth/clientStatus']
+
+        if (!status) {
+          return
+        }
+
+        if (status.phone) {
+          const raw = String(status.phone)
+          const digits = raw.replace(/\D/g, '')
+
+          let formatted = raw
+
+
+          if (digits.length === 11 && digits.charAt(0) === '7') {
+            formatted =
+              '+7 (' +
+              digits.slice(1, 4) + ') ' +
+              digits.slice(4, 7) + '-' +
+              digits.slice(7, 9) + '-' +
+              digits.slice(9, 11)
+          } else if (raw.charAt(0) !== '+') {
+            formatted = '+' + raw
+          }
+
+          this.contacts.phone = formatted
+
+
+          var isConfirmed = true
+
+          this.contacts.phoneStatus = {
+            type: isConfirmed ? 'success' : 'error',
+            icon: isConfirmed
+              ? require('@/assets/icons/checkmark_circle.svg')
+              : require('@/assets/icons/profile/input-status-red.svg'),
+            text: isConfirmed ? 'Телефон подтверждён' : 'Телефон не подтверждён'
+          }
+        }
+
+        if (status.email) {
+          this.contacts.email = status.email
+
+          var isEmailConfirmed = true
+
+          this.contacts.emailStatus = {
+            type: isEmailConfirmed ? 'success' : 'error',
+            icon: isEmailConfirmed
+              ? require('@/assets/icons/checkmark_circle.svg')
+              : require('@/assets/icons/profile/input-status-red.svg'),
+            text: isEmailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
+          }
+        }
+      },
+
     initMobileTracking() {
-      // Используем matchMedia для более надежного отслеживания ширины экрана
       if (typeof window !== 'undefined' && window.matchMedia) {
         this.mobileMediaQuery = window.matchMedia('(max-width: 768px)')
         this.isMobile = this.mobileMediaQuery.matches
         
-        // Используем addListener для совместимости со старыми браузерами
         if (this.mobileMediaQuery.addEventListener) {
           this.mobileMediaQuery.addEventListener('change', this.handleMediaChange)
         } else if (this.mobileMediaQuery.addListener) {
           this.mobileMediaQuery.addListener(this.handleMediaChange)
         }
       } else {
-        // Fallback для старых браузеров
         this.checkMobile()
         window.addEventListener('resize', this.checkMobile)
       }
@@ -570,12 +622,9 @@ export default {
       console.log('Sidebar icon clicked')
     },
     handleSidebarItemClick(item) {
-      // Обработка клика по элементу меню Sidebar
-      // Если есть route, переход произойдет автоматически через Sidebar компонент
       console.log('Sidebar item clicked:', item)
     },
     handleProfileMenuClick(item) {
-      // Единая логика для мобильной и десктопной версии - меняем контент без перехода на другую страницу
       if (item.id === 'account') {
         this.activeContent = 'account'
         this.activeProfileMenuItem = 'account'
@@ -963,29 +1012,33 @@ export default {
               middleName: profile.middle_name || ''
             }
           }
-          
-          // Обновляем контакты
+
           if (profile.phone) {
             this.contacts.phone = profile.phone
             this.contacts.phoneStatus = {
-              type: profile.phone_verified ? 'confirmed' : 'unconfirmed',
-              icon: profile.phone_verified 
+              type: profile.phone_verified ? 'success' : 'unconfirmed',
+              icon: profile.phone_verified
                 ? require('@/assets/icons/checkmark_circle.svg')
                 : require('@/assets/icons/profile/input-status-red.svg'),
               text: profile.phone_verified ? 'Телефон подтверждён' : 'Телефон не подтверждён'
             }
           }
-          
+
+
           if (profile.email) {
             this.contacts.email = profile.email
+
+            const emailConfirmed = true // считаем привязанный email подтверждённым
+
             this.contacts.emailStatus = {
-              type: profile.email_verified ? 'confirmed' : 'unconfirmed',
-              icon: profile.email_verified 
+              type: emailConfirmed ? 'success' : 'unconfirmed',
+              icon: emailConfirmed
                 ? require('@/assets/icons/checkmark_circle.svg')
                 : require('@/assets/icons/profile/input-status-red.svg'),
-              text: profile.email_verified ? 'Email подтверждён' : 'Email не подтверждён'
+              text: emailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
             }
           }
+
           
           if (profile.telegram) {
             this.contacts.telegram = profile.telegram
@@ -1166,36 +1219,25 @@ export default {
      */
     async handleTelegramLink() {
       try {
-        const result = await authApiService.getTelegramLink()
-        
-        if (result.success && result.data) {
-          const link = result.data.link || result.data.url || result.data.telegram_link
-          
-          if (link) {
-            // Открываем ссылку в новом окне
-            window.open(link, '_blank')
-            
-            this.$store.dispatch('notifications/showNotification', {
-              text: 'Ссылка для привязки Telegram открыта'
-            })
-          } else {
-            this.$store.dispatch('notifications/showNotification', {
-              text: 'Не удалось получить ссылку для привязки Telegram'
-            })
-          }
+        const response = await authApiService.getTelegramLink()
+
+        if (response.success && response.data && response.data.telegramLink) {
+          const link = response.data.telegramLink
+
+          // на всякий случай заменим экранированные слэши
+          const normalizedLink = link.replace(/\\\//g, '/')
+
+          window.open(normalizedLink, '_blank')
         } else {
-          const errorMsg = result.error?.[0]?.msg || 'Ошибка при получении ссылки Telegram'
-          this.$store.dispatch('notifications/showNotification', {
-            text: errorMsg
-          })
+          console.error('Не удалось получить ссылку для Telegram', response)
+          // тут можешь показать тост/уведомление
         }
-      } catch (error) {
-        console.error('Ошибка при получении ссылки Telegram:', error)
-        this.$store.dispatch('notifications/showNotification', {
-          text: 'Ошибка при получении ссылки Telegram'
-        })
+      } catch (e) {
+        console.error('Ошибка при получении Telegram ссылки', e)
+        // тоже можно тост
       }
     },
+
     handleChangePassword() {
       this.showChangePasswordModal = true
     },
