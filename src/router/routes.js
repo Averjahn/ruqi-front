@@ -25,7 +25,11 @@ export const routes = [
     component: i('/organisationData/index.vue'),
     meta: { requiresAuth: false, layout: 'EmptyLayout' },
   },
-  
+  {
+    path: '/client/profile',
+    component: i('/ui-new/profile/index.vue'), // тот же самый компонент, что и у /ui-new/profile
+    meta: { requiresAuth: false, layout: 'EmptyLayout' },
+  },
   // redirects
   { path: '/welcome-prompt', redirect: '/ui-new/profile' },
   
