@@ -71,6 +71,7 @@
 
 <script>
 import AvatarCropper from './AvatarCropper.vue'
+import authApiService from '@/services/authApi'
 
 export default {
   name: 'LogoUpload',
@@ -81,7 +82,8 @@ export default {
     modelValue: { type: File, default: null },
     maxSize: { type: Number, default: 4 * 1024 * 1024 }, // 4MB по умолчанию
     minWidth: { type: Number, default: 98 },
-    minHeight: { type: Number, default: 98 }
+    minHeight: { type: Number, default: 98 },
+    organizationUuid: { type: String, required: true },
   },
   emits: ['update:modelValue', 'error'],
   data() {
@@ -91,7 +93,8 @@ export default {
       previewUrl: null,
       fileName: '',
       showCropper: false,
-      pendingFile: null
+      pendingFile: null,
+      isUploading: false,
     }
   },
   computed: {
@@ -237,15 +240,41 @@ export default {
     },
 
     // Cropper methods
-    handleAvatarReady({ blob, dataUrl }) {
-      // console.log('🎯 handleAvatarReady вызван с:', { blob, dataUrl })
-      // Создаем файл из blob
+// Cropper methods
+    async handleAvatarReady({ blob, dataUrl }) {
+      // создаём файл из blob
       const file = new File([blob], this.pendingFile.name, { type: 'image/png' })
-      // console.log('📁 Создан файл из blob:', file.name, file.size, 'байт')
+
+      // обновляем v-model и превью
       this.$emit('update:modelValue', file)
-      // console.log('📤 Эмитирован update:modelValue с файлом:', file.name)
       this.createPreview(file)
-      this.closeCropper()
+
+      // проверяем, что пришёл uuid организации
+      if (!this.organizationUuid) {
+        this.setError('Не передан UUID организации')
+        this.closeCropper()
+        return
+      }
+
+      this.isUploading = true
+      try {
+        const result = await authApiService.uploadOrganizationLogo(
+          this.organizationUuid,
+          file
+        )
+
+        if (!result.success) {
+          this.setError(result.error?.msg || 'Не удалось загрузить логотип организации')
+        } else {
+          // если нужно, уведомляем родителя, что логотип загружен
+          this.$emit('uploaded', result.data)
+        }
+      } catch (e) {
+        this.setError('Ошибка при загрузке логотипа организации')
+      } finally {
+        this.isUploading = false
+        this.closeCropper()
+      }
     },
 
     closeCropper() {

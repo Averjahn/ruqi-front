@@ -146,23 +146,12 @@ export default {
       this.isLoading = true
       this.isCodeValid = true
 
-      const result = await authApi.confirmPhoneChange(this.code, this.phone || null)
-
-      if (result.success) {
-        // можно пробросить наружу данные, если надо
-        this.$emit('confirm', {
-          code: this.code,
-          phone: this.phone || null,
-          data: result.data
-        })
-        this.close()
-      } else {
-        // подсветим ошибку — OtpInput покажет "Неверный код"
-        this.isCodeValid = false
-      }
+      // НИКАКИХ запросов из модалки
+      this.$emit('confirm', this.code)
 
       this.isLoading = false
-    },
+    }
+,
 
     handleResend() {
       this.clearTimer()
