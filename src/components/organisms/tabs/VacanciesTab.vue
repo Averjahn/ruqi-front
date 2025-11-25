@@ -210,8 +210,16 @@ export default {
       // TODO: Implement filter logic
     },
     handleAddVacancy() {
-      console.log('Add vacancy clicked')
-      // TODO: Implement add vacancy logic
+      // Получаем объект из родительского компонента или localStorage
+      const object = this.$parent?.object || {}
+      const objectId = object.id || (typeof window !== 'undefined' ? window.localStorage.getItem('uiObjects.selectedObjectId') : null)
+      const objectName = object.name || null
+      
+      const query = {}
+      if (objectId) query.objectId = objectId
+      if (objectName) query.objectName = objectName
+      
+      this.$router.push({ path: '/ui-new/objects/create-vacancy', query })
     },
     handleSelectAll(event) {
       if (event.target.checked) {
