@@ -19,6 +19,7 @@
           @change="onChange"
           :type="currentType"
           v-bind="filteredAttrs"
+          @blur="onBlur"
         />
       </div>
       <ButtonIconGhost v-if="isClearIconShow" @click.stop="clear">
@@ -27,7 +28,7 @@
       <ButtonIconGhost v-if="type === 'password'" @click="togglePassword">
         <img 
           class="icon" 
-          :src="currentType === 'password' ? require('@/assets/icons/input/Eye.svg') : require('@/assets/icons/eye_open.svg')" 
+          :src="currentType === 'password' ? require('@/assets/icons/eye-off.svg') : require('@/assets/icons/input/Eye.svg')" 
         />
       </ButtonIconGhost>
       <slot name="right" />
@@ -98,6 +99,7 @@ export default {
       updateAnimation: false,
       silentIsValid: true,
       errorMessage: null,
+      isTouched: false,
     }
   },
   mounted () {
@@ -121,7 +123,10 @@ export default {
       if (val) this.shakeIt()
     },
     checkValid (val) {
-      if (val) this.validate()
+      if (val) {
+        this.isTouched = true
+        this.validate(true)
+      }
     },
     errorText (val) {
       if (val) {
@@ -162,10 +167,16 @@ export default {
     onChange (e) {
       this.$emit('change', e)
       this.$emit('update:modelValue', e.target.value)
+      this.isTouched = true
       this.afterChange()
     },
+    onBlur (e) {
+      this.isTouched = true
+      this.validate()
+      this.$emit('blur', e)
+    },
     afterChange () {
-      if (this.validationType === 'change') setTimeout(this.validate, 50)
+      if (this.validationType === 'change') setTimeout(() => this.validate(), 50)
     },
     shakeIt () {
       this.shake = true
@@ -193,9 +204,16 @@ export default {
     resetError () {
       this.isValid = true
       this.errorMessage = null
+      if (this.isTouched) {
+        this.silentIsValid = true
+      }
     },
-    validate () {
+    validate (force = false) {
       if (this.rules && !this.disableValidation) {
+        if (!this.isTouched && !force) {
+          this.silentIsValid = true
+          return
+        }
         const value = this.modelValue || this.value
         for (let i = 0; i < this.rules.length; i++) {
           const res = this.rules[i](value)
@@ -203,6 +221,7 @@ export default {
             this.shakeIt()
             this.isValid = false
             this.errorMessage = res
+            this.silentIsValid = false
             return
           }
         }
@@ -212,6 +231,10 @@ export default {
     silentValidate () {
       this.$nextTick(() => {
         if (this.rules) {
+          if (!this.isTouched) {
+            this.silentIsValid = true
+            return
+          }
           const value = this.modelValue || this.value
           for (let i = 0; i < this.rules.length; i++) {
             if (this.rules[i](value) !== true) {

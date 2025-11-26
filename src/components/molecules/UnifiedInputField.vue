@@ -41,8 +41,8 @@
       
       <!-- Иконка глаза для пароля -->
       <ButtonIconGhost v-if="type === 'password'" @click="togglePasswordVisibility">
-        <img v-if="currentInputType === 'text'" class="icon" src="@/assets/icons/eye_close.svg" />
-        <img v-if="currentInputType === 'password'" class="icon" src="@/assets/icons/eye_open.svg" />
+        <img v-if="currentInputType === 'text'" class="icon" src="@/assets/icons/input/Eye.svg" />
+        <img v-if="currentInputType === 'password'" class="icon" src="@/assets/icons/eye-off.svg" />
       </ButtonIconGhost>
       
       <!-- Индикатор загрузки -->

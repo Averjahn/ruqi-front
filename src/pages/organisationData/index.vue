@@ -169,9 +169,8 @@ export default {
         },
       },
       counterpartyTypes: [
-        { value: 'physical', label: 'Физическое лицо' },
-        { value: 'legal', label: 'Юридическое лицо' }, 
-        { value: 'individual', label: 'Индивидуальный предприниматель' }
+        { value: 'legal', label: 'Юридическое лицо' },
+        { value: 'other', label: 'Прочее' }
       ]
     }
   },
@@ -408,9 +407,8 @@ export default {
         
         // Маппим тип контрагента в тип организации
         const counterpartyTypeMap = {
-          'legal': 'ООО',
-          'individual': 'ИП',
-          'physical': 'Физ. лицо'
+          legal: 'ООО',
+          other: 'Прочее'
         }
         
         // Подготавливаем данные организации для отправки согласно API

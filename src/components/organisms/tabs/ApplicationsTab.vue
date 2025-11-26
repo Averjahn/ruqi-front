@@ -36,13 +36,6 @@
             </template>
           </Input>
         </div>
-        <button class="object-detail-content__filter-button" @click="handleApplicationsFilterClick">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-        </button>
       </div>
       <div class="object-detail-content__toolbar-right">
         <Button
@@ -197,10 +190,6 @@ export default {
     }
   },
   methods: {
-    handleApplicationsFilterClick() {
-      console.log('Applications filter clicked')
-      // TODO: Implement applications filter logic
-    },
     handleNewApplication() {
       console.log('New application clicked')
       // TODO: Implement new application logic
