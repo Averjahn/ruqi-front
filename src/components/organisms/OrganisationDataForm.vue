@@ -3,10 +3,12 @@
     <!-- Logo Upload Section -->
     <div class="organisation-data-form__logo-section">
       <LogoUpload
+        v-if="organizationUuid"
         :model-value="modelValue.logo"
         @update:model-value="updateField('logo', $event)"
         :min-width="98"
         :min-height="98"
+        :organization-uuid="organizationUuid"
         @error="handleUploadError"
       />
     </div>
@@ -348,6 +350,7 @@ import FieldsRow from '@/components/atoms/FieldsRow.vue'
 import LogoUpload from '@/components/atoms/LogoUpload.vue'
 import { rules } from '@/constants/validations'
 import dadataApi from '@/services/dadataApi'
+import authApiService from '@/services/authApi'
 
 export default {
   name: 'OrganisationDataForm',
@@ -370,7 +373,7 @@ export default {
         { value: 'legal', label: 'Юридическое лицо' },
         { value: 'individual', label: 'Индивидуальный предприниматель' }
       ]
-    }
+    },
   },
   emits: ['update:modelValue', 'data-filled', 'upload-error'],
   data() {
@@ -385,7 +388,8 @@ export default {
         { value: '10', label: '10%' },
         { value: '20', label: '20%' },
         { value: 'without', label: 'Без НДС' }
-      ]
+      ],
+      organizationUuid: null,
     }
   },
   beforeUnmount() {
@@ -394,7 +398,26 @@ export default {
       clearTimeout(this.searchTimeout)
     }
   },
+  mounted() {
+    this.loadOrganizationUuid()
+  },
+
   methods: {
+
+    async loadOrganizationUuid() {
+      try {
+        const result = await authApiService.getClientOrganization()
+
+        if (result.success && result.data) {
+          this.organizationUuid = result.data.uuid
+        } else {
+          console.error('Не удалось получить организацию', result.error)
+        }
+      } catch (e) {
+        console.error('Ошибка при запросе организации', e)
+      }
+    },
+
     updateField(field, value) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
