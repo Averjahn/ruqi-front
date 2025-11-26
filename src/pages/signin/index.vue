@@ -1,7 +1,11 @@
 <template>
   <div class="login_page">
     <div class="form_block">
-      <AuthLogoHeader :title="callRequested ? 'Восстановление пароля' : 'Вход в систему'" />
+      <AuthLogoHeader
+        :title="currentTab === 'by_phone_call' && callRequested
+          ? 'Вход по коду'
+          : 'Вход в систему'"
+      />
       <AuthTabs v-if="!callRequested" :value="currentTab" :old-method="oldMethod" @change="changeTab" />
 
       <template v-if="currentTab === 'by_password'">
