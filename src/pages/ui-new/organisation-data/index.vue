@@ -244,9 +244,8 @@ export default {
         vatRate: null
       },
       counterpartyTypes: [
-        { value: 'physical', label: 'Физическое лицо' },
         { value: 'legal', label: 'Юридическое лицо' },
-        { value: 'individual', label: 'Индивидуальный предприниматель' }
+        { value: 'other', label: 'Прочее' }
       ],
       currentDocument: {
         name: 'Screenshot_20241118_183604.jpg',

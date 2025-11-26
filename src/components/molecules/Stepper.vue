@@ -132,6 +132,11 @@ export default {
   display: flex;
   position: relative;
 
+  // Удаляем визуальный зазор между предыдущей линией и следующей точкой
+  & + & {
+    margin-left: 0;
+  }
+
   // Первый элемент - растягивается
   &--first {
     flex: 1;
@@ -167,18 +172,6 @@ export default {
   // Для среднего элемента - точка центрируется
   .stepper__point-item--middle & {
     justify-content: center;
-    position: relative;
-    
-    .stepper__point {
-      position: absolute;
-      left: 0;
-      z-index: 3;
-    }
-    
-    .stepper__line--right {
-      margin-left: 44px; // 32px точка + 12px gap
-      flex: 1;
-    }
   }
   
   // Для последнего элемента
@@ -254,7 +247,7 @@ export default {
 }
 
 .stepper__line {
-  margin-top: 14px; // Выравнивание по центру точки (32px / 2 - 4px / 2 = 14px)
+  
   flex-shrink: 0;
 
   // Правая полулиния - начинается от точки и идет вправо
@@ -262,7 +255,7 @@ export default {
     position: relative;
     width: 50%;
     margin-left: 12px; // Отступ от точки справа (gap)
-    margin-right: 0;
+    margin-right: 12px;
     flex: 1; // Для растягивания на оставшееся пространство
     min-width: 50%; // Минимум 50% для визуального эффекта
   }
@@ -317,6 +310,11 @@ export default {
   .stepper__points {
     flex-direction: column;
     gap: 16px;
+
+    .stepper__point-item + .stepper__point-item {
+      margin-left: 0;
+    }
+
   }
 
   .stepper__line {

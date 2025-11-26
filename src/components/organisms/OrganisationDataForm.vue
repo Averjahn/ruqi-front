@@ -408,9 +408,8 @@ export default {
     counterpartyTypes: {
       type: Array,
       default: () => [
-        { value: 'physical', label: 'Физическое лицо' },
         { value: 'legal', label: 'Юридическое лицо' },
-        { value: 'individual', label: 'Индивидуальный предприниматель' }
+        { value: 'other', label: 'Прочее' }
       ]
     }
   },
@@ -723,8 +722,8 @@ export default {
       // Статус организации
       if (organization.type === 'LEGAL') {
         updates.counterpartyType = 'legal'
-      } else if (organization.type === 'INDIVIDUAL') {
-        updates.counterpartyType = 'individual'
+      } else {
+        updates.counterpartyType = 'other'
       }
 
       // Должность руководителя

@@ -289,7 +289,7 @@ export default {
   position: relative;
 
   @media (min-width: 769px) {
-    padding-left: 306px;
+    padding-left: calc(var(--sidebar-width, 286px) + 20px);
     padding-top: 100px;
   }
 
