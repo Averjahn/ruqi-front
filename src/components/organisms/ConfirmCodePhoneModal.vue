@@ -250,6 +250,11 @@ export default {
 .confirm-code-modal__otp-input {
   display: flex;
   justify-content: center;
+  width: 100%;
+
+  :deep(.otp-wrapper) {
+    margin: 0 auto;
+  }
 }
 
 .confirm-code-modal__timer {
