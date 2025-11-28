@@ -69,6 +69,28 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f0f2f5;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c9d0e1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #aeb7cb;
+      }
+    }
   }
 }
 </style>

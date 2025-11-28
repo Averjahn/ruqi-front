@@ -75,7 +75,8 @@ export default {
   border-radius: 12px;
   max-width: 90vw;
   max-height: 90vh;
-  width: 100%;
+  width: auto;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -121,6 +122,7 @@ export default {
   align-items: center;
   justify-content: center;
   overflow: auto;
+  flex-shrink: 0;
 }
 
 .document-modal__image {
@@ -132,17 +134,13 @@ export default {
 
 @media (max-width: 768px) {
   .document-modal-overlay {
-    padding: 20px !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    padding: 16px;
   }
 
   .document-modal {
-    max-width: 90vw !important;
-    max-height: 90vh !important;
-    width: 100% !important;
-    border: 3px solid red !important;
-    min-height: 200px !important;
+    max-width: calc(100vw - 32px);
+    width: auto;
+    min-width: 280px;
   }
 }
 </style>
