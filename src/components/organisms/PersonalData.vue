@@ -91,12 +91,12 @@
       <div class="personal-data__fields">
         <div class="personal-data__clickable-field" @click="handlePhoneClick">
           <DataField
-            label="Телефон"
-            :value="contacts.phone"
-            placeholder="Введите телефон"
-            :status="contacts.phoneStatus"
-            :action="{ type: 'icon', icon: require('@/assets/icons/profile/arrow-icon.svg') }"
-            @action-click="handlePhoneClick"
+              label="Телефон"
+              :value="phoneFormatted"
+              placeholder="Введите телефон"
+              :status="contacts.phoneStatus"
+              :action="{ type: 'icon', icon: require('@/assets/icons/profile/arrow-icon.svg') }"
+              @action-click="handlePhoneClick"
           />
         </div>
         <div class="personal-data__clickable-field" @click="handleEmailClick">
@@ -218,6 +218,19 @@ export default {
       isEmailModalOpen: false,
       pendingEmail: '',
       isConfirmEmailCodeModalOpen: false
+    }
+  },
+  computed: {
+    phoneFormatted() {
+      const p = this.contacts.phone || ''
+      const d = p.replace(/\D/g, '')
+
+      // 79063000000 → +7 (906) 300-00-00
+      if (d.length === 11 && d[0] === '7') {
+        return `+7 (${d.slice(1, 4)}) ${d.slice(4, 7)}-${d.slice(7, 9)}-${d.slice(9, 11)}`
+      }
+
+      return p
     }
   },
   watch: {
