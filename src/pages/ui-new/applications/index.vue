@@ -112,18 +112,26 @@
             class="ui-applications__empty-icon"
           />
           <div class="ui-applications__empty-text">
-            <h3 class="ui-applications__empty-title">У вас нет еще заявок</h3>
-            <p class="ui-applications__empty-description">Нажмите на кнопку, чтобы создать заявку</p>
+            <h3 class="ui-applications__empty-title">
+              {{ hasObjects ? 'У вас нет еще заявок' : 'У вас нет ни одного объекта' }}
+            </h3>
+            <p class="ui-applications__empty-description">
+              {{
+                hasObjects
+                  ? 'Нажмите на кнопку, чтобы создать заявку'
+                  : 'Для создания заявки вам нужно добавить хотя бы один объект'
+              }}
+            </p>
           </div>
           <Button
             type="contained"
             color="blue"
             size="l"
-            @click="handleCreateApplication"
+            @click="hasObjects ? handleCreateApplication() : handleCreateObject()"
             class="ui-applications__empty-button"
           >
             <img src="@/assets/icons/profile/Add.svg" alt="Add" class="ui-applications__empty-button-icon" />
-            Создать заявку
+            {{ hasObjects ? 'Создать заявку' : 'Добавить объект' }}
           </Button>
         </div>
       </div>
@@ -325,6 +333,9 @@ export default {
     sidebarMenuItems() {
       return this.desktopMenuItems
     },
+    hasObjects() {
+      return Array.isArray(this.objectOptions) && this.objectOptions.length > 0
+    },
     filteredApplications() {
       let filtered = this.applications
 
@@ -383,6 +394,9 @@ export default {
     },
     handleCreateApplication() {
       this.$router.push('/ui-new/applications/create')
+    },
+    handleCreateObject() {
+      this.$router.push('/ui-new/objects/create')
     },
     handleSelectAll(event) {
       if (event.target.checked) {

@@ -70,10 +70,18 @@
         :icon="require('@/assets/icons/info_blue.svg')"
       />
       
-      <DocumentCard
+      <DocumentUploadCard
         title="Свидетельство о постановке на учет в налоговом органе"
         :file="currentDocument"
-        @delete="handleDocumentDelete"
+        @remove="handleDocumentDelete"
+        @fileSelected="handleDocumentUpload"
+        input-ref="documentFileInput"
+      />
+      <input
+        ref="documentFileInput"
+        type="file"
+        accept="image/png,image/jpg,image/jpeg"
+        style="display: none"
       />
       
       <div v-if="documentHistory.length > 0" class="organisation-data-content__history">
@@ -113,7 +121,7 @@ import OrganisationDataForm from '@/components/organisms/OrganisationDataForm.vu
 import Tabs from '@/components/atoms/Tabs.vue'
 import Button from '@/components/atoms/Button.vue'
 import WarningBlock from '@/components/atoms/WarningBlock.vue'
-import DocumentCard from '@/components/molecules/DocumentCard.vue'
+import DocumentUploadCard from '@/components/molecules/DocumentUploadCard.vue'
 import DocumentHistoryItem from '@/components/molecules/DocumentHistoryItem.vue'
 
 export default {
@@ -123,7 +131,7 @@ export default {
     Tabs,
     Button,
     WarningBlock,
-    DocumentCard,
+    DocumentUploadCard,
     DocumentHistoryItem
   },
   props: {
@@ -209,6 +217,10 @@ export default {
     handleDocumentDelete() {
       this.currentDocument = null
       // TODO: Implement document delete logic
+    },
+    handleDocumentUpload(fileData) {
+      this.currentDocument = fileData
+      // TODO: Implement document upload logic (e.g., send to API)
     }
   }
 }

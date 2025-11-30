@@ -105,10 +105,18 @@
               :icon="require('@/assets/icons/info_blue.svg')"
             />
             
-            <DocumentCard
+            <DocumentUploadCard
               title="Свидетельство о постановке на учет в налоговом органе"
               :file="currentDocument"
-              @delete="handleDeleteDocument"
+              @remove="handleDeleteDocument"
+              @fileSelected="handleDocumentUpload"
+              input-ref="documentFileInput"
+            />
+            <input
+              ref="documentFileInput"
+              type="file"
+              accept="image/png,image/jpg,image/jpeg"
+              style="display: none"
             />
             
             <div v-if="documentHistory.length > 0" class="ui-organisation-data__history">
@@ -160,7 +168,7 @@ import Tabs from '@/components/atoms/Tabs.vue'
 import Button from '@/components/atoms/Button.vue'
 import MobileBottomNav from '@/components/organisms/MobileBottomNav.vue'
 import WarningBlock from '@/components/atoms/WarningBlock.vue'
-import DocumentCard from '@/components/molecules/DocumentCard.vue'
+import DocumentUploadCard from '@/components/molecules/DocumentUploadCard.vue'
 import DocumentHistoryItem from '@/components/molecules/DocumentHistoryItem.vue'
 
 export default {
@@ -175,7 +183,7 @@ export default {
     Button,
     MobileBottomNav,
     WarningBlock,
-    DocumentCard,
+    DocumentUploadCard,
     DocumentHistoryItem
   },
   data() {
@@ -208,22 +216,13 @@ export default {
         { id: 4, title: 'Исполнители', iconPath: require('@/assets/icons/profile/executor.svg'), route: null },
         { id: 5, title: 'Еще', iconPath: require('@/assets/icons/FAQ/lines-else.svg'), route: null }
       ],
-      managers: [
-        {
-          name: 'Иванов Иван Иванович',
-          role: 'Объект 1',
-          phone: '+7 (999) 999-99-99',
-          email: 'anna.smirnova@ruqi.ru',
-          avatarUrl: null
-        },
-        {
-          name: 'Иванов Иван Иванович',
-          role: 'Объект 1',
-          phone: '+7 (999) 999-99-99',
-          email: 'anna.smirnova@ruqi.ru',
-          avatarUrl: null
-        }
-      ],
+      managers: Array.from({ length: 50 }).map((_, index) => ({
+        name: `Иванов Иван Иванович`,
+        role: `Объект ${index + 1}`,
+        phone: '+7 (999) 999-99-99',
+        email: 'anna.smirnova@ruqi.ru',
+        avatarUrl: null
+      })),
       formData: {
         logo: null,
         counterpartyType: 'legal',
@@ -340,6 +339,11 @@ export default {
     handleDeleteDocument() {
       this.currentDocument = null
       console.log('Document deleted')
+    },
+    handleDocumentUpload(fileData) {
+      this.currentDocument = fileData
+      console.log('Document uploaded:', fileData)
+      // TODO: Implement document upload logic (e.g., send to API)
     },
     handleBack() {
       this.$router.push('/ui-new/profile')

@@ -32,10 +32,24 @@
     </div>
     
     <!-- Upload Area -->
-    <div v-else class="document-upload-card__upload-area">
+    <div 
+      v-else 
+      class="document-upload-card__upload-area"
+      :class="{ 'document-upload-card__upload-area--dragover': isDragover }"
+      @dragover.prevent="handleDragOver"
+      @dragleave.prevent="handleDragLeave"
+      @drop.prevent="handleDrop"
+    >
+      <input
+        :ref="inputRef"
+        type="file"
+        :accept="accept"
+        style="display: none"
+        @change="handleFileSelect"
+      />
       <div class="document-upload-card__upload-content">
         <p class="document-upload-card__upload-text">Перетащите файлы сюда или</p>
-        <button class="document-upload-card__upload-button" @click="$emit('upload')">
+        <button class="document-upload-card__upload-button" @click="triggerFileInput">
           <div class="document-upload-card__icon-placeholder">📎</div>
           загрузите документы
         </button>
@@ -78,10 +92,81 @@ export default {
       default: 'fileInput'
     }
   },
-  emits: ['viewSample', 'viewFile', 'remove', 'upload'],
+  emits: ['viewSample', 'viewFile', 'remove', 'upload', 'fileSelected', 'upload-error'],
+  data() {
+    return {
+      isDragover: false
+    }
+  },
   methods: {
     triggerFileInput() {
       this.$refs[this.inputRef]?.click()
+    },
+    handleDragOver(event) {
+      event.preventDefault()
+      this.isDragover = true
+    },
+    handleDragLeave(event) {
+      event.preventDefault()
+      this.isDragover = false
+    },
+    handleDrop(event) {
+      event.preventDefault()
+      this.isDragover = false
+      
+      const files = event.dataTransfer.files
+      if (files && files.length > 0) {
+        this.processFile(files[0])
+      }
+    },
+    handleFileSelect(event) {
+      const files = event.target.files
+      if (files && files.length > 0) {
+        this.processFile(files[0])
+      }
+    },
+    processFile(file) {
+      // Проверка типа файла
+      const acceptedTypes = this.accept.split(',').map(type => type.trim())
+      const fileType = file.type
+      const isValidType = acceptedTypes.some(type => {
+        if (type.startsWith('.')) {
+          return file.name.toLowerCase().endsWith(type.toLowerCase())
+        }
+        return fileType === type || fileType.startsWith(type.split('/')[0] + '/')
+      })
+      
+      if (!isValidType) {
+        this.$emit('upload-error', 'Неподдерживаемый формат файла')
+        return
+      }
+      
+      // Проверка размера (5 МБ)
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        this.$emit('upload-error', 'Размер файла превышает 5 МБ')
+        return
+      }
+      
+      // Создание preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const fileData = {
+          file: file,
+          name: file.name,
+          size: this.formatFileSize(file.size),
+          preview: e.target.result
+        }
+        this.$emit('fileSelected', fileData)
+      }
+      reader.readAsDataURL(file)
+    },
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes'
+      const k = 1024
+      const sizes = ['Bytes', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
     }
   }
 }
@@ -131,10 +216,17 @@ export default {
   justify-content: center;
   margin: 0 auto;
   transition: all 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     border-color: #1735f5;
     background: #f0f4ff;
+  }
+
+  &--dragover {
+    border-color: #1735f5;
+    background: #f0f4ff;
+    border-style: solid;
   }
 }
 

@@ -139,6 +139,8 @@ export default {
     if (this.ignoreOverflow) this.list.parentNode.removeChild(this.list)
     document.removeEventListener('mousedown', this.documentClick)
     this.list.removeEventListener('scroll', this.scrollList)
+    window.removeEventListener('scroll', this.updatePosition, true)
+    window.removeEventListener('resize', this.updatePosition)
   },
   watch: {
     error (val) {
@@ -249,28 +251,41 @@ export default {
     positionList () {
       const size = this.$refs.selectSection.getBoundingClientRect()
       this.list.style.display = 'block'
+      this.list.style.position = 'fixed'
       const listSize = this.list.getBoundingClientRect()
       const windowHeight = window.innerHeight
       const distanceBottom = windowHeight - size.bottom
       const shouldDropUp = this.dropUp || distanceBottom < 310
-      if (shouldDropUp) this.list.style.top = size.top + window.scrollY - listSize.height - 5 + 'px'
-      else this.list.style.top = size.top + window.scrollY + 50 + 'px'
+      if (shouldDropUp) {
+        this.list.style.top = size.top - listSize.height - 5 + 'px'
+      } else {
+        this.list.style.top = size.bottom + 5 + 'px'
+      }
       this.list.style.left = size.left + 'px'
       this.list.style.width = size.width + 'px'
     },
 
+    updatePosition () {
+      if (this.isOpen && this.list) {
+        this.positionList()
+      }
+    },
     openSelect () {
-      if (this.ignoreOverflow) this.positionList()
+      this.positionList()
       this.isOpen = true
       this.isFocus = true
       setTimeout(() => {
         document.addEventListener('mousedown', this.documentClick)
+        window.addEventListener('scroll', this.updatePosition, true)
+        window.addEventListener('resize', this.updatePosition)
       }, 0)
     },
 
     closeSelect () {
-      if (this.ignoreOverflow) this.list.style.left = '-9999px'
+      this.list.style.left = '-9999px'
       this.isOpen = false
+      window.removeEventListener('scroll', this.updatePosition, true)
+      window.removeEventListener('resize', this.updatePosition)
     },
     shakeIt () {
       this.shake = true
@@ -449,6 +464,8 @@ input {
   }
   &.isOpen {
     display: block;
+    z-index: 9999;
+    position: fixed;
   }
   &.ignoreOverflow {
     left: -9999px;

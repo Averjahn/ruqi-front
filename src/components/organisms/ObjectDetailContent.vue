@@ -1125,17 +1125,19 @@ padding-left: 24px;
   background: #ffffff;
   position: relative;
   flex-shrink: 0;
+  background-image: none !important;
+  background-size: auto !important;
 
   &:checked {
-    background: #1735F5;
+    background: #1735F5 !important;
     border-color: #1735F5;
+    background-image: none !important;
 
     &::after {
       content: '';
       position: absolute;
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%);
       width: 6px;
       height: 10px;
       border: solid white;
