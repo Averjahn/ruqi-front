@@ -2,8 +2,8 @@
   <div class="logo-upload">
     <div
       class="logo-upload__card"
-      :class="{ 
-        'logo-upload__card--dragover': isDragOver, 
+      :class="{
+        'logo-upload__card--dragover': isDragOver,
         'logo-upload__card--error': errorMessage
       }"
       @dragover.prevent="onDragOver"
@@ -18,7 +18,7 @@
         accept="image/png,image/jpeg,image/jpg"
         @change="onFileChange"
       />
-      
+
       <div v-if="!hasFile" class="logo-upload__content">
         <div class="logo-upload__upload-area">
           <div class="logo-upload__icon">
@@ -35,12 +35,12 @@
           </button>
         </div>
       </div>
-      
+
       <div v-else class="logo-upload__preview-content">
         <div class="logo-upload__preview-area logo-upload__preview-area--has-image" :style="{ background: 'transparent' }">
-          <img 
-            :src="previewUrl" 
-            :alt="fileName" 
+          <img
+            :src="previewUrl"
+            :alt="fileName"
             class="logo-upload__preview-image"
           />
         </div>
@@ -59,8 +59,7 @@
 
     <p v-if="errorMessage" class="logo-upload__error">{{ errorMessage }}</p>
 
-    <!-- Avatar Cropper Modal -->
-    <AvatarCropper 
+    <AvatarCropper
       v-if="showCropper"
       :file="pendingFile"
       @avatar-ready="handleAvatarReady"
@@ -79,8 +78,11 @@ export default {
     AvatarCropper
   },
   props: {
-    modelValue: { type: File, default: null },
-    maxSize: { type: Number, default: 4 * 1024 * 1024 }, // 4MB по умолчанию
+    modelValue: {
+      type: [File, String, null],
+      default: null
+    },
+    maxSize: { type: Number, default: 4 * 1024 * 1024 },
     minWidth: { type: Number, default: 98 },
     minHeight: { type: Number, default: 98 },
     organizationUuid: { type: String, required: true },
@@ -95,26 +97,25 @@ export default {
       showCropper: false,
       pendingFile: null,
       isUploading: false,
+      isLoadingLogo: false,
     }
   },
   computed: {
     hasFile() {
-      return this.modelValue && this.previewUrl
+      return !!this.previewUrl
     }
   },
   watch: {
-    modelValue(newFile) {
-      // console.log('📁 modelValue изменился:', newFile)
-      if (newFile) {
-        this.createPreview(newFile)
-      } else {
-        this.clearPreview()
+    organizationUuid(newVal, oldVal) {
+      if (newVal && newVal !== oldVal) {
+        this.downloadLogo(newVal)
       }
     }
   },
-  mounted() {
-    if (this.modelValue) {
-      this.createPreview(this.modelValue)
+
+  async mounted() {
+    if (this.organizationUuid) {
+      this.downloadLogo(this.organizationUuid)
     }
   },
   beforeUnmount() {
@@ -124,16 +125,16 @@ export default {
     openDialog() {
       this.$refs.fileInput && this.$refs.fileInput.click()
     },
-    
+
     onDragOver() {
       this.isDragOver = true
       this.clearError()
     },
-    
+
     onDragLeave() {
       this.isDragOver = false
     },
-    
+
     onDrop(e) {
       this.isDragOver = false
       const files = Array.from(e.dataTransfer.files || [])
@@ -141,73 +142,84 @@ export default {
         this.handleFile(files[0])
       }
     },
-    
+
     onFileChange(e) {
       const files = Array.from(e.target.files || [])
       if (files.length > 0) {
         this.handleFile(files[0])
       }
-      // Сброс input для возможности повторного выбора того же файла
       e.target.value = ''
     },
-    
+
     handleFile(file) {
       this.clearError()
-      
-      // Проверка типа файла - только PNG и JPG
+
       const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg']
       if (!allowedTypes.includes(file.type)) {
         this.setError('Пожалуйста, выберите изображение в формате PNG или JPG')
         return
       }
-      
-      // Проверка размера файла (4MB = 4 * 1024 * 1024 байт)
+
       const maxSizeBytes = 4 * 1024 * 1024
       if (file.size > maxSizeBytes) {
         this.setError(`Размер файла превышает 4MB. Текущий размер: ${this.formatFileSize(file.size)}`)
         return
       }
-      
-      // Проверка размеров изображения и открытие модального окна обрезки
+
       this.validateImageDimensions(file)
     },
-    
+    async downloadLogo(uuid) {
+      this.isLoadingLogo = true
+      try {
+        const res = await authApiService.getOrganizationLogo(uuid)
+        if (res.success && res.data?.url) {
+          this.previewUrl = res.data.url
+          this.fileName = 'Логотип организации'
+          this.$emit('update:modelValue', res.data.url)
+        }
+      } finally {
+        this.isLoadingLogo = false
+      }
+    },
     validateImageDimensions(file) {
-      // console.log('🔍 validateImageDimensions для файла:', file.name, file.size, 'байт')
       const img = new Image()
       img.onload = () => {
-        // console.log('📐 Размеры изображения:', img.width, 'x', img.height, 'px')
-        // console.log('📏 Минимальные требования:', this.minWidth, 'x', this.minHeight, 'px')
-        
+
+
         if (img.width < this.minWidth || img.height < this.minHeight) {
-          // console.log('❌ Изображение слишком маленькое')
           this.setError(`Минимальный размер изображения: ${this.minWidth}×${this.minHeight}px. Текущий размер: ${img.width}×${img.height}px`)
           return
         }
-        
-        // console.log('✅ Все проверки пройдены - открываем cropper')
-        // Все проверки пройдены - открываем cropper
+
         this.pendingFile = file
         this.showCropper = true
       }
-      
+
       img.onerror = () => {
-        // console.log('❌ Ошибка загрузки изображения')
         this.setError('Не удалось загрузить изображение')
       }
-      
+
       img.src = URL.createObjectURL(file)
     },
-    
-    createPreview(file) {
+
+    createPreview(fileOrUrl) {
       this.clearPreview()
-      if (file) {
-        this.previewUrl = URL.createObjectURL(file)
-        this.fileName = file.name
-        // console.log('🖼️ Создан превью для файла:', file.name, 'Размер:', file.size, 'байт')
+
+      if (!fileOrUrl) return
+
+      if (typeof fileOrUrl === 'string') {
+        this.previewUrl = fileOrUrl
+        this.fileName = 'Логотип организации'
+        return
+      }
+
+      if (fileOrUrl instanceof File || fileOrUrl instanceof Blob) {
+        this.previewUrl = URL.createObjectURL(fileOrUrl)
+        this.fileName = fileOrUrl.name || 'Логотип организации'
       }
     },
-    
+
+
     clearPreview() {
       if (this.previewUrl) {
         URL.revokeObjectURL(this.previewUrl)
@@ -215,22 +227,22 @@ export default {
         this.fileName = ''
       }
     },
-    
+
     removeFile() {
       this.$emit('update:modelValue', null)
       this.clearPreview()
       this.clearError()
     },
-    
+
     setError(message) {
       this.errorMessage = message
       this.$emit('error', message)
     },
-    
+
     clearError() {
       this.errorMessage = ''
     },
-    
+
     formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes'
       const k = 1024
@@ -239,17 +251,12 @@ export default {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
     },
 
-    // Cropper methods
-// Cropper methods
     async handleAvatarReady({ blob, dataUrl }) {
-      // создаём файл из blob
       const file = new File([blob], this.pendingFile.name, { type: 'image/png' })
 
-      // обновляем v-model и превью
       this.$emit('update:modelValue', file)
       this.createPreview(file)
 
-      // проверяем, что пришёл uuid организации
       if (!this.organizationUuid) {
         this.setError('Не передан UUID организации')
         this.closeCropper()
@@ -266,7 +273,11 @@ export default {
         if (!result.success) {
           this.setError(result.error?.msg || 'Не удалось загрузить логотип организации')
         } else {
-          // если нужно, уведомляем родителя, что логотип загружен
+          const serverUrl = result.data?.logo_url
+          if (serverUrl) {
+            this.previewUrl = serverUrl
+            this.$emit('update:modelValue', serverUrl)
+          }
           this.$emit('uploaded', result.data)
         }
       } catch (e) {
@@ -340,7 +351,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     img {
       width: 40px;
       height: 40px;
@@ -451,7 +462,7 @@ export default {
 @media (max-width: 768px) {
   .logo-upload {
     max-width: 100%;
-    
+
     &__card {
       padding: 16px;
       border-radius: 8px;
@@ -475,7 +486,7 @@ export default {
     &__icon {
       width: 28px; // Размер иконки камеры
       height: 28px;
-      
+
       img {
         width: 28px;
         height: 28px;

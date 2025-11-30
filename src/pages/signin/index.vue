@@ -616,15 +616,15 @@ export default {
         })
         return
       }
-      
+
       this.loading = true
       try {
         // Используем правильный API для подтверждения кода восстановления
         const response = await this.$axios.post(
           'api/v2/auth/recovery/client/submit-code',
-          { 
+          {
             once_token: this.onceToken,
-            code: this.smsCode 
+            code: this.smsCode
           },
           { errorMessage: 'Ошибка при отправке кода' },
         )
