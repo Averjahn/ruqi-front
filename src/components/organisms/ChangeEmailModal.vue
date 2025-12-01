@@ -41,7 +41,7 @@
           />
           <MainButton
             type="primary"
-            text="Получить код"
+            text="Продолжить"
             @click="handleGetCode"
             :disabled="isLoading"
             class="change-email-modal__button"

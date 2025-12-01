@@ -844,7 +844,32 @@ class AuthApiService {
     }
   }
 
+  async getOrganizationLogo(orgUuid) {
+    try {
+      const response = await axios.get(
+        `/img/organizations/${orgUuid}/logo/original`,
+        {
+          responseType: 'blob', // получаем файл
+          headers: {
+            Accept: 'application/json',
+          },
+        }
+      )
 
+      const blob = response.data
+      const url = URL.createObjectURL(blob)
+
+      return {
+        success: true,
+        data: {
+          blob,
+          url,
+        },
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
 
 
 }

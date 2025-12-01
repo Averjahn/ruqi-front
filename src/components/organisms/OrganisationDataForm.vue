@@ -3,12 +3,11 @@
     <!-- Logo Upload Section -->
     <div class="organisation-data-form__logo-section">
       <LogoUpload
+        :organization-uuid="organizationUuid"
         :model-value="modelValue.logo"
         @update:model-value="updateField('logo', $event)"
-        :min-width="98"
-        :min-height="98"
-        @error="handleUploadError"
       />
+
     </div>
 
     <!-- Row 1 Desktop: Вид контрагента + Ставка НДС -->
@@ -383,6 +382,7 @@ import {
   validateLegalAddressFormat
 } from '@/constants/validations'
 import dadataApi from '@/services/dadataApi'
+import authApiService from '@/services/authApi'
 
 const makeOptionalRule = (validator) => (value) => {
   if (value === null || value === undefined) return true
@@ -411,7 +411,7 @@ export default {
         { value: 'legal', label: 'Юридическое лицо' },
         { value: 'other', label: 'Прочее' }
       ]
-    }
+    },
   },
   emits: ['update:modelValue', 'data-filled', 'upload-error'],
   data() {
@@ -451,16 +451,36 @@ export default {
         { value: '10', label: '10%' },
         { value: '20', label: '20%' },
         { value: 'without', label: 'Без НДС' }
-      ]
+      ],
+      organizationUuid: null,
     }
   },
   beforeUnmount() {
-    // Очищаем таймер при размонтировании компонента
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout)
     }
   },
+  mounted() {
+    this.loadOrganizationUuid()
+  },
+
   methods: {
+
+    async loadOrganizationUuid() {
+      try {
+        const result = await authApiService.getClientOrganization()
+
+        if (result.success && result.data) {
+          this.organizationUuid = result.data.uuid
+          this.updateField('logo', null)
+        } else {
+          console.error('Не удалось получить организацию', result.error)
+        }
+      } catch (e) {
+        console.error('Ошибка при запросе организации', e)
+      }
+    },
+
     updateField(field, value) {
       this.$emit('update:modelValue', {
         ...this.modelValue,
@@ -469,22 +489,17 @@ export default {
     },
 
     handleInnUpdate(value) {
-      // При вводе используем только проверку формата (без длины)
       this.innValidationRules = [makeOptionalRule(validateInnFormat)]
       
-      // Очищаем предыдущий таймер, если он есть
       if (this.searchTimeout) {
         clearTimeout(this.searchTimeout)
         this.searchTimeout = null
       }
       
-      // Очищаем ошибку при изменении ИНН
       this.dadataError = null
       
-      // Если ИНН пустой - очищаем все поля, включая сам ИНН
       if (!value || value.length === 0) {
         this.currentSearchInn = null
-        // Обновляем все поля, включая ИНН, одним событием
         const cleared = {
           inn: '',
           fullName: '',
@@ -510,18 +525,13 @@ export default {
         return
       }
       
-      // Обновляем поле ИНН
       this.updateField('inn', value)
       
-      // Автоматический поиск при достижении 10 или 12 символов с debounce
       const innLength = value.length
       if (innLength === 10 || innLength === 12) {
-        // Сохраняем текущий ИНН для проверки после загрузки
         this.currentSearchInn = value
         
-        // Добавляем задержку перед поиском, чтобы пользователь успел закончить ввод
         this.searchTimeout = setTimeout(() => {
-          // Проверяем, что ИНН не изменился за время ожидания
           if (this.currentSearchInn === value) {
             this.searchByInn(value)
           }
@@ -532,11 +542,8 @@ export default {
     },
 
     handleInnBlur() {
-      // При blur переключаем на полную валидацию с проверкой длины
       this.innValidationRules = [makeOptionalRule(validateInn)]
-      // Принудительно валидируем поле после смены правил
       this.$nextTick(() => {
-        // Валидируем оба инпута (десктопный и мобильный)
         if (this.$refs.innInputDesktop && typeof this.$refs.innInputDesktop.validate === 'function') {
           this.$refs.innInputDesktop.validate(true)
         }
@@ -547,7 +554,6 @@ export default {
     },
 
     handleFullNamePersonUpdate(value) {
-      // Обновляем поле ФИО
       this.updateField('fullNamePerson', value)
       
       // TODO: Добавить проверку ФИО через DaData API при необходимости
@@ -555,7 +561,6 @@ export default {
     },
 
     handleFieldBlur(fieldName) {
-      // Переключаем правила валидации на полную проверку при blur
       const validationRulesMap = {
         fullName: {
           rules: 'fullNameValidationRules',
