@@ -211,29 +211,30 @@ export default {
 
 .stepper__point-track {
   position: absolute;
-  left: -2px;
-  top: -2px;
-  width: 36px;
-  height: 36px;
+  left: -4px;
+  top: -4px;
+  width: 40px;
+  height: 40px;
   border-radius: 24px;
-  border: 2px solid #1735f5;
+  // Серая часть обрамления такого же цвета, как серая линия stepper-line
+  border: 2px solid #e3e5e4;
   z-index: 0;
   box-sizing: border-box;
 }
 
 .stepper__point-progress {
   position: absolute;
-  left: -2px;
-  top: -2px;
-  width: 36px;
-  height: 36px;
+  left: -4px;
+  top: -4px;
+  width: 40px;
+  height: 40px;
   border-radius: 24px;
   border: 2px solid #1735f5;
   border-right-color: transparent;
   border-bottom-color: transparent;
-  border-left-color: transparent;
+  // Левая и верхняя части остаются цветными — получаем половину кольца
   z-index: 1;
-  transform: rotate(-45deg);
+  transform: rotate(150deg);
   box-sizing: border-box;
 }
 
@@ -264,7 +265,6 @@ export default {
 .stepper__labels {
   display: flex;
   justify-content: space-between;
-  width: 100%;
 }
 
 .stepper__label {
@@ -273,7 +273,9 @@ export default {
   font-size: 18px;
   line-height: 100%;
   white-space: nowrap;
-  flex: 1;
+  width: 200px;
+  text-align: left;
+  /* flex: 1; */
 
   &--active {
     color: #1735f5;
@@ -281,28 +283,11 @@ export default {
 
   &--waiting {
     color: #666666;
+    text-align: center;
   }
 
   &--completed {
     color: #1735f5;
-  }
-  
-  // Первый шаг - выравнивание по левому краю
-  &:first-child {
-    text-align: left;
-    flex: 1;
-  }
-  
-  // Средний шаг - выравнивание по центру
-  &:nth-child(2) {
-    text-align: center;
-    flex: 1;
-  }
-  
-  // Последний шаг - выравнивание по правому краю
-  &:last-child {
-    text-align: right;
-    flex: 0 0 auto;
   }
 }
 

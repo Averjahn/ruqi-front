@@ -31,11 +31,15 @@
 
     <div class="ui-vacancy-create__content">
       <!-- Stepper -->
-      <Stepper :steps="stepperSteps" />
+      <div class="ui-vacancy-create__stepper-wrapper">
+        <Stepper :steps="stepperSteps" />
+      </div>
 
-      <!-- Form Card -->
-      <div class="ui-vacancy-create__card">
-        <!-- Основное -->
+      <!-- Шаг 1: Основное -->
+      <div
+        v-if="currentStepIndex === 0"
+        class="ui-vacancy-create__card ui-vacancy-create__card--narrow"
+      >
         <VacancyBasicInfoForm
           :form-data="form"
           :profession-options="professionOptions"
@@ -70,6 +74,150 @@
         />
       </div>
 
+      <!-- Шаг 2: Данные чека -->
+      <div
+        v-else-if="currentStepIndex === 1"
+        class="ui-vacancy-create__step2-layout"
+      >
+        <div class="ui-vacancy-create__card ui-vacancy-create__step2-card">
+          <div class="ui-vacancy-create__section">
+            <div class="ui-vacancy-create__section-header">
+              <h2 class="ui-vacancy-create__section-title">
+                Данные для формирования чека
+                <br />
+                при расчёте с исполнителем
+              </h2>
+              <p class="ui-vacancy-create__section-description">
+                Краткое описание что сюда писать, например напишите в
+                наименовании общедоступное название и примерное расположение.
+              </p>
+            </div>
+
+            <div class="ui-vacancy-create__fields-row">
+              <div class="ui-vacancy-create__field">
+                <label>Юниты/Единицы измерения</label>
+                <Select
+                  v-model="form.ratePer"
+                  :options="ratePerOptions"
+                  placeholder="Выберите значение"
+                />
+              </div>
+
+              <div class="ui-vacancy-create__field">
+                <label>Норма выработки</label>
+                <Input
+                  v-model="form.hoursPerShift"
+                  placeholder="8"
+                />
+              </div>
+            </div>
+
+            <div class="ui-vacancy-create__field">
+              <label>Наименование услуги в чеке для самозанятого*</label>
+              <Input
+                v-model="form.checkServiceName"
+                placeholder="Введите значение"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Карточка предпросмотра чека (пока статичная) -->
+        <div class="ui-vacancy-create__check-card">
+          <h3 class="ui-vacancy-create__check-title">Чек № 123</h3>
+          <div class="ui-vacancy-create__check-row ui-vacancy-create__check-row--meta">
+            <span>10.07.25</span>
+            <span>15:00 (+03:00)</span>
+          </div>
+          <div class="ui-vacancy-create__check-divider"></div>
+          <div class="ui-vacancy-create__check-person">
+            <p>ИВАНОВ ИВАН</p>
+            <p>ИВАНОВИЧ</p>
+          </div>
+          <div class="ui-vacancy-create__check-divider"></div>
+          <div class="ui-vacancy-create__check-table">
+            <div class="ui-vacancy-create__check-row ui-vacancy-create__check-row--header">
+              <span>Наименование</span>
+              <span>Сумма</span>
+            </div>
+            <div class="ui-vacancy-create__check-row ui-vacancy-create__check-row--item">
+              <span>
+                1. {{ form.checkServiceName || 'Услуги по комплектованию товара на складе заказчика в соответствии с требованиями с 16.06.2023 по 18.06.2023 в количестве 12 шт' }}
+              </span>
+              <span>0,00₽</span>
+            </div>
+          </div>
+          <div class="ui-vacancy-create__check-divider"></div>
+          <div class="ui-vacancy-create__check-row ui-vacancy-create__check-row--total">
+            <span>Итого</span>
+            <span>0,00 ₽</span>
+          </div>
+          <div class="ui-vacancy-create__check-divider"></div>
+          <div class="ui-vacancy-create__check-row">
+            <span>Режим НО</span>
+            <span>НПД</span>
+          </div>
+          <div class="ui-vacancy-create__check-row">
+            <span>ИНН</span>
+            <span>1111111111111</span>
+          </div>
+          <div class="ui-vacancy-create__check-divider"></div>
+          <div class="ui-vacancy-create__check-row ui-vacancy-create__check-row--buyer">
+            <span>Покупатель:</span>
+          </div>
+          <div class="ui-vacancy-create__check-row ui-vacancy-create__check-row--buyer">
+            <span>ИНН: 11111111111111</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Шаг 3: Фотографии и описание -->
+      <div
+        v-else
+        class="ui-vacancy-create__card ui-vacancy-create__card--narrow"
+      >
+        <div class="ui-vacancy-create__photos-section">
+          <!-- Заголовок с кнопкой -->
+          <div class="ui-vacancy-create__photos-header">
+            <div class="ui-vacancy-create__photos-header-text">
+              <h2 class="ui-vacancy-create__photos-title">
+                Чем предстоит заниматься
+              </h2>
+              <p class="ui-vacancy-create__photos-description">
+                Загружайте изображения в разрешении 1080×1920 для основной фотографии. Размер файла — до 20 Мб
+              </p>
+            </div>
+            <button class="ui-vacancy-create__photos-add-button" @click="addPhotoItem">
+              <img src="@/assets/icons/profile/Add.svg" alt="Add" />
+              Добавить
+            </button>
+          </div>
+
+          <!-- Кнопка "Добавить из библиотеки" -->
+          <button class="ui-vacancy-create__photos-library-button" @click="addFromLibrary">
+            <img src="@/assets/icons/camera.svg" alt="Library" />
+            Добавить из библиотеки
+          </button>
+
+          <!-- Карточки с фотографиями -->
+          <PhotoUploadCard
+            v-for="(photo, index) in form.photos"
+            :key="photo.id"
+            :main-image="photo.mainImage"
+            :thumbnail="photo.thumbnail"
+            :title="photo.title"
+            :description="photo.description"
+            @update:main-image="photo.mainImage = $event"
+            @update:thumbnail="photo.thumbnail = $event"
+            @update:title="photo.title = $event"
+            @update:description="photo.description = $event"
+            @delete="removePhotoItem(index)"
+            @generate-image="generateImage(index)"
+            @generate-description="generateDescription(index)"
+          />
+        </div>
+      </div>
+
     </div>
 
     <!-- Fixed Action Bar -->
@@ -92,6 +240,9 @@ import VacancyRatesForm from '@/components/molecules/VacancyRatesForm.vue'
 import VacancyRatesTable from '@/components/molecules/VacancyRatesTable.vue'
 import VacancyDescriptionEditor from '@/components/molecules/VacancyDescriptionEditor.vue'
 import FixedActionBar from '@/components/molecules/FixedActionBar.vue'
+import PhotoUploadCard from '@/components/molecules/PhotoUploadCard.vue'
+import Input from '@/components/atoms/Input.vue'
+import Select from '@/components/atoms/Select.vue'
 
 const OBJECTS_SELECTED_KEY = 'uiObjects.selectedObjectId'
 
@@ -106,7 +257,10 @@ export default {
     VacancyRatesForm,
     VacancyRatesTable,
     VacancyDescriptionEditor,
-    FixedActionBar
+    FixedActionBar,
+    PhotoUploadCard,
+    Input,
+    Select
   },
   data() {
     return {
@@ -148,7 +302,11 @@ export default {
             status: 'Текущая'
           }
         ],
-        publicDescription: ''
+        publicDescription: '',
+        // Поле для шага "Данные чека"
+        checkServiceName: '',
+        // Поля для шага "Фотографии и описание"
+        photos: []
       },
       professionOptions: [
         { value: 'loader', label: 'Грузчик' },
@@ -161,6 +319,7 @@ export default {
         { value: 'shift', label: 'Смена' },
         { value: 'day', label: 'День' }
       ],
+      currentStepIndex: 0,
       stepperSteps: [
         { number: 1, label: 'Основное', status: 'active' },
         { number: 2, label: 'Данные чека', status: 'waiting' },
@@ -205,6 +364,7 @@ export default {
   mounted() {
     this.checkMobile()
     window.addEventListener('resize', this.checkMobile)
+    this.updateStepperStatuses()
     
     // Получаем ID и имя объекта из query параметров или localStorage
     if (this.$route.query.objectId) {
@@ -240,6 +400,14 @@ export default {
       }
     },
     handleBack() {
+      // Временно: если мы не на первом шаге, переходим на предыдущий шаг.
+      // Иначе ведем себя как раньше — возвращаемся к списку объектов.
+      if (this.currentStepIndex > 0) {
+        this.currentStepIndex -= 1
+        this.updateStepperStatuses()
+        return
+      }
+
       if (this.objectId) {
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(OBJECTS_SELECTED_KEY, String(this.objectId))
@@ -250,8 +418,15 @@ export default {
       }
     },
     handleNext() {
-      console.log('Next step', this.form)
-      // TODO: Переход на следующий шаг
+      // Временно: переключаем шаги по кнопке "Далее", чтобы можно было попасть на шаг 2 и 3.
+      if (this.currentStepIndex < this.stepperSteps.length - 1) {
+        this.currentStepIndex += 1
+        this.updateStepperStatuses()
+        return
+      }
+
+      // Последний шаг — пока просто логируем данные формы
+      console.log('Finish wizard (последний шаг)', this.form)
     },
     addRate() {
       const newRate = {
@@ -275,6 +450,44 @@ export default {
       if (rate) {
         rate[field] = value
       }
+    },
+    updateStepperStatuses() {
+      // Обновляем статусы шагов в соответствии с текущим индексом
+      this.stepperSteps = this.stepperSteps.map((step, index) => {
+        let status = 'waiting'
+        if (index < this.currentStepIndex) {
+          status = 'completed'
+        } else if (index === this.currentStepIndex) {
+          status = 'active'
+        }
+        return { ...step, status }
+      })
+    },
+    // Методы для работы с фотографиями
+    addPhotoItem() {
+      const newPhoto = {
+        id: Date.now(),
+        mainImage: null,
+        thumbnail: null,
+        title: '',
+        description: ''
+      }
+      this.form.photos.push(newPhoto)
+    },
+    removePhotoItem(index) {
+      this.form.photos.splice(index, 1)
+    },
+    addFromLibrary() {
+      // TODO: Реализовать добавление из библиотеки
+      console.log('Add from library')
+    },
+    generateImage(index) {
+      // TODO: Реализовать генерацию изображения
+      console.log('Generate image', index)
+    },
+    generateDescription(index) {
+      // TODO: Реализовать генерацию описания
+      console.log('Generate description', index)
     }
   }
 }
@@ -340,8 +553,6 @@ export default {
 
   &__content {
     width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
     padding: 32px 24px;
     padding-bottom: 120px; // Отступ для фиксированного бара
     display: flex;
@@ -352,7 +563,6 @@ export default {
       padding: 24px 16px;
       padding-bottom: 88px; // Отступ для фиксированного бара на мобильных (72px + 16px)
       gap: 32px;
-      max-width: 100%;
     }
   }
 
@@ -372,6 +582,23 @@ export default {
       margin: 0 -16px; // Убираем отступы по бокам на мобильных
       width: calc(100% + 32px);
     }
+  }
+
+  &__card--narrow {
+    max-width: 800px;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+      max-width: 100%;
+      margin: 0 -16px;
+      width: calc(100% + 32px);
+    }
+  }
+
+  &__stepper-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
   }
 
   &__section {
@@ -431,13 +658,198 @@ export default {
     }
   }
 
-
   &__divider {
     height: 1px;
     background: #e3e5e4;
     width: 100%;
   }
 
+  &__step2-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__step2-card {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__check-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+    width: 330px;
+    flex-shrink: 0;
+
+    @media (max-width: 1024px) {
+      width: 100%;
+    }
+  }
+
+  &__check-title {
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 24px;
+    color: #263043;
+    margin: 0;
+  }
+
+  &__check-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 16px;
+    line-height: 22px;
+    color: #263043;
+    gap: 8px;
+
+    &--header {
+      font-weight: 700;
+    }
+
+    &--item {
+      align-items: flex-start;
+    }
+
+    &--total {
+      font-weight: 700;
+    }
+
+    &--buyer {
+      justify-content: flex-start;
+    }
+  }
+
+  // Текст наименования в чеке с переносами
+  &__check-row--item {
+    span:first-child {
+      flex: 1;
+      white-space: normal;
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+
+    span:last-child {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+
+  &__check-person {
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 20px;
+    line-height: 24px;
+    color: #263043;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__check-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__check-divider {
+    height: 1px;
+    background: #e3e5e4;
+    width: 100%;
+  }
+  // Стили для шага "Фотографии и описание"
+  &__photos-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+  }
+
+  &__photos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  &__photos-header-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__photos-title {
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.25;
+    color: #263043;
+    margin: 0;
+  }
+
+  &__photos-description {
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 16px;
+    line-height: 22px;
+    color: #263043;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  &__photos-add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #1735f5;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 26px;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__photos-library-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #1735f5;
+    font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    cursor: pointer;
+    padding: 0;
+    letter-spacing: 0.1px;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
 
 }
 </style>

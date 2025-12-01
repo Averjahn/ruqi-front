@@ -156,7 +156,40 @@
             <th class="objects-content__th">Ср. выход</th>
             <th class="objects-content__th">Выход</th>
             <th class="objects-content__th">% выхода</th>
-            <th class="objects-content__th objects-content__th--actions">Действия</th>
+            <th class="objects-content__th objects-content__th--actions">
+              <button
+                class="objects-content__actions-header-button"
+                type="button"
+                @click.stop="toggleHeaderActionsMenu"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="8" cy="4" r="1.5" fill="currentColor"/>
+                  <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+                  <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
+                </svg>
+              </button>
+              <div
+                v-if="showHeaderActionsMenu"
+                class="objects-content__actions-menu"
+              >
+                <button
+                  type="button"
+                  class="objects-content__actions-menu-item"
+                  @click="handleHeaderAction('edit')"
+                >
+                  <img src="@/assets/icons/profile/Edit.svg" alt="Редактировать" />
+                  <span>Редактировать</span>
+                </button>
+                <button
+                  type="button"
+                  class="objects-content__actions-menu-item"
+                  @click="handleHeaderAction('archive')"
+                >
+                  <img src="@/assets/icons/trash.svg" alt="Архивировать" />
+                  <span>Архивировать</span>
+                </button>
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -287,7 +320,8 @@ export default {
       sortField: null,
       sortOrder: 'asc', // 'asc' | 'desc'
       showObjectModal: false,
-      selectedObjectData: null
+      selectedObjectData: null,
+      showHeaderActionsMenu: false
     }
   },
   computed: {
@@ -395,6 +429,14 @@ export default {
   mounted() {
     // Не сохраняем viewMode при инициализации, чтобы при переходе через sidebar всегда был 'list'
     // Сохранение происходит только при явном изменении пользователем (через watch)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', this.handleDocumentClick)
+    }
+  },
+  beforeUnmount() {
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('click', this.handleDocumentClick)
+    }
   },
   watch: {
     activeTab() {
@@ -419,6 +461,9 @@ export default {
     }
   },
   methods: {
+    handleDocumentClick() {
+      this.showHeaderActionsMenu = false
+    },
     getInitialViewMode() {
       // Для десктопа всегда используем 'list' по умолчанию при переходе через sidebar
       // Для мобильных устройств используем defaultViewMode или проверяем localStorage
@@ -511,6 +556,15 @@ export default {
     handlePageChange(page) {
       this.currentPage = page
       this.$emit('page-change', page)
+    },
+    toggleHeaderActionsMenu() {
+      this.showHeaderActionsMenu = !this.showHeaderActionsMenu
+    },
+    handleHeaderAction(action) {
+      this.showHeaderActionsMenu = false
+      // Здесь можно повесить реальные действия над выбранными объектами.
+      // Пока просто выводим в консоль.
+      console.log('Header action:', action, 'selectedObjects:', this.selectedObjects)
     },
     getExitPercentClass(percent) {
       if (!percent || percent === 0) return 'objects-content__exit-percent--zero'
@@ -899,6 +953,7 @@ export default {
   &--actions {
     width: 60px;
     text-align: center;
+    position: relative;
   }
 }
 
@@ -1014,6 +1069,69 @@ export default {
   &:hover {
     background-color: #F2F8FF;
     color: #1735F5;
+  }
+}
+
+.objects-content__actions-header-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #666666;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background-color: #F2F8FF;
+    color: #1735F5;
+  }
+}
+
+.objects-content__actions-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 200px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow:
+    0px 8px 48px 4px #0234e30a,
+    0px 0px 10px 0px #1735f508;
+  padding: 8px 0;
+  z-index: 20;
+}
+
+.objects-content__actions-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: #263043;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: grayscale(1);
+  }
+
+  &:hover {
+    background: #F6F8FB;
   }
 }
 

@@ -50,8 +50,25 @@
               />
               <span v-else>{{ rate.standard }}</span>
             </td>
-            <td>
-              <span :class="{ 'vacancy-rates-table__date-link': index > 0 }">{{ rate.validFrom }}</span>
+            <td class="vacancy-rates-table__date-cell">
+              <span v-if="index === 0">
+                {{ rate.validFrom }}
+              </span>
+              <div v-else class="vacancy-rates-table__date-wrapper">
+                <span
+                  class="vacancy-rates-table__date-link"
+                  @click="openDatePicker(rate.id)"
+                >
+                  {{ rate.validFrom }}
+                </span>
+                <DatePicker
+                  :ref="el => setDatePickerRef(rate.id, el)"
+                  class="vacancy-rates-table__date-picker"
+                  :date="rate.validFrom"
+                  format="DD.MM.YYYY"
+                  @update:date="updateRate(rate.id, 'validFrom', $event)"
+                />
+              </div>
             </td>
             <td>
               <span v-if="rate.status" class="vacancy-rates-table__status-badge">{{ rate.status }}</span>
@@ -167,12 +184,14 @@
 <script>
 import Input from '@/components/atoms/Input.vue'
 import Select from '@/components/atoms/Select.vue'
+import DatePicker from '@/components/atoms/DatePicker.vue'
 
 export default {
   name: 'VacancyRatesTable',
   components: {
     Input,
-    Select
+    Select,
+    DatePicker
   },
   props: {
     rates: {
@@ -183,7 +202,8 @@ export default {
   emits: ['add-rate', 'remove-rate', 'update-rate'],
   data() {
     return {
-      expandedCards: [] // Массив ID развернутых карточек
+      expandedCards: [], // Массив ID развернутых карточек
+      datePickerRefs: {} // Хранилище refs для DatePicker
     }
   },
   mounted() {
@@ -232,6 +252,22 @@ export default {
       } else {
         this.expandedCards.push(rateId)
       }
+    },
+    setDatePickerRef(rateId, el) {
+      if (el) {
+        this.datePickerRefs[rateId] = el
+      }
+    },
+    openDatePicker(rateId) {
+      this.$nextTick(() => {
+        const picker = this.datePickerRefs[rateId]
+        if (picker && typeof picker.openCalendar === 'function') {
+          picker.openCalendar()
+        } else if (picker && picker.$refs && picker.$refs.input) {
+          // Альтернативный способ: вызываем клик на input
+          picker.$refs.input.$el?.click()
+        }
+      })
     }
   }
 }
@@ -348,9 +384,21 @@ export default {
   }
 }
 
+.vacancy-rates-table__date-cell {
+  position: relative;
+}
+
 .vacancy-rates-table__date-link {
-  text-decoration: underline;
   color: #263043;
+  cursor: pointer;
+}
+
+.vacancy-rates-table__date-picker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .vacancy-rates-table__status-badge {

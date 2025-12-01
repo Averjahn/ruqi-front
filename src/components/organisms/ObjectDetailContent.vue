@@ -1,15 +1,61 @@
 <template>
   <div class="object-detail-content">
-    <!-- Header Section: Object Name + Tabs -->
+    <!-- Header Section: Object Name + Tabs + Actions -->
     <div class="object-detail-content__header-section">
-      <h1 class="object-detail-content__object-title">{{ object.name || 'Объект' }}</h1>
-      <Tabs
-        :tabs="tabs"
-        :value="activeTab"
-        @change="handleTabChange"
-        type="underlined"
-        class="object-detail-content__tabs"
-      />
+      <div class="object-detail-content__header">
+        <div class="object-detail-content__header-content">
+          <h1 class="object-detail-content__object-title">{{ object.name || 'Объект' }}</h1>
+          <Tabs
+            :tabs="tabs"
+            :value="activeTab"
+            @change="handleTabChange"
+            type="underlined"
+            class="object-detail-content__tabs"
+          />
+        </div>
+        <div class="object-detail-content__header-actions">
+          <button
+            type="button"
+            class="object-detail-content__actions-button"
+            @click.stop="toggleHeaderMenu"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="4" r="1.5" fill="currentColor"/>
+              <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+              <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+          </button>
+          <div
+            v-if="showHeaderMenu"
+            class="object-detail-content__actions-menu"
+          >
+            <button
+              type="button"
+              class="object-detail-content__actions-menu-item"
+              @click="handleHeaderMenuAction('add-vacancy')"
+            >
+              <img src="@/assets/icons/profile/Add.svg" alt="Добавить вакансию" />
+              <span>Добавить вакансию</span>
+            </button>
+            <button
+              type="button"
+              class="object-detail-content__actions-menu-item"
+              @click="handleHeaderMenuAction('edit')"
+            >
+              <img src="@/assets/icons/profile/Edit.svg" alt="Редактировать" />
+              <span>Редактировать</span>
+            </button>
+            <button
+              type="button"
+              class="object-detail-content__actions-menu-item"
+              @click="handleHeaderMenuAction('archive')"
+            >
+              <img src="@/assets/icons/trash.svg" alt="Архивировать" />
+              <span>Архивировать</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Tab Content Section -->
@@ -248,7 +294,8 @@ export default {
           detailLabel: 'Объект',
           detailValue: 'Брюс Уйен'
         }
-      ]
+      ],
+      showHeaderMenu: false
     }
   },
   computed: {
@@ -262,7 +309,20 @@ export default {
       ]
     }
   },
+  mounted() {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', this.handleDocumentClick)
+    }
+  },
+  beforeUnmount() {
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('click', this.handleDocumentClick)
+    }
+  },
   methods: {
+    handleDocumentClick() {
+      this.showHeaderMenu = false
+    },
     handleBack() {
       this.$emit('back')
     },
@@ -272,6 +332,30 @@ export default {
     },
     handleTabChange(tab) {
       this.$emit('tab-change', tab)
+    },
+    toggleHeaderMenu() {
+      this.showHeaderMenu = !this.showHeaderMenu
+    },
+    handleHeaderMenuAction(action) {
+      this.showHeaderMenu = false
+      if (action === 'add-vacancy') {
+        // Логика аналогична VacanciesTab.handleAddVacancy
+        const object = this.object || {}
+        const objectId = object.id || (typeof window !== 'undefined'
+          ? window.localStorage.getItem('uiObjects.selectedObjectId')
+          : null)
+        const objectName = object.name || null
+
+        const query = {}
+        if (objectId) query.objectId = objectId
+        if (objectName) query.objectName = objectName
+
+        this.$router.push({ path: '/ui-new/objects/create-vacancy', query })
+        return
+      }
+
+      // Здесь позже можно реализовать реальные действия для edit/archive
+      console.log('Object header action:', action, this.object)
     }
   }
 }
@@ -356,6 +440,10 @@ padding-left: 24px;
   flex-direction: column;
   gap: 8px;
   flex: 1;
+}
+
+.object-detail-content__header-actions {
+  position: relative;
 }
 
 .object-detail-content__breadcrumbs {
@@ -456,6 +544,70 @@ padding-left: 24px;
   line-height: 32px;
   color: #263043;
   margin: 0;
+}
+
+.object-detail-content__actions-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #666666;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background-color: #F2F8FF;
+    color: #1735F5;
+  }
+}
+
+.object-detail-content__actions-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 320px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow:
+    0px 8px 48px 4px #0234e30a,
+    0px 0px 10px 0px #1735f508;
+  padding: 8px 0;
+  z-index: 20;
+}
+
+.object-detail-content__actions-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: #263043;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: grayscale(1);
+  }
+
+  &:hover {
+    background: #F6F8FB;
+  }
 }
 
 
@@ -931,7 +1083,8 @@ padding-left: 24px;
   height: 20px;
   cursor: pointer;
   flex-shrink: 0;
-  accent-color: #1735F5;
+  // Цвет чекбокса в вакансиях / карточках объекта
+  accent-color: #666666;
 }
 
 .object-detail-content__card-title {
@@ -1129,8 +1282,9 @@ padding-left: 24px;
   background-size: auto !important;
 
   &:checked {
-    background: #1735F5 !important;
-    border-color: #1735F5;
+    // Активное состояние чекбокса в вакансиях / заявках
+    background: #666666 !important;
+    border-color: #666666;
     background-image: none !important;
 
     &::after {
@@ -1147,7 +1301,7 @@ padding-left: 24px;
   }
 
   &:hover {
-    border-color: #1735F5;
+    border-color: #666666;
   }
 }
 
