@@ -2,41 +2,65 @@
   <div class="container">
     <img class="mb_24" src="@/assets/icon_deprecated/mail.svg" />
     <div class="description">
-      Мы получили запрос на изменение email, привязанного к вашему аккаунту RUQI.ru. Чтобы подтвердить изменение email,
-      нажмите кнопку:
+      Подтверждение привязки email...
     </div>
-    <div class="button_block">
-      <Button class="action_button" :loading="loading" @click="approveEmail">Подтвердить email</Button>
+    <div v-if="loading" class="loading">
+      Обработка запроса...
+    </div>
+    <div v-if="error" class="error">
+      {{ error }}
     </div>
   </div>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
-import { getAPIError } from '@/constants/helpers'
+import authApiService from '@/services/authApi'
+
 export default {
-  name: 'unavailablePage',
+  name: 'EmailConfirmPage',
   data () {
     return {
       loading: false,
+      error: null,
     }
   },
-  mounted () {},
+  async mounted () {
+    await this.confirmEmail()
+  },
   methods: {
     ...mapActions('notifications', ['showNotification']),
 
-    async approveEmail () {
-      this.loading = true
-      const response = await this.$axios.patch('v2/user/setnewloginemail', {
-        token: this.$route.query.hash,
-      })
-      if (response?.data?.success) {
-        this.showNotification({ type: 'success', text: 'Email успешно подтверждён' })
-        this.$router.push('/')
-      } else {
-        this.showNotification({ type: 'error', text: getAPIError(response) || 'Ошибка при подтверждении email' })
+    async confirmEmail () {
+      const hash = this.$route.query.hash
+      
+      if (!hash) {
+        this.error = 'Хэш не найден в ссылке'
+        this.showNotification({ type: 'error', text: 'Хэш не найден в ссылке' })
+        return
       }
-      this.loading = false
+
+      this.loading = true
+      this.error = null
+
+      try {
+        const response = await authApiService.confirmEmailBind(hash)
+        
+        if (response.success) {
+          this.showNotification({ type: 'success', text: 'Email успешно привязан' })
+          this.$router.push('/client/profile')
+        } else {
+          const errorMessage = response.error?.[0]?.msg || response.error || 'Ошибка при подтверждении email'
+          this.error = errorMessage
+          this.showNotification({ type: 'error', text: errorMessage })
+        }
+      } catch (error) {
+        const errorMessage = 'Ошибка при подтверждении email'
+        this.error = errorMessage
+        this.showNotification({ type: 'error', text: errorMessage })
+      } finally {
+        this.loading = false
+      }
     },
   },
 }
@@ -55,13 +79,15 @@ export default {
   margin-bottom: 24px;
   max-width: 560px;
 }
-.button_block {
-  display: flex;
-  justify-content: center;
+.loading {
+  color: #7a91a9;
+  font-size: 16px;
+  margin-top: 16px;
 }
-.action_button {
-  flex: 1;
-  max-width: 460px;
+.error {
+  color: #e74c3c;
+  font-size: 16px;
+  margin-top: 16px;
 }
 @media (max-width: 490px) {
   .container {

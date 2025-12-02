@@ -15,9 +15,26 @@
     </div>
 
     <div class="change-password-new-password-modal__content">
+      <!-- Поле старого пароля показывается только при смене через текущий пароль -->
+      <div 
+        v-if="method === 'current-password'"
+        class="change-password-new-password-modal__input-wrapper"
+      >
+        <label class="change-password-new-password-modal__label">
+          Старый пароль
+        </label>
+        <Input
+          :model-value="oldPassword"
+          @update:model-value="oldPassword = $event"
+          type="password"
+          placeholder="Введите старый пароль"
+          class="change-password-new-password-modal__input"
+        />
+      </div>
+
       <div class="change-password-new-password-modal__input-wrapper">
         <label class="change-password-new-password-modal__label">
-          Пароль
+          {{ method === 'current-password' ? 'Новый пароль' : 'Пароль' }}
         </label>
         <Input
           :model-value="password"
@@ -30,7 +47,7 @@
 
       <div class="change-password-new-password-modal__input-wrapper">
         <label class="change-password-new-password-modal__label">
-          Повторите пароль
+          Повторите {{ method === 'current-password' ? 'новый ' : '' }}пароль
         </label>
         <Input
           :model-value="confirmPassword"
@@ -67,7 +84,6 @@
         type="contained"
         color="blue"
         size="l"
-        :loading="loading"
         :disabled="!isFormValid"
         @click="handleConfirm"
       >
@@ -87,22 +103,35 @@ export default {
     Input,
     Button
   },
+  props: {
+    method: {
+      type: String,
+      default: null // 'current-password' | 'phone' | 'email' | null
+    }
+  },
   emits: ['close', 'back', 'confirm'],
   data() {
     return {
+      oldPassword: '',
       password: '',
-      confirmPassword: '',
-      loading: false
+      confirmPassword: ''
     }
   },
   computed: {
     isFormValid() {
-      return this.password.length >= 8 && 
+      const passwordValid = this.password.length >= 8 && 
              this.password === this.confirmPassword &&
              /[A-Z]/.test(this.password) &&
              /[a-z]/.test(this.password) &&
              /[0-9]/.test(this.password) &&
              /[^A-Za-z0-9]/.test(this.password)
+      
+      // Если меняем через старый пароль, проверяем что старый пароль введен
+      if (this.method === 'current-password') {
+        return passwordValid && this.oldPassword.length > 0
+      }
+      
+      return passwordValid
     }
   },
   methods: {
@@ -110,15 +139,18 @@ export default {
       if (!this.isFormValid) {
         return
       }
-      this.loading = true
-      // TODO: Implement password change logic
-      setTimeout(() => {
-        this.loading = false
+      if (this.method === 'current-password') {
+        this.$emit('confirm', {
+          oldPassword: this.oldPassword,
+          password: this.password,
+          confirmPassword: this.confirmPassword
+        })
+      } else {
         this.$emit('confirm', {
           password: this.password,
           confirmPassword: this.confirmPassword
         })
-      }, 1000)
+      }
     }
   }
 }

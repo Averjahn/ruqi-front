@@ -307,9 +307,29 @@
     <!-- Change Password New Password Modal -->
     <Popup :show="showChangePasswordNewPasswordModal" @update:show="showChangePasswordNewPasswordModal = $event">
       <ChangePasswordNewPasswordModal
+        :method="passwordChangeMethod"
         @close="showChangePasswordNewPasswordModal = false"
         @back="handleNewPasswordModalBack"
         @confirm="handlePasswordConfirm"
+      />
+    </Popup>
+
+    <!-- Change Password Email Input Modal -->
+    <Popup :show="showChangePasswordEmailInputModal" @update:show="showChangePasswordEmailInputModal = $event">
+      <ChangePasswordEmailInputModal
+        @close="handleEmailPasswordClose"
+        @get-code="handleGetEmailCode"
+      />
+    </Popup>
+
+    <!-- Change Password Email Code Modal -->
+    <Popup :show="showChangePasswordEmailCodeModal" @update:show="showChangePasswordEmailCodeModal = $event">
+      <ChangePasswordEmailCodeModal
+        :email="changePasswordEmail"
+        @close="handleEmailPasswordClose"
+        @back="handleEmailCodeModalBack"
+        @continue="handleEmailCodeContinue"
+        @resend-code="handleResendEmailCode"
       />
     </Popup>
   </div>
@@ -337,6 +357,9 @@ import ChangePasswordModal from '@/components/organisms/popups/ChangePasswordMod
 import ChangePasswordPhoneModal from '@/components/organisms/popups/ChangePasswordPhoneModal.vue'
 import ChangePasswordCodeModal from '@/components/organisms/popups/ChangePasswordCodeModal.vue'
 import ChangePasswordNewPasswordModal from '@/components/organisms/popups/ChangePasswordNewPasswordModal.vue'
+import ChangePasswordEmailModal from '@/components/organisms/popups/ChangePasswordEmailModal.vue'
+import ChangePasswordEmailInputModal from '@/components/organisms/popups/ChangePasswordEmailInputModal.vue'
+import ChangePasswordEmailCodeModal from '@/components/organisms/popups/ChangePasswordEmailCodeModal.vue'
 import { mapState } from 'vuex'
 import authApiService from '@/services/authApi'
 
@@ -363,6 +386,9 @@ export default {
     ChangePasswordPhoneModal,
     ChangePasswordCodeModal,
     ChangePasswordNewPasswordModal,
+    ChangePasswordEmailModal,
+    ChangePasswordEmailInputModal,
+    ChangePasswordEmailCodeModal,
   },
   data() {
     return {
@@ -396,7 +422,13 @@ export default {
       showChangePasswordPhoneModal: false,
       showChangePasswordCodeModal: false,
       showChangePasswordNewPasswordModal: false,
+      showChangePasswordEmailModal: false,
+      showChangePasswordEmailInputModal: false,
+      showChangePasswordEmailCodeModal: false,
       changePasswordPhone: '',
+      changePasswordCode: '',
+      changePasswordEmail: '',
+      changePasswordEmailCode: '',
       
       personalData: {
         lastName: '',
@@ -481,6 +513,8 @@ export default {
       objects: [],
       objectsTotalCount: 0,
       objectsLoading: false,
+      // Текущий способ смены пароля: 'phone' | 'current-password' | 'email' | null
+      passwordChangeMethod: null,
     }
   },
   computed: {
@@ -496,6 +530,22 @@ export default {
 
     sidebarMenuItems() {
       return this.desktopMenuItems
+    },
+    
+    // Отслеживаем изменения статуса клиента в store
+    clientStatus() {
+      return this.$store.getters['auth/clientStatus']
+    }
+  },
+  watch: {
+    // Автоматически обновляем контакты при изменении статуса в store
+    clientStatus: {
+      handler(newStatus) {
+        if (newStatus) {
+          this.initContactsFromStatus()
+        }
+      },
+      immediate: true
     }
   },
   async mounted() {
@@ -507,68 +557,79 @@ export default {
       }
     }
 
-    await this.loadClientProfile()
-
+    // Всегда загружаем статус клиента при заходе на страницу профиля
+    await this.$store.dispatch('auth/checkClientStatus')
+    
+    // Инициализируем контакты из статуса (приоритетный источник для телефона и email)
     this.initContactsFromStatus()
+
+    // Загружаем профиль для дополнительных данных (имя, фамилия и т.д.)
+    await this.loadClientProfile()
   },
 
   beforeUnmount() {
     this.cleanupMobileTracking()
   },
   methods: {
-      initContactsFromStatus() {
-        const status = this.$store.getters['auth/clientStatus']
+initContactsFromStatus() {
+  const status = this.$store.getters['auth/clientStatus']
 
-        if (!status) {
-          return
-        }
+  if (!status) {
+    return
+  }
 
-        if (status.phone) {
-          const raw = String(status.phone)
-          const digits = raw.replace(/\D/g, '')
+  // Проверяем оба варианта: login_phone и phone (API может возвращать любой из них)
+  const phoneNumber = status.login_phone || status.phone
+  
+  if (phoneNumber) {
+    const raw = String(phoneNumber)
+    const digits = raw.replace(/\D/g, '')
 
-          let formatted = raw
+    let formatted = raw
 
+    if (digits.length === 11 && digits.charAt(0) === '7') {
+      formatted =
+        '+7 (' +
+        digits.slice(1, 4) + ') ' +
+        digits.slice(4, 7) + '-' +
+        digits.slice(7, 9) + '-' +
+        digits.slice(9, 11)
+    } else if (raw.charAt(0) !== '+') {
+      formatted = '+' + raw
+    }
 
-          if (digits.length === 11 && digits.charAt(0) === '7') {
-            formatted =
-              '+7 (' +
-              digits.slice(1, 4) + ') ' +
-              digits.slice(4, 7) + '-' +
-              digits.slice(7, 9) + '-' +
-              digits.slice(9, 11)
-          } else if (raw.charAt(0) !== '+') {
-            formatted = '+' + raw
-          }
+    this.contacts.phone = formatted
 
-          this.contacts.phone = formatted
+    // 👉 Как в почте: если телефон есть в статусе — считаем его подтверждённым
+    const isConfirmed =
+      true // или, если хочешь подстраховаться: !!phoneNumber || status.phone_verified === true
 
+    this.contacts.phoneStatus = {
+      type: isConfirmed ? 'success' : 'error',
+      icon: isConfirmed
+        ? require('@/assets/icons/checkmark_circle.svg')
+        : require('@/assets/icons/profile/input-status-red.svg'),
+      text: isConfirmed ? 'Телефон подтверждён' : 'Телефон не подтверждён'
+    }
+  }
 
-          var isConfirmed = true
+  // email часть можно оставить как есть
+  const email = status.login_email || status.email
+  
+  if (email) {
+    this.contacts.email = email
 
-          this.contacts.phoneStatus = {
-            type: isConfirmed ? 'success' : 'error',
-            icon: isConfirmed
-              ? require('@/assets/icons/checkmark_circle.svg')
-              : require('@/assets/icons/profile/input-status-red.svg'),
-            text: isConfirmed ? 'Телефон подтверждён' : 'Телефон не подтверждён'
-          }
-        }
+    const isEmailConfirmed = status.email_verified === true
 
-        if (status.email) {
-          this.contacts.email = status.email
-
-          var isEmailConfirmed = true
-
-          this.contacts.emailStatus = {
-            type: isEmailConfirmed ? 'success' : 'error',
-            icon: isEmailConfirmed
-              ? require('@/assets/icons/checkmark_circle.svg')
-              : require('@/assets/icons/profile/input-status-red.svg'),
-            text: isEmailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
-          }
-        }
-      },
+    this.contacts.emailStatus = {
+      type: isEmailConfirmed ? 'success' : 'error',
+      icon: isEmailConfirmed
+        ? require('@/assets/icons/checkmark_circle.svg')
+        : require('@/assets/icons/profile/input-status-red.svg'),
+      text: isEmailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
+    }
+  }
+},
 
     initMobileTracking() {
       if (typeof window !== 'undefined' && window.matchMedia) {
@@ -1013,7 +1074,9 @@ export default {
             }
           }
 
-          if (profile.phone) {
+          // Обновляем телефон из профиля только если его нет в статусе
+          // (данные из статуса имеют приоритет, так как они более актуальные)
+          if (profile.phone && !this.contacts.phone) {
             this.contacts.phone = profile.phone
             this.contacts.phoneStatus = {
               type: profile.phone_verified ? 'success' : 'unconfirmed',
@@ -1025,7 +1088,9 @@ export default {
           }
 
 
-          if (profile.email) {
+          // Обновляем email из профиля только если его нет в статусе
+          // (данные из статуса имеют приоритет, так как они более актуальные)
+          if (profile.email && !this.contacts.email) {
             this.contacts.email = profile.email
 
             const emailConfirmed = true // считаем привязанный email подтверждённым
@@ -1239,25 +1304,64 @@ export default {
     },
 
     handleChangePassword() {
+      // Сбрасываем предыдущий выбранный способ и открываем стартовое модальное окно
+      this.passwordChangeMethod = null
+      this.changePasswordPhone = ''
+      this.changePasswordCode = ''
       this.showChangePasswordModal = true
     },
     handlePasswordOptionSelect(option) {
+      this.passwordChangeMethod = option
+
       if (option === 'phone') {
         // Закрываем первое модальное окно и открываем модальное окно с телефоном
         this.showChangePasswordModal = false
         this.showChangePasswordPhoneModal = true
+      } else if (option === 'current-password') {
+        // Для варианта "через текущий пароль" сразу открываем модальное окно ввода нового пароля
+        this.showChangePasswordModal = false
+        this.showChangePasswordNewPasswordModal = true
+      } else if (option === 'email') {
+        // Для варианта "через email" открываем модалку ввода email
+        this.showChangePasswordModal = false
+        this.showChangePasswordEmailInputModal = true
       } else {
-        // TODO: Implement password change logic for other options
-        console.log('Password option selected:', option)
+        // На всякий случай закрываем модалку и логируем неизвестный опшен
+        console.log('Unknown password option selected:', option)
         this.showChangePasswordModal = false
       }
     },
-    handleGetCode(phone) {
-      console.log('Get code for phone:', phone)
-      // Сохраняем номер телефона и открываем модальное окно с кодом
-      this.changePasswordPhone = phone
-      this.showChangePasswordPhoneModal = false
-      this.showChangePasswordCodeModal = true
+    async handleGetCode(phone) {
+      try {
+        // Очищаем телефон от + и пробелов, оставляем только цифры
+        const cleanPhone = phone.replace(/\D/g, '')
+        
+        const result = await authApiService.sendPasswordRecoveryCode('phone', {
+          phone: cleanPhone,
+          verificationBy: 'telegram'
+        })
+        
+        if (result.success) {
+          // Сохраняем номер телефона и открываем модальное окно с кодом
+          this.changePasswordPhone = phone
+          this.showChangePasswordPhoneModal = false
+          this.showChangePasswordCodeModal = true
+          
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Код восстановления отправлен'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при отправке кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при запросе кода восстановления:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при отправке кода'
+        })
+      }
     },
     handleCodeModalBack() {
       // Возвращаемся к модальному окну с телефоном
@@ -1265,24 +1369,221 @@ export default {
       this.showChangePasswordPhoneModal = true
     },
     handleCodeContinue(code) {
-      console.log('Continue with code:', code)
-      // Закрываем модальное окно с кодом и открываем модальное окно для нового пароля
+      // Сохраняем код и открываем модальное окно для нового пароля
+      this.changePasswordCode = code
       this.showChangePasswordCodeModal = false
       this.showChangePasswordNewPasswordModal = true
     },
     handleNewPasswordModalBack() {
-      // Возвращаемся к модальному окну с кодом
+      // Возврат зависит от выбранного способа смены пароля
       this.showChangePasswordNewPasswordModal = false
-      this.showChangePasswordCodeModal = true
+
+      if (this.passwordChangeMethod === 'phone') {
+        // Возвращаемся к модальному окну с кодом для сценария по телефону
+        this.showChangePasswordCodeModal = true
+      } else if (this.passwordChangeMethod === 'email') {
+        // Возвращаемся к модальному окну с кодом для сценария по email
+        this.showChangePasswordEmailCodeModal = true
+      } else {
+        // Для сценария "через текущий пароль"
+        // возвращаемся к первому модальному окну выбора способа
+        this.showChangePasswordModal = true
+      }
     },
-    handlePasswordConfirm({ password, confirmPassword }) {
-      console.log('Password confirmed:', password, confirmPassword)
-      // TODO: Implement password change logic
-      this.showChangePasswordNewPasswordModal = false
+    async handlePasswordConfirm({ oldPassword, password, confirmPassword }) {
+      try {
+        if (this.passwordChangeMethod === 'current-password') {
+          // Смена пароля через старый пароль
+          if (!oldPassword) {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Введите старый пароль'
+            })
+            return
+          }
+          
+          const result = await authApiService.changePasswordByOldPassword(oldPassword, password)
+          
+          if (result.success) {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Пароль успешно изменён'
+            })
+            this.showChangePasswordNewPasswordModal = false
+            this.passwordChangeMethod = null
+          } else {
+            const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при смене пароля'
+            this.$store.dispatch('notifications/showNotification', {
+              text: errorMsg
+            })
+          }
+        } else if (this.passwordChangeMethod === 'phone') {
+          // Смена пароля через телефон
+          if (!this.changePasswordCode) {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Код восстановления не найден'
+            })
+            return
+          }
+          
+          const result = await authApiService.setNewPasswordByCode('phone', this.changePasswordCode, password)
+          
+          if (result.success) {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Пароль успешно изменён'
+            })
+            this.showChangePasswordNewPasswordModal = false
+            this.passwordChangeMethod = null
+            this.changePasswordCode = ''
+            this.changePasswordPhone = ''
+          } else {
+            const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при смене пароля'
+            this.$store.dispatch('notifications/showNotification', {
+              text: errorMsg
+            })
+          }
+        } else if (this.passwordChangeMethod === 'email') {
+          // Смена пароля через email
+          if (!this.changePasswordEmailCode) {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Код восстановления не найден'
+            })
+            return
+          }
+          
+          const result = await authApiService.setNewPasswordByCode('email', this.changePasswordEmailCode, password)
+          
+          if (result.success) {
+            this.$store.dispatch('notifications/showNotification', {
+              text: 'Пароль успешно изменён'
+            })
+            this.showChangePasswordNewPasswordModal = false
+            this.passwordChangeMethod = null
+            this.changePasswordEmailCode = ''
+            this.changePasswordEmail = ''
+          } else {
+            const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при смене пароля'
+            this.$store.dispatch('notifications/showNotification', {
+              text: errorMsg
+            })
+          }
+        } else {
+          // Для других методов (email) логика будет реализована позже
+          console.log(
+            'Password confirmed with method:',
+            this.passwordChangeMethod,
+            password,
+            confirmPassword
+          )
+          // TODO: Implement password change logic для других методов
+          this.showChangePasswordNewPasswordModal = false
+          this.passwordChangeMethod = null
+        }
+      } catch (error) {
+        console.error('Ошибка при смене пароля:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при смене пароля'
+        })
+      }
     },
-    handleResendCode(phone) {
-      console.log('Resend code for phone:', phone)
-      // TODO: Implement resend code logic
+    async handleGetEmailCode(email) {
+      try {
+        const result = await authApiService.sendPasswordRecoveryCode('email', {
+          email: email
+        })
+        
+        if (result.success) {
+          // Сохраняем email и открываем модальное окно с кодом
+          this.changePasswordEmail = email
+          this.showChangePasswordEmailInputModal = false
+          this.showChangePasswordEmailCodeModal = true
+          
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Код восстановления отправлен'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при отправке кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при запросе кода восстановления:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при отправке кода'
+        })
+      }
+    },
+    handleEmailCodeModalBack() {
+      // Возвращаемся к модальному окну с email
+      this.showChangePasswordEmailCodeModal = false
+      this.showChangePasswordEmailInputModal = true
+    },
+    handleEmailCodeContinue(code) {
+      // Сохраняем код и открываем модальное окно для нового пароля
+      this.changePasswordEmailCode = code
+      this.showChangePasswordEmailCodeModal = false
+      this.showChangePasswordNewPasswordModal = true
+    },
+    async handleResendEmailCode(email) {
+      try {
+        const result = await authApiService.sendPasswordRecoveryCode('email', {
+          email: email
+        })
+        
+        if (result.success) {
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Код восстановления отправлен повторно'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при повторной отправке кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при повторной отправке кода:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при повторной отправке кода'
+        })
+      }
+    },
+    handleEmailPasswordBack() {
+      // Закрываем модалку email-сценария и возвращаемся к окну выбора способа
+      this.showChangePasswordEmailInputModal = false
+      this.showChangePasswordModal = true
+      this.passwordChangeMethod = null
+    },
+    handleEmailPasswordClose() {
+      // Полное закрытие сценария смены пароля по email
+      this.showChangePasswordEmailInputModal = false
+      this.showChangePasswordEmailCodeModal = false
+      this.passwordChangeMethod = null
+    },
+    async handleResendCode(phone) {
+      try {
+        // Очищаем телефон от + и пробелов, оставляем только цифры
+        const cleanPhone = phone.replace(/\D/g, '')
+        
+        const result = await authApiService.sendPasswordRecoveryCode('phone', {
+          phone: cleanPhone,
+          verificationBy: 'telegram'
+        })
+        
+        if (result.success) {
+          this.$store.dispatch('notifications/showNotification', {
+            text: 'Код восстановления отправлен повторно'
+          })
+        } else {
+          const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при повторной отправке кода'
+          this.$store.dispatch('notifications/showNotification', {
+            text: errorMsg
+          })
+        }
+      } catch (error) {
+        console.error('Ошибка при повторной отправке кода:', error)
+        this.$store.dispatch('notifications/showNotification', {
+          text: 'Ошибка при повторной отправке кода'
+        })
+      }
     },
     /**
      * Выход из аккаунта

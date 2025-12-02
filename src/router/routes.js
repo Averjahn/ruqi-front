@@ -32,6 +32,11 @@ export const routes = [
     component: i('/ui-new/profile/index.vue'), // тот же самый компонент, что и у /ui-new/profile
     meta: { requiresAuth: false, layout: 'EmptyLayout' },
   },
+  {
+    path: '/email-confirm',
+    component: i('/emailConfirm/index.vue'),
+    meta: { requiresAuth: false, layout: 'EmptyLayout' },
+  },
   // redirects
   { path: '/welcome-prompt', redirect: '/ui-new/profile' },
   

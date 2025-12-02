@@ -1,55 +1,55 @@
 <template>
-  <div class="change-password-code-modal">
-    <div class="change-password-code-modal__header">
-      <h2 class="change-password-code-modal__title">Смена пароля</h2>
+  <div class="change-password-email-code-modal">
+    <div class="change-password-email-code-modal__header">
+      <h2 class="change-password-email-code-modal__title">Смена пароля</h2>
       <button 
-        class="change-password-code-modal__close-button"
+        class="change-password-email-code-modal__close-button"
         @click="$emit('close')"
       >
         <img 
           src="@/assets/icons/cross_black.svg" 
           alt="Close" 
-          class="change-password-code-modal__close-icon"
+          class="change-password-email-code-modal__close-icon"
         />
       </button>
     </div>
 
-    <div class="change-password-code-modal__content">
-      <p class="change-password-code-modal__description">
-        Мы отправили код в телеграм на номер {{ formattedPhone }}. Введите его и задайте новый пароль.
+    <div class="change-password-email-code-modal__content">
+      <p class="change-password-email-code-modal__description">
+        Мы отправили код на email <b>{{ email }}</b>. Введите его и задайте новый пароль.
       </p>
 
-      <div class="change-password-code-modal__code-section">
-        <div class="change-password-code-modal__input-wrapper">
-          <label class="change-password-code-modal__label">
-            Код из телеграм
+      <div class="change-password-email-code-modal__code-section">
+        <div class="change-password-email-code-modal__input-wrapper">
+          <label class="change-password-email-code-modal__label">
+            Код из письма
           </label>
           <Input
             :model-value="code"
             @update:model-value="code = $event"
             type="text"
-            placeholder="Введите код из телеграм"
-            maxlength="6"
-            class="change-password-code-modal__input"
+            placeholder="Введите код из письма"
+            maxlength="4"
+            class="change-password-email-code-modal__input"
           />
         </div>
 
-        <div class="change-password-code-modal__resend-section">
+        <div class="change-password-email-code-modal__resend-section">
           <button 
             v-if="!isTimerRunning"
-            class="change-password-code-modal__resend-button"
+            class="change-password-email-code-modal__resend-button"
             @click="handleResendCode"
           >
             Отправить код повторно
           </button>
-          <p v-else class="change-password-code-modal__timer">
+          <p v-else class="change-password-email-code-modal__timer">
             Отправить код повторно ({{ remainingTimeString }})
           </p>
         </div>
       </div>
     </div>
 
-    <div class="change-password-code-modal__actions">
+    <div class="change-password-email-code-modal__actions">
       <Button
         type="outlined"
         color="blue"
@@ -74,16 +74,15 @@
 <script>
 import Input from '@/components/atoms/Input.vue'
 import Button from '@/components/atoms/Button.vue'
-import { formatPhoneNumber, clearPhoneAlwaysSeven } from '@/constants/helpers'
 
 export default {
-  name: 'ChangePasswordCodeModal',
+  name: 'ChangePasswordEmailCodeModal',
   components: {
     Input,
     Button
   },
   props: {
-    phone: {
+    email: {
       type: String,
       required: true
     }
@@ -98,22 +97,8 @@ export default {
     }
   },
   computed: {
-    formattedPhone() {
-      if (!this.phone) return '+7 (999) 999-33-31'
-      const digitsOnly = this.phone.replace(/\D/g, '')
-      const cleaned = clearPhoneAlwaysSeven(digitsOnly.slice(0, 11))
-      const formatted = formatPhoneNumber(cleaned)
-      // Format as +7 (999) 999-33-31
-      if (formatted.length >= 11) {
-        const digits = formatted.replace(/\D/g, '')
-        if (digits.length === 11) {
-          return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`
-        }
-      }
-      return formatted
-    },
     isCodeValid() {
-      return this.code.length >= 4
+      return this.code.length === 4
     },
     remainingTimeString() {
       const minutes = Math.floor(this.remainingTime / 60)
@@ -136,7 +121,7 @@ export default {
     },
     handleResendCode() {
       this.startTimer()
-      this.$emit('resend-code', this.phone)
+      this.$emit('resend-code', this.email)
     },
     startTimer() {
       this.clearTimer()
@@ -162,7 +147,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.change-password-code-modal {
+.change-password-email-code-modal {
   position: relative;
   background: #ffffff;
   border: 1px solid #dadada;
@@ -185,14 +170,14 @@ export default {
   }
 }
 
-.change-password-code-modal__header {
+.change-password-email-code-modal__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
-.change-password-code-modal__title {
+.change-password-email-code-modal__title {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 600;
   font-size: 20px;
@@ -202,7 +187,7 @@ export default {
   flex: 1;
 }
 
-.change-password-code-modal__close-button {
+.change-password-email-code-modal__close-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,19 +200,19 @@ export default {
   flex-shrink: 0;
 }
 
-.change-password-code-modal__close-icon {
+.change-password-email-code-modal__close-icon {
   width: 15.5px;
   height: 15.5px;
   object-fit: contain;
 }
 
-.change-password-code-modal__content {
+.change-password-email-code-modal__content {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.change-password-code-modal__description {
+.change-password-email-code-modal__description {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -235,23 +220,27 @@ export default {
   letter-spacing: 0.1px;
   color: #263043;
   margin: 0;
+
+  b {
+    font-weight: 600;
+  }
 }
 
-.change-password-code-modal__code-section {
+.change-password-email-code-modal__code-section {
   display: flex;
   flex-direction: column;
   gap: 24px;
   align-items: center;
 }
 
-.change-password-code-modal__input-wrapper {
+.change-password-email-code-modal__input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: 100%;
 }
 
-.change-password-code-modal__label {
+.change-password-email-code-modal__label {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -261,18 +250,18 @@ export default {
   margin: 0;
 }
 
-.change-password-code-modal__input {
+.change-password-email-code-modal__input {
   width: 100%;
 }
 
-.change-password-code-modal__resend-section {
+.change-password-email-code-modal__resend-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
 }
 
-.change-password-code-modal__resend-button {
+.change-password-email-code-modal__resend-button {
   background: none;
   border: none;
   padding: 0;
@@ -290,7 +279,7 @@ export default {
   }
 }
 
-.change-password-code-modal__timer {
+.change-password-email-code-modal__timer {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 18px;
@@ -300,7 +289,7 @@ export default {
   text-align: center;
 }
 
-.change-password-code-modal__actions {
+.change-password-email-code-modal__actions {
   display: flex;
   gap: 16px;
   align-items: center;

@@ -11,11 +11,28 @@
             :rules="[rules.required, rules.email]"
           />
         </div>
-        <div class="action_block">
-          <Button type="outlined" :disabled="loading" @click="$emit('onBack')">Отмена</Button>
-          <Button :disabled="loading" :loading="loading" @click="requestCode">Получить код</Button>
-        </div>
       </Form>
+      <div class="action_block">
+        <Button
+          type="outlined"
+          color="blue"
+          size="m"
+          :disabled="loading"
+          @click="$emit('onBack')"
+        >
+          Отмена
+        </Button>
+        <Button
+          type="contained"
+          color="blue"
+          size="m"
+          :disabled="loading"
+          :loading="loading"
+          @click="requestCode"
+        >
+          Получить код
+        </Button>
+      </div>
     </div>
     <div v-if="showWindow === 'change_password'" class="new_password_form">
       <div class="title" v-html="smsMessage" />
@@ -59,10 +76,25 @@
         </div>
       </Form>
       <div class="action_block">
-        <Button type="outlined" :disabled="loadingPassword" @click="onBack">Отмена</Button>
-        <Button :disabled="continueDisabled || loadingPassword" :loading="loadingPassword" @click="submitNewPassword"
-          >Подтвердить</Button
+        <Button
+          type="outlined"
+          color="blue"
+          size="l"
+          :disabled="loadingPassword"
+          @click="onBack"
         >
+          Отмена
+        </Button>
+        <Button
+          type="contained"
+          color="blue"
+          size="l"
+          :disabled="continueDisabled || loadingPassword"
+          :loading="loadingPassword"
+          @click="submitNewPassword"
+        >
+          Подтвердить
+        </Button>
       </div>
     </div>
   </div>
@@ -73,10 +105,14 @@ import { rules, rulesSets } from '@/constants/validations'
 import { getAPIError } from '@/constants/helpers'
 import { mapActions, mapGetters } from 'vuex'
 import OtpInput from '@/components/atoms/OtpInput.vue'
+import Input from '@/components/atoms/Input.vue'
+import Button from '@/components/atoms/Button.vue'
 
 export default {
   components: {
     OtpInput,
+    Input,
+    Button,
   },
   props: {},
   data () {
@@ -197,11 +233,21 @@ export default {
     margin-bottom: 8px;
   }
   .action_block {
+    width: 100%;
     margin-top: 8px;
     display: flex;
     gap: 16px;
-    & > div {
+
+    .rq_button {
       flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+
+      .rq_button {
+        width: 100%;
+      }
     }
   }
   .phone_otp {

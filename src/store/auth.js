@@ -25,6 +25,8 @@ export const auth = {
     async auth ({ commit, dispatch }, token) {
       commit('setToken', token)
       await dispatch('user/fetchUser', null, { root: true })
+      // После авторизации проверяем статус клиента, чтобы обновить данные в store
+      await dispatch('checkClientStatus')
     },
 
     async signIn ({ commit, dispatch }, payload) {

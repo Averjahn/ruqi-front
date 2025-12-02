@@ -1,35 +1,35 @@
 <template>
-  <div class="change-password-phone-modal">
-    <div class="change-password-phone-modal__header">
-      <h2 class="change-password-phone-modal__title">Смена пароля</h2>
+  <div class="change-password-email-input-modal">
+    <div class="change-password-email-input-modal__header">
+      <h2 class="change-password-email-input-modal__title">Смена пароля</h2>
       <button 
-        class="change-password-phone-modal__close-button"
+        class="change-password-email-input-modal__close-button"
         @click="$emit('close')"
       >
         <img 
           src="@/assets/icons/cross_black.svg" 
           alt="Close" 
-          class="change-password-phone-modal__close-icon"
+          class="change-password-email-input-modal__close-icon"
         />
       </button>
     </div>
 
-    <div class="change-password-phone-modal__content">
-      <div class="change-password-phone-modal__input-wrapper">
-        <label class="change-password-phone-modal__label">
-          Введите номер телефона, указанный при регистрации
+    <div class="change-password-email-input-modal__content">
+      <div class="change-password-email-input-modal__input-wrapper">
+        <label class="change-password-email-input-modal__label">
+          Введите email, указанный при регистрации
         </label>
         <Input
-          :model-value="phone"
-          @update:model-value="handlePhoneUpdate"
-          type="tel"
-          placeholder="+7 900 000-00-00"
-          class="change-password-phone-modal__input"
+          :model-value="email"
+          @update:model-value="email = $event"
+          type="email"
+          placeholder="user@example.com"
+          class="change-password-email-input-modal__input"
         />
       </div>
     </div>
 
-    <div class="change-password-phone-modal__actions">
+    <div class="change-password-email-input-modal__actions">
       <Button
         type="outlined"
         color="blue"
@@ -44,7 +44,7 @@
         size="m"
         @click="handleGetCode"
       >
-        Получить код в телеграм
+        Получить код
       </Button>
     </div>
   </div>
@@ -53,10 +53,9 @@
 <script>
 import Input from '@/components/atoms/Input.vue'
 import Button from '@/components/atoms/Button.vue'
-import { formatPhoneNumber, clearPhoneAlwaysSeven } from '@/constants/helpers'
 
 export default {
-  name: 'ChangePasswordPhoneModal',
+  name: 'ChangePasswordEmailInputModal',
   components: {
     Input,
     Button
@@ -64,29 +63,23 @@ export default {
   emits: ['close', 'get-code'],
   data() {
     return {
-      phone: ''
+      email: ''
     }
   },
   methods: {
-    handlePhoneUpdate(value) {
-      const digitsOnly = value.replace(/\D/g, '')
-      const limitedDigits = digitsOnly.slice(0, 11)
-      const cleaned = clearPhoneAlwaysSeven(limitedDigits)
-      this.phone = formatPhoneNumber(cleaned)
-    },
     handleGetCode() {
-      if (!this.phone || this.phone.replace(/\D/g, '').length < 11) {
+      if (!this.email || !this.email.includes('@')) {
         // TODO: Show error message
         return
       }
-      this.$emit('get-code', this.phone)
+      this.$emit('get-code', this.email)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.change-password-phone-modal {
+.change-password-email-input-modal {
   position: relative;
   background: #ffffff;
   border: 1px solid #dadada;
@@ -109,14 +102,14 @@ export default {
   }
 }
 
-.change-password-phone-modal__header {
+.change-password-email-input-modal__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
-.change-password-phone-modal__title {
+.change-password-email-input-modal__title {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 600;
   font-size: 20px;
@@ -126,7 +119,7 @@ export default {
   flex: 1;
 }
 
-.change-password-phone-modal__close-button {
+.change-password-email-input-modal__close-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,26 +132,26 @@ export default {
   flex-shrink: 0;
 }
 
-.change-password-phone-modal__close-icon {
+.change-password-email-input-modal__close-icon {
   width: 15.5px;
   height: 15.5px;
   object-fit: contain;
 }
 
-.change-password-phone-modal__content {
+.change-password-email-input-modal__content {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.change-password-phone-modal__input-wrapper {
+.change-password-email-input-modal__input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 4px;
   width: 100%;
 }
 
-.change-password-phone-modal__label {
+.change-password-email-input-modal__label {
   font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -168,11 +161,11 @@ export default {
   margin: 0;
 }
 
-.change-password-phone-modal__input {
+.change-password-email-input-modal__input {
   width: 100%;
 }
 
-.change-password-phone-modal__actions {
+.change-password-email-input-modal__actions {
   display: flex;
   gap: 16px;
   align-items: center;

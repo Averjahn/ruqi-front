@@ -713,13 +713,13 @@ class AuthApiService {
    * Подтвердить привязку email
    * POST /api/v2/auth/client/email/confirm-bind
    * Требуется авторизация (Bearer токен)
-   * @param {string} code - Код подтверждения
+   * @param {string} token - Токен подтверждения
    * @param {string} email - Email адрес (опционально, если требуется)
    * @returns {Promise<Object>} Ответ API
    */
-  async confirmEmailBind(code, email = null) {
+  async confirmEmailBind(token, email = null) {
     try {
-      const requestData = { code }
+      const requestData = { token }
       if (email) {
         requestData.email = email
       }
@@ -752,6 +752,114 @@ class AuthApiService {
   async getTelegramLink() {
     try {
       const response = await axios.get('/api/v2/auth/client/telegram/link')
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Смена пароля через старый пароль
+   * POST /api/v2/auth/client/password/change
+   * Требуется авторизация (Bearer токен)
+   * @param {string} oldPassword - Старый пароль
+   * @param {string} newPassword - Новый пароль
+   * @returns {Promise<Object>} Ответ API
+   */
+  async changePasswordByOldPassword(oldPassword, newPassword) {
+    try {
+      const response = await axios.post('/api/v2/auth/client/password/change', {
+        old_password: oldPassword,
+        new_password: newPassword
+      })
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Отправка кода восстановления пароля
+   * POST /api/v2/auth/client/password/send-recovery-code
+   * @param {string} recoveryType - Тип восстановления (email/phone)
+   * @param {string} email - Email для восстановления (если recovery_type=email)
+   * @param {string} phone - Телефон для восстановления (если recovery_type=phone)
+   * @param {string} verificationBy - Метод отправки кода для телефона (telegram/sms)
+   * @returns {Promise<Object>} Ответ API
+   */
+  async sendPasswordRecoveryCode(recoveryType, { email = null, phone = null, verificationBy = 'telegram' }) {
+    try {
+      const requestData = {
+        recovery_type: recoveryType
+      }
+      
+      if (recoveryType === 'email' && email) {
+        requestData.email = email
+      } else if (recoveryType === 'phone' && phone) {
+        // Очищаем телефон от + и пробелов, оставляем только цифры
+        const cleanPhone = phone.replace(/\D/g, '')
+        requestData.phone = cleanPhone
+        requestData.verification_by = verificationBy
+      }
+      
+      const response = await axios.post('/api/v2/auth/client/password/send-recovery-code', requestData)
+      
+      // Проверяем успешность ответа от API
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Установка нового пароля по коду восстановления
+   * POST /api/v2/auth/client/password/set-new-by-code
+   * @param {string} recoveryType - Тип восстановления (email/phone)
+   * @param {string} code - 4-значный код восстановления
+   * @param {string} newPassword - Новый пароль (минимум 8 символов)
+   * @returns {Promise<Object>} Ответ API
+   */
+  async setNewPasswordByCode(recoveryType, code, newPassword) {
+    try {
+      const response = await axios.patch('/api/v2/auth/client/password/set-new-by-code', {
+        recovery_type: recoveryType,
+        code: code,
+        new_password: newPassword
+      })
       
       // Проверяем успешность ответа от API
       if (response.data.success) {
