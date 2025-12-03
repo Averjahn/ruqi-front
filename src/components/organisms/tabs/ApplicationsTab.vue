@@ -67,7 +67,7 @@
         class="object-detail-content__bulk-action"
         @click="handleBulkCreateCopies"
       >
-        <span class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--copy" />
+        <img src="@/assets/icons/profile/copy.svg" alt="Copy" class="object-detail-content__bulk-action-icon" />
         <span class="object-detail-content__bulk-action-text">Создать копии</span>
       </button>
       <button
@@ -75,7 +75,7 @@
         class="object-detail-content__bulk-action"
         @click="handleBulkDownloadPerformers"
       >
-        <span class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--download" />
+        <img src="@/assets/icons/profile/download.svg" alt="Download" class="object-detail-content__bulk-action-icon" />
         <span class="object-detail-content__bulk-action-text">Скачать список исполнителей</span>
       </button>
       <button
@@ -83,7 +83,7 @@
         class="object-detail-content__bulk-action"
         @click="handleBulkDelete"
       >
-        <span class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--delete" />
+        <img src="@/assets/icons/delete.svg" alt="Delete" class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--delete" />
         <span class="object-detail-content__bulk-action-text">Удалить</span>
       </button>
     </div>
@@ -109,10 +109,10 @@
             <th class="object-detail-content__th">Наполнение</th>
             <th class="object-detail-content__th object-detail-content__th--actions">
               <button
-           
+                v-if="selectedApplications.length > 0"
                 type="button"
                 class="object-detail-content__actions-button object-detail-content__actions-button--header"
-                @click.stop="toggleBulkActions"
+                @click.stop
               >
                 <svg
                   width="16"
@@ -245,6 +245,13 @@ export default {
       return filtered
     }
   },
+  watch: {
+    filteredApplications() {
+      // Очищаем выбранные заявки, которые больше не в отфильтрованном списке
+      const filteredIds = this.filteredApplications.map(a => a.id)
+      this.selectedApplications = this.selectedApplications.filter(id => filteredIds.includes(id))
+    }
+  },
   methods: {
     handleNewApplication() {
       console.log('New application clicked')
@@ -262,17 +269,17 @@ export default {
     },
     handleSelectAllApplications(event) {
       if (event.target.checked) {
-        this.selectedApplications = [...this.filteredApplications.map(a => a.id)]
+        this.$set(this, 'selectedApplications', [...this.filteredApplications.map(a => a.id)])
       } else {
-        this.selectedApplications = []
+        this.$set(this, 'selectedApplications', [])
       }
     },
     handleSelectApplication(applicationId) {
       const index = this.selectedApplications.indexOf(applicationId)
       if (index > -1) {
-        this.selectedApplications.splice(index, 1)
+        this.$set(this, 'selectedApplications', this.selectedApplications.filter(id => id !== applicationId))
       } else {
-        this.selectedApplications.push(applicationId)
+        this.$set(this, 'selectedApplications', [...this.selectedApplications, applicationId])
       }
     },
     handleApplicationClick(application, event) {
@@ -286,13 +293,6 @@ export default {
     handleApplicationActions(application) {
       console.log('Application actions:', application)
       // TODO: Implement application actions menu
-    },
-    toggleBulkActions() {
-      if (this.selectedApplications.length === 0) {
-        this.showBulkActions = false
-        return
-      }
-      this.showBulkActions = !this.showBulkActions
     },
     handleBulkCreateCopies() {
       // TODO: Реализовать создание копий заявок

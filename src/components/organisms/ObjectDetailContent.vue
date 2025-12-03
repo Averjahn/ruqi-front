@@ -1080,7 +1080,7 @@ padding-left: 24px;
   background: transparent;
   cursor: pointer;
   padding: 0;
-  font-family: 'Nunito Sans', 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
@@ -1100,23 +1100,11 @@ padding-left: 24px;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  border-radius: 999px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 16px 16px;
-}
+  object-fit: contain;
 
-.object-detail-content__bulk-action-icon--copy {
-  background-image: url('@/assets/icons/profile/doc-exec.svg');
-}
-
-.object-detail-content__bulk-action-icon--download {
-  background-image: url('@/assets/icons/profile/download-doc.svg');
-}
-
-.object-detail-content__bulk-action-icon--delete {
-  background-image: url('@/assets/icons/delete.svg');
-  filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
+  &--delete {
+    filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
+  }
 }
 
 .object-detail-content__bulk-action-text {
