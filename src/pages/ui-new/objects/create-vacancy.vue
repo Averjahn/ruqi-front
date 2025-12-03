@@ -335,7 +335,7 @@ export default {
       stepperSteps: [
         { number: 1, label: 'Основное', status: 'active' },
         { number: 2, label: 'Данные чека', status: 'waiting' },
-        { number: 5, label: 'Фотографии и описание', status: 'waiting' }
+        { number: 3, label: 'Фотографии и описание', status: 'waiting' }
       ],
       objectId: null,
       objectName: null

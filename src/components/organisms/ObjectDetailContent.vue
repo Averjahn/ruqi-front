@@ -1101,10 +1101,10 @@ padding-left: 24px;
   height: 20px;
   flex-shrink: 0;
   object-fit: contain;
-
-  &--delete {
-    filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
-  }
+  opacity: 1;
+  display: block;
+  // Базовый цвет для иконок (серый #263043)
+  filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
 }
 
 .object-detail-content__bulk-action-text {

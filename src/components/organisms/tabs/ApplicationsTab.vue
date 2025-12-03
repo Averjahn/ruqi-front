@@ -83,7 +83,7 @@
         class="object-detail-content__bulk-action"
         @click="handleBulkDelete"
       >
-        <img src="@/assets/icons/delete.svg" alt="Delete" class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--delete" />
+        <img src="@/assets/icons/delete.svg" alt="Delete" class="object-detail-content__bulk-action-icon" />
         <span class="object-detail-content__bulk-action-text">Удалить</span>
       </button>
     </div>
