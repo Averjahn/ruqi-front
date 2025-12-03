@@ -51,6 +51,43 @@
       </div>
     </div>
 
+    <!-- Bulk actions (панель массовых действий, как в дизайне заявок) -->
+    <div
+      v-if="selectedApplications.length > 0"
+      class="object-detail-content__bulk-actions"
+    >
+      <div class="object-detail-content__bulk-actions-info">
+        <span class="object-detail-content__bulk-actions-label">Выбрано:</span>
+        <span class="object-detail-content__bulk-actions-counter">
+          {{ selectedApplications.length }}
+        </span>
+      </div>
+      <button
+        type="button"
+        class="object-detail-content__bulk-action"
+        @click="handleBulkCreateCopies"
+      >
+        <span class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--copy" />
+        <span class="object-detail-content__bulk-action-text">Создать копии</span>
+      </button>
+      <button
+        type="button"
+        class="object-detail-content__bulk-action"
+        @click="handleBulkDownloadPerformers"
+      >
+        <span class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--download" />
+        <span class="object-detail-content__bulk-action-text">Скачать список исполнителей</span>
+      </button>
+      <button
+        type="button"
+        class="object-detail-content__bulk-action"
+        @click="handleBulkDelete"
+      >
+        <span class="object-detail-content__bulk-action-icon object-detail-content__bulk-action-icon--delete" />
+        <span class="object-detail-content__bulk-action-text">Удалить</span>
+      </button>
+    </div>
+
     <!-- Applications Table -->
     <div class="object-detail-content__table-wrapper">
       <table class="object-detail-content__table">
@@ -70,7 +107,26 @@
             <th class="object-detail-content__th">Набор от</th>
             <th class="object-detail-content__th">Набор до</th>
             <th class="object-detail-content__th">Наполнение</th>
-            <th class="object-detail-content__th object-detail-content__th--actions"></th>
+            <th class="object-detail-content__th object-detail-content__th--actions">
+              <button
+           
+                type="button"
+                class="object-detail-content__actions-button object-detail-content__actions-button--header"
+                @click.stop="toggleBulkActions"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="8" cy="4" r="1.5" fill="currentColor" />
+                  <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                  <circle cx="8" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+              </button>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -230,6 +286,25 @@ export default {
     handleApplicationActions(application) {
       console.log('Application actions:', application)
       // TODO: Implement application actions menu
+    },
+    toggleBulkActions() {
+      if (this.selectedApplications.length === 0) {
+        this.showBulkActions = false
+        return
+      }
+      this.showBulkActions = !this.showBulkActions
+    },
+    handleBulkCreateCopies() {
+      // TODO: Реализовать создание копий заявок
+      console.log('Bulk create copies for applications:', this.selectedApplications)
+    },
+    handleBulkDownloadPerformers() {
+      // TODO: Реализовать скачивание списка исполнителей
+      console.log('Bulk download performers for applications:', this.selectedApplications)
+    },
+    handleBulkDelete() {
+      // TODO: Реализовать массовое удаление заявок
+      console.log('Bulk delete applications:', this.selectedApplications)
     },
     getApplicationStatusClass(status) {
       if (status === 'В работе') return 'object-detail-content__status--active'
