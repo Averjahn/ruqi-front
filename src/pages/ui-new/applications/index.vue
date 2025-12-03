@@ -103,41 +103,8 @@
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div v-if="applications.length === 0" class="ui-applications__empty">
-        <div class="ui-applications__empty-content">
-          <img 
-            src="@/assets/icons/FAQ/search-folder.svg" 
-            alt="Empty" 
-            class="ui-applications__empty-icon"
-          />
-          <div class="ui-applications__empty-text">
-            <h3 class="ui-applications__empty-title">
-              {{ hasObjects ? 'У вас нет еще заявок' : 'У вас нет ни одного объекта' }}
-            </h3>
-            <p class="ui-applications__empty-description">
-              {{
-                hasObjects
-                  ? 'Нажмите на кнопку, чтобы создать заявку'
-                  : 'Для создания заявки вам нужно добавить хотя бы один объект'
-              }}
-            </p>
-          </div>
-          <Button
-            type="contained"
-            color="blue"
-            size="l"
-            @click="hasObjects ? handleCreateApplication() : handleCreateObject()"
-            class="ui-applications__empty-button"
-          >
-            <img src="@/assets/icons/profile/Add.svg" alt="Add" class="ui-applications__empty-button-icon" />
-            {{ hasObjects ? 'Создать заявку' : 'Добавить объект' }}
-          </Button>
-        </div>
-      </div>
-
       <!-- Table View -->
-      <div v-else-if="viewMode === 'table'" class="ui-applications__table-wrapper">
+      <div v-if="viewMode === 'table'" class="ui-applications__table-wrapper">
         <table class="ui-applications__table">
           <thead>
             <tr>
@@ -149,14 +116,82 @@
                   class="ui-applications__checkbox"
                 />
               </th>
-              <th class="ui-applications__th">Заявка</th>
+              <th class="ui-applications__th">Название</th>
+              <th class="ui-applications__th">Ставка в час</th>
               <th class="ui-applications__th">Объект</th>
               <th class="ui-applications__th">Статус</th>
-              <th class="ui-applications__th">Дата создания</th>
+              <th class="ui-applications__th">Закрытие</th>
+              <th class="ui-applications__th">Набор</th>
+              <th class="ui-applications__th">Наполнение</th>
               <th class="ui-applications__th ui-applications__th--actions"></th>
             </tr>
           </thead>
           <tbody>
+            <!-- Empty State внутри таблицы -->
+            <tr v-if="!hasObjects && applications.length === 0" class="ui-applications__empty-row">
+              <td colspan="9" class="ui-applications__empty-cell">
+                <div class="ui-applications__empty">
+                  <div class="ui-applications__empty-content">
+                    <img 
+                      src="@/assets/icons/FAQ/search-folder.svg" 
+                      alt="Empty" 
+                      class="ui-applications__empty-icon"
+                    />
+                    <div class="ui-applications__empty-text">
+                      <h3 class="ui-applications__empty-title">
+                        У вас нет ни одного объекта
+                      </h3>
+                      <p class="ui-applications__empty-description">
+                        Для создания заявки вам нужно добавить хотя бы один объект
+                      </p>
+                    </div>
+                    <Button
+                      type="contained"
+                      color="blue"
+                      size="l"
+                      @click="handleCreateObject()"
+                      class="ui-applications__empty-button"
+                    >
+                      <img src="@/assets/icons/profile/Add.svg" alt="Add" class="ui-applications__empty-button-icon" />
+                      Добавить объект
+                    </Button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <!-- Empty State когда есть объекты, но нет заявок -->
+            <tr v-else-if="hasObjects && applications.length === 0" class="ui-applications__empty-row">
+              <td colspan="9" class="ui-applications__empty-cell">
+                <div class="ui-applications__empty">
+                  <div class="ui-applications__empty-content">
+                    <img 
+                      src="@/assets/icons/FAQ/search-folder.svg" 
+                      alt="Empty" 
+                      class="ui-applications__empty-icon"
+                    />
+                    <div class="ui-applications__empty-text">
+                      <h3 class="ui-applications__empty-title">
+                        У вас нет еще заявок
+                      </h3>
+                      <p class="ui-applications__empty-description">
+                        Нажмите на кнопку, чтобы создать заявку
+                      </p>
+                    </div>
+                    <Button
+                      type="contained"
+                      color="blue"
+                      size="l"
+                      @click="handleCreateApplication()"
+                      class="ui-applications__empty-button"
+                    >
+                      <img src="@/assets/icons/profile/Add.svg" alt="Add" class="ui-applications__empty-button-icon" />
+                      Создать заявку
+                    </Button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <!-- Заявки -->
             <tr
               v-for="application in filteredApplications"
               :key="application.id"
@@ -171,13 +206,16 @@
                 />
               </td>
               <td class="ui-applications__td">{{ application.name }}</td>
+              <td class="ui-applications__td">{{ application.hourlyRate || '-' }}</td>
               <td class="ui-applications__td">{{ application.objectName }}</td>
               <td class="ui-applications__td">
                 <span class="ui-applications__status" :class="`ui-applications__status--${application.status}`">
                   {{ application.statusText }}
                 </span>
               </td>
-              <td class="ui-applications__td">{{ formatDate(application.createdAt) }}</td>
+              <td class="ui-applications__td">{{ application.closingDate || '-' }}</td>
+              <td class="ui-applications__td">{{ application.recruitment || '-' }}</td>
+              <td class="ui-applications__td">{{ application.filling || '-' }}</td>
               <td class="ui-applications__td ui-applications__td--actions" @click.stop>
                 <button
                   class="ui-applications__actions-button"
@@ -654,15 +692,16 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 600px;
-    padding: 40px 20px;
+    min-height: 683px;
+    padding: 16px;
+    width: 100%;
   }
 
   &__empty-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
     max-width: 500px;
     text-align: center;
   }
@@ -701,6 +740,17 @@ export default {
     width: 220px;
   }
 
+  &__empty-row {
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  &__empty-cell {
+    padding: 0;
+    border: none;
+  }
+
   &__table-wrapper {
     overflow-x: auto;
     width: 100%;
@@ -716,20 +766,21 @@ export default {
     padding: 12px 16px;
     text-align: left;
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 14px;
-    line-height: 20px;
-    color: #263043;
-    border-bottom: 1px solid #E3E5E4;
-    background: #F6F8FB;
+    line-height: 22px;
+    color: #666666;
+    border-bottom: 1px solid #f3f3f3;
+    background: #fbfbfb;
 
     &--checkbox {
-      width: 48px;
+      width: 64px;
       text-align: center;
+      padding: 12px 24px;
     }
 
     &--actions {
-      width: 48px;
+      width: 64px;
       text-align: center;
     }
   }
@@ -739,12 +790,13 @@ export default {
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    line-height: 20px;
+    line-height: 22px;
     color: #263043;
-    border-bottom: 1px solid #E3E5E4;
+    border-bottom: 1px solid #f3f3f3;
 
     &--checkbox {
       text-align: center;
+      padding: 12px 24px;
     }
 
     &--actions {

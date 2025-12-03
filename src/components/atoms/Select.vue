@@ -15,7 +15,6 @@
           <img class="clear_icon" src="@/assets/icons/cross.svg" />
         </ButtonIconGhost>
         <img class="chevron" :class="{ isOpen }" src="@/assets/icons/chevron_down.svg" />
-        <ThinLineLoading class="progress_wrap" :show="loading && !isOpen" />
       </div>
 
       <div ref="list" class="list_container" :class="{ ignoreOverflow, isOpen }">
@@ -404,13 +403,6 @@ input {
 }
 .search_block {
   padding: 5px 13px 9px 13px;
-}
-.progress_wrap {
-  position: absolute;
-  width: 100%;
-  height: 3px;
-  left: 0;
-  bottom: 0;
 }
 .list_progress_wrap {
   height: 5px;

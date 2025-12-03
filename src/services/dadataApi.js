@@ -62,6 +62,41 @@ class DadataApiService {
     }
   }
 
+  // Поиск банка по БИК, SWIFT, ИНН или регистрационному номеру
+  async findBank(query, kpp = null) {
+    try {
+      console.log('🚀 Отправка запроса в DaData API для поиска банка:', {
+        url: `${this.baseURL}/findById/bank`,
+        query: query,
+        kpp: kpp,
+        token: this.apiToken
+      })
+
+      const requestBody = { query }
+      if (kpp) {
+        requestBody.kpp = kpp
+      }
+
+      const response = await axios.post(`${this.baseURL}/findById/bank`, requestBody, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Token ${this.apiToken}`
+        }
+      })
+
+      console.log('📨 Ответ от DaData API (банк):', response.data)
+
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      console.error('❌ Ошибка в DaData API (банк):', error)
+      return this.handleError(error)
+    }
+  }
+
   // Обработка ошибок
   handleError(error) {
     let errorMessage = 'Произошла ошибка при обращении к DaData API'

@@ -97,9 +97,12 @@
               <div class="ui-vacancy-create__field">
                 <label>Юниты/Единицы измерения</label>
                 <Select
-                  v-model="form.ratePer"
-                  :options="ratePerOptions"
+                  v-model="form.units"
+                  :options="unitsOptions"
                   placeholder="Выберите значение"
+                  multiselect
+                  item-value="value"
+                  item-text="label"
                 />
               </div>
 
@@ -305,6 +308,7 @@ export default {
         publicDescription: '',
         // Поле для шага "Данные чека"
         checkServiceName: '',
+        units: [],
         // Поля для шага "Фотографии и описание"
         photos: []
       },
@@ -318,6 +322,15 @@ export default {
         { value: 'hour', label: 'Час' },
         { value: 'shift', label: 'Смена' },
         { value: 'day', label: 'День' }
+      ],
+      unitsOptions: [
+        { value: 'piece', label: 'Штука' },
+        { value: 'kg', label: 'Килограмм' },
+        { value: 'm', label: 'Метр' },
+        { value: 'm2', label: 'Квадратный метр' },
+        { value: 'm3', label: 'Кубический метр' },
+        { value: 'hour', label: 'Час' },
+        { value: 'shift', label: 'Смена' }
       ],
       currentStepIndex: 0,
       stepperSteps: [
