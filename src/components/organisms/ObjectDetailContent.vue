@@ -1027,6 +1027,102 @@ padding-left: 24px;
   height: 16px;
 }
 
+.object-detail-content__bulk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px 24px;
+  background: #ffffff;
+  margin-bottom: 16px;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px;
+  }
+}
+
+.object-detail-content__bulk-actions-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.object-detail-content__bulk-actions-label {
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  color: #263043;
+}
+
+.object-detail-content__bulk-actions-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 2px 8px;
+  border-radius: 16px;
+  background: #F3F3F3;
+  font-family: 'Nunito Sans', 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #263043;
+}
+
+.object-detail-content__bulk-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Nunito Sans', 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  color: #263043;
+
+  &:hover {
+    color: #1735F5;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.object-detail-content__bulk-action-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px 16px;
+}
+
+.object-detail-content__bulk-action-icon--copy {
+  background-image: url('@/assets/icons/profile/doc-exec.svg');
+}
+
+.object-detail-content__bulk-action-icon--download {
+  background-image: url('@/assets/icons/profile/download-doc.svg');
+}
+
+.object-detail-content__bulk-action-icon--delete {
+  background-image: url('@/assets/icons/delete.svg');
+  filter: brightness(0) saturate(100%) invert(15%) sepia(8%) saturate(750%) hue-rotate(201deg) brightness(101%) contrast(89%);
+}
+
+.object-detail-content__bulk-action-text {
+  white-space: nowrap;
+}
+
 .object-detail-content__table-wrapper {
   width: 100%;
   max-width: 100%;
@@ -1207,8 +1303,11 @@ padding-left: 24px;
   }
 
   &--actions {
-    width: 48px;
-    text-align: center;
+    width: 64px;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 }
 
@@ -1283,7 +1382,7 @@ padding-left: 24px;
   line-height: 20px;
 
   &--review {
-    /* color: #F6AD55; */
+    color: #F6AD55;
   }
 
   &--active {
@@ -1328,6 +1427,11 @@ padding-left: 24px;
   svg {
     width: 16px;
     height: 16px;
+  }
+
+  &--header {
+    margin-left: auto;
+    margin-right: 0;
   }
 }
 

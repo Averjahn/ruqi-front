@@ -10,15 +10,26 @@
             >
           </span>
         </div>
-        <Button @click="accept" class="ok_button">OK</Button>
+        <MainButton
+          type="primary"
+          text="Принимаю"
+          @click="accept"
+          :full-width="true"
+          class="cookie_consent__button"
+        />
       </div>
     </div>
   </transition>
 </template>
 
 <script>
+import MainButton from '@/components/atoms/MainButton.vue'
+
 export default {
   name: 'CookieConsent',
+  components: {
+    MainButton
+  },
   data () {
     return {
       showConsent: false,
@@ -81,15 +92,16 @@ export default {
   flex-direction: column;
   width: 100%;
   gap: 32px;
+
+  a {
+    color: #1164f6;
+    text-decoration: underline;
+  }
 }
-.cookie_content {
-}
-.cookie_content a {
-  color: #1164f6;
-  text-decoration: underline;
-}
-.ok_button {
+
+.cookie_consent__button {
   width: 100%;
+  max-width: 100%;
 }
 .fade-enter-active,
 .fade-leave-active {

@@ -35,22 +35,9 @@
             <span>Добавить фото</span>
           </div>
         </div>
-        <!-- Миниатюра -->
-        <div 
-          class="photo-upload-card__upload-thumbnail" 
-          @click="triggerThumbnailInput"
-          @dragover.prevent="onDragOverThumbnail"
-          @dragleave.prevent="onDragLeaveThumbnail"
-          @drop.prevent="onDropThumbnail"
-        >
-          <input
-            ref="thumbnailInput"
-            type="file"
-            accept="image/png,image/jpeg,image/jpg"
-            style="display: none"
-            @change="handleThumbnailChange"
-          />
-          <img v-if="thumbnail" :src="thumbnail" alt="Thumbnail" class="photo-upload-card__preview" />
+        <!-- Миниатюра (только для отображения) -->
+        <div class="photo-upload-card__upload-thumbnail photo-upload-card__upload-thumbnail--readonly">
+          <img v-if="mainImage" :src="mainImage" alt="Thumbnail" class="photo-upload-card__preview" />
           <div v-else class="photo-upload-card__upload-placeholder">
             <img src="@/assets/icons/profile/Edit.svg" alt="Edit" />
             <span>Миниатюра</span>
@@ -118,33 +105,23 @@ export default {
       default: ''
     }
   },
-  emits: ['update:mainImage', 'update:thumbnail', 'update:title', 'update:description', 'delete', 'generate-image', 'generate-description'],
+  emits: ['update:mainImage', 'update:title', 'update:description', 'delete', 'generate-image', 'generate-description'],
   data() {
     return {
-      isDragOverMain: false,
-      isDragOverThumbnail: false
+      isDragOverMain: false
     }
   },
   methods: {
     triggerMainPhotoInput() {
       this.$refs.mainPhotoInput?.click()
     },
-    triggerThumbnailInput() {
-      this.$refs.thumbnailInput?.click()
-    },
     handleMainPhotoChange(event) {
       const file = event.target.files?.[0]
       if (file) {
-        this.handleFileUpload(file, 'main')
+        this.handleFileUpload(file)
       }
     },
-    handleThumbnailChange(event) {
-      const file = event.target.files?.[0]
-      if (file) {
-        this.handleFileUpload(file, 'thumbnail')
-      }
-    },
-    handleFileUpload(file, type) {
+    handleFileUpload(file) {
       // Проверка типа файла
       if (!file.type.match('image.*')) {
         console.error('Файл должен быть изображением')
@@ -160,11 +137,7 @@ export default {
 
       const reader = new FileReader()
       reader.onload = (e) => {
-        if (type === 'main') {
-          this.$emit('update:mainImage', e.target.result)
-        } else {
-          this.$emit('update:thumbnail', e.target.result)
-        }
+        this.$emit('update:mainImage', e.target.result)
       }
       reader.readAsDataURL(file)
     },
@@ -180,22 +153,7 @@ export default {
       this.isDragOverMain = false
       const file = e.dataTransfer.files?.[0]
       if (file) {
-        this.handleFileUpload(file, 'main')
-      }
-    },
-    onDragOverThumbnail(e) {
-      e.preventDefault()
-      this.isDragOverThumbnail = true
-    },
-    onDragLeaveThumbnail() {
-      this.isDragOverThumbnail = false
-    },
-    onDropThumbnail(e) {
-      e.preventDefault()
-      this.isDragOverThumbnail = false
-      const file = e.dataTransfer.files?.[0]
-      if (file) {
-        this.handleFileUpload(file, 'thumbnail')
+        this.handleFileUpload(file)
       }
     }
   }
@@ -301,14 +259,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   position: relative;
   overflow: hidden;
   background: #ffffff;
-  transition: border-color 0.2s ease;
 
-  &:hover {
-    border-color: #1735f5;
+  &--readonly {
+    cursor: default;
   }
 }
 
