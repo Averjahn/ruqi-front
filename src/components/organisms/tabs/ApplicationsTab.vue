@@ -269,17 +269,17 @@ export default {
     },
     handleSelectAllApplications(event) {
       if (event.target.checked) {
-        this.$set(this, 'selectedApplications', [...this.filteredApplications.map(a => a.id)])
+        this.selectedApplications = [...this.filteredApplications.map(a => a.id)]
       } else {
-        this.$set(this, 'selectedApplications', [])
+        this.selectedApplications = []
       }
     },
     handleSelectApplication(applicationId) {
       const index = this.selectedApplications.indexOf(applicationId)
       if (index > -1) {
-        this.$set(this, 'selectedApplications', this.selectedApplications.filter(id => id !== applicationId))
+        this.selectedApplications = this.selectedApplications.filter(id => id !== applicationId)
       } else {
-        this.$set(this, 'selectedApplications', [...this.selectedApplications, applicationId])
+        this.selectedApplications = [...this.selectedApplications, applicationId]
       }
     },
     handleApplicationClick(application, event) {
