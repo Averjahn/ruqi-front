@@ -53,6 +53,8 @@ export default {
   box-sizing: border-box;
   background: #ffffff;
   border-radius: 10px;
+  min-height: 0;
+  flex: 1;
 
   &__title {
     font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
@@ -69,10 +71,11 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    height: 420px;
+    height: 348px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 8px;
+    margin-right: -16px;
+    padding-right: 16px;
 
     &::-webkit-scrollbar {
       width: 6px;

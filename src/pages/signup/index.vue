@@ -231,7 +231,8 @@ export default {
       passwordRules: [
         (v) => !!v || 'Заполните поле',
         (v) => (v && v.length >= 4) || 'Пароль должен содержать минимум 4 символа',
-        (v) => (v && /[A-ZА-Я]/.test(v)) || 'Пароль должен содержать минимум одну заглавную букву',
+        (v) => (v && /[A-Za-z]/.test(v)) || 'Пароль должен состоять из латинских букв',
+        (v) => (v && /[A-Z]/.test(v)) || 'Пароль должен содержать минимум одну заглавную букву',
         (v) => (v && /[0-9]/.test(v)) || 'Пароль должен содержать минимум одну цифру',
         (v) => (v && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v)) || 'Пароль должен содержать минимум один специальный символ (!, @, #, и т.д.)'
       ]
@@ -261,7 +262,11 @@ export default {
       if (this.password.length < 4) {
         return false
       }
-      if (!/[A-ZА-Я]/.test(this.password)) {
+      // Пароль должен состоять из латинских букв
+      if (!/[A-Za-z]/.test(this.password)) {
+        return false
+      }
+      if (!/[A-Z]/.test(this.password)) {
         return false
       }
       if (!/[0-9]/.test(this.password)) {
@@ -665,7 +670,7 @@ export default {
   min-height: 100%;
   width: 100%;
   padding: 24px 16px;
-  background: #f8f9fa;
+  background: linear-gradient(90.3deg, #edf2ff -1.79%, #ffffff 99.73%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -758,14 +763,18 @@ export default {
   &__btn {
     width: 100%;
     max-width: none;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
 
     &--secondary {
       background: #e9ecef;
       border: none;
       color: #212529;
       font-family: 'Source Sans 3', sans-serif;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 600;
+      line-height: 24px;
     }
   }
 

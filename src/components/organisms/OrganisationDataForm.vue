@@ -314,8 +314,11 @@
           Расчётный счёт*
         </label>
         <Input
+          ref="settlementAccountInput"
           :model-value="modelValue.settlementAccount"
           @update:model-value="updateField('settlementAccount', $event)"
+          @blur="handleFieldBlur('settlementAccount')"
+          :rules="settlementAccountValidationRules"
           placeholder="Введите расчётный счёт"
           class="organisation-data-form__input"
         />
@@ -325,8 +328,11 @@
           Корреспондентский счёт*
         </label>
         <Input
+          ref="correspondentAccountInput"
           :model-value="modelValue.correspondentAccount"
           @update:model-value="updateField('correspondentAccount', $event)"
+          @blur="handleFieldBlur('correspondentAccount')"
+          :rules="correspondentAccountValidationRules"
           placeholder="Введите корреспондентский счёт"
           class="organisation-data-form__input"
         />
@@ -340,8 +346,11 @@
           БИК*
         </label>
         <Input
+          ref="bicInput"
           :model-value="modelValue.bic"
-          @update:model-value="updateField('bic', $event)"
+          @update:model-value="handleBicUpdate($event)"
+          @blur="handleBicBlur"
+          :rules="bicValidationRules"
           placeholder="Введите БИК"
           class="organisation-data-form__input"
         />
@@ -371,6 +380,8 @@ import {
   rules, 
   validateInnFormat, 
   validateInn,
+  validateBikFormat,
+  validateBik,
   validateFullNameFormat,
   validateKppDigitsFormat,
   validateOgrnFormat,
@@ -379,7 +390,11 @@ import {
   validatePositionFormat,
   validateBasisFormat,
   validateMailingAddressFormat,
-  validateLegalAddressFormat
+  validateLegalAddressFormat,
+  validateSettlementAccountFormat,
+  validateSettlementAccount,
+  validateCorrespondentAccountFormat,
+  validateCorrespondentAccount
 } from '@/constants/validations'
 import dadataApi from '@/services/dadataApi'
 import authApiService from '@/services/authApi'
@@ -429,6 +444,9 @@ export default {
         validateBasis: makeOptionalRule(validateBasisFormat), // При вводе проверяем только формат
         validateMailingAddress: makeOptionalRule(validateMailingAddressFormat), // При вводе проверяем только формат
         validateLegalAddress: makeOptionalRule(validateLegalAddressFormat), // При вводе проверяем только формат
+        validateBik: makeOptionalRule(validateBikFormat), // При вводе проверяем только формат
+        validateSettlementAccount: makeOptionalRule(validateSettlementAccountFormat), // При вводе проверяем только формат
+        validateCorrespondentAccount: makeOptionalRule(validateCorrespondentAccountFormat), // При вводе проверяем только формат
       },
       // Правила валидации для каждого поля (переключаются при blur)
       fullNameValidationRules: [makeOptionalRule(validateFullNameFormat)],
@@ -441,11 +459,17 @@ export default {
       mailingAddressValidationRules: [makeOptionalRule(validateMailingAddressFormat)],
       legalAddressValidationRules: [makeOptionalRule(validateLegalAddressFormat)],
       innValidationRules: [makeOptionalRule(validateInnFormat)], // По умолчанию только формат
-      innValidationRules: [makeOptionalRule(validateInnFormat)], // По умолчанию только формат
+      bicValidationRules: [makeOptionalRule(validateBikFormat)], // По умолчанию только формат
+      settlementAccountValidationRules: [
+        makeOptionalRule(validateSettlementAccountFormat)
+      ], // По умолчанию только формат
+      correspondentAccountValidationRules: [makeOptionalRule(validateCorrespondentAccountFormat)], // По умолчанию только формат
       dadataLoading: false,
       dadataError: null,
       searchTimeout: null,
+      bankSearchTimeout: null,
       currentSearchInn: null,
+      currentSearchBic: null,
       vatRateOptions: [
         { value: '0', label: '0%' },
         { value: '10', label: '10%' },
@@ -458,6 +482,9 @@ export default {
   beforeUnmount() {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout)
+    }
+    if (this.bankSearchTimeout) {
+      clearTimeout(this.bankSearchTimeout)
     }
   },
   mounted() {
@@ -597,6 +624,14 @@ export default {
         legalAddress: {
           rules: 'legalAddressValidationRules',
           fullValidator: rules.validateLegalAddress
+        },
+        settlementAccount: {
+          rules: 'settlementAccountValidationRules',
+          fullValidator: (value) => validateSettlementAccount(value, this.modelValue.bic)
+        },
+        correspondentAccount: {
+          rules: 'correspondentAccountValidationRules',
+          fullValidator: (value) => validateCorrespondentAccount(value, this.modelValue.bic)
         }
       }
 
@@ -691,6 +726,138 @@ export default {
       } finally {
         this.dadataLoading = false
       }
+    },
+
+    handleBicUpdate(value) {
+      this.bicValidationRules = [makeOptionalRule(validateBikFormat)]
+      
+      if (this.bankSearchTimeout) {
+        clearTimeout(this.bankSearchTimeout)
+        this.bankSearchTimeout = null
+      }
+      
+      this.dadataError = null
+      
+      if (!value || value.length === 0) {
+        this.currentSearchBic = null
+        this.updateField('bic', '')
+        this.updateField('bank', '')
+        this.updateField('correspondentAccount', '')
+        return
+      }
+      
+      this.updateField('bic', value)
+      
+      const bicLength = value.length
+      if (bicLength === 9) {
+        this.currentSearchBic = value
+        
+        this.bankSearchTimeout = setTimeout(() => {
+          if (this.currentSearchBic === value) {
+            this.searchByBic(value)
+          }
+        }, 500) // Задержка 500ms
+      } else {
+        this.currentSearchBic = null
+      }
+    },
+
+    handleBicBlur() {
+      this.bicValidationRules = [makeOptionalRule(validateBik)]
+      this.$nextTick(() => {
+        // Валидируем поле БИК
+        const bicInputs = ['bicInput', 'bicInputDesktop', 'bicInputMobile']
+        bicInputs.forEach(refName => {
+          const ref = this.$refs[refName]
+          if (ref && typeof ref.validate === 'function') {
+            ref.validate(true)
+          }
+        })
+        
+        // Перепроверяем расчетный и корреспондентский счета при изменении БИК
+        if (this.modelValue.settlementAccount && this.$refs.settlementAccountInput) {
+          this.settlementAccountValidationRules = [
+            makeOptionalRule((value) => validateSettlementAccount(value, this.modelValue.bic))
+          ]
+          this.$nextTick(() => {
+            if (this.$refs.settlementAccountInput && typeof this.$refs.settlementAccountInput.validate === 'function') {
+              this.$refs.settlementAccountInput.validate(true)
+            }
+          })
+        }
+        
+        if (this.modelValue.correspondentAccount && this.$refs.correspondentAccountInput) {
+          this.correspondentAccountValidationRules = [
+            makeOptionalRule((value) => validateCorrespondentAccount(value, this.modelValue.bic))
+          ]
+          this.$nextTick(() => {
+            if (this.$refs.correspondentAccountInput && typeof this.$refs.correspondentAccountInput.validate === 'function') {
+              this.$refs.correspondentAccountInput.validate(true)
+            }
+          })
+        }
+      })
+    },
+
+    async searchByBic(bic = null) {
+      const bicToSearch = bic || this.modelValue.bic
+      
+      if (!bicToSearch || bicToSearch.length !== 9) {
+        this.dadataError = 'БИК должен содержать 9 цифр'
+        return
+      }
+
+      // Проверяем, что БИК не изменился во время загрузки
+      if (this.currentSearchBic && this.currentSearchBic !== bicToSearch) {
+        // БИК изменился, не показываем ошибку
+        return
+      }
+
+      this.dadataLoading = true
+      this.dadataError = null
+
+      try {
+        const result = await dadataApi.findBank(bicToSearch)
+        
+        // Проверяем, что БИК не изменился после получения ответа
+        if (this.currentSearchBic && this.currentSearchBic !== bicToSearch) {
+          // БИК изменился, игнорируем результат
+          return
+        }
+        
+        if (result.success && result.data.suggestions && result.data.suggestions.length > 0) {
+          const bank = result.data.suggestions[0].data
+          this.fillBankData(bank)
+          this.dadataError = null
+        } else {
+          // Показываем ошибку только если БИК не изменился
+          if (!this.currentSearchBic || this.currentSearchBic === bicToSearch) {
+            this.dadataError = 'Банк не найден'
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при поиске банка:', error)
+        // Показываем ошибку только если БИК не изменился
+        if (!this.currentSearchBic || this.currentSearchBic === bicToSearch) {
+          this.dadataError = 'Ошибка при поиске банка'
+        }
+      } finally {
+        this.dadataLoading = false
+      }
+    },
+
+    fillBankData(bank) {
+      // Заполняем поля формы данными из DaData
+      const updates = {
+        bank: bank.name?.payment || bank.name?.short || bank.name?.full || '',
+        bic: bank.bic || this.modelValue.bic,
+        correspondentAccount: bank.correspondent_account || ''
+      }
+      
+      this.$emit('update:modelValue', {
+        ...this.modelValue,
+        ...updates
+      })
     },
 
     fillOrganizationData(organization) {

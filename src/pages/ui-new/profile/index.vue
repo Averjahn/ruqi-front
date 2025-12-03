@@ -429,10 +429,52 @@ export default {
           avatarUrl: null
         },
         {
-          name: 'Иванов Иван Иванович',
-          role: 'Объект 1',
-          phone: '+7 (999) 999-99-99',
-          email: 'anna.smirnova@ruqi.ru',
+          name: 'Петров Петр Петрович',
+          role: 'Объект 2',
+          phone: '+7 (999) 888-88-88',
+          email: 'petrov@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Сидоров Сидор Сидорович',
+          role: 'Объект 3',
+          phone: '+7 (999) 777-77-77',
+          email: 'sidorov@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Кузнецова Мария Сергеевна',
+          role: 'Объект 4',
+          phone: '+7 (999) 666-66-66',
+          email: 'kuznetsova@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Смирнов Алексей Владимирович',
+          role: 'Объект 5',
+          phone: '+7 (999) 555-55-55',
+          email: 'smirnov@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Волкова Елена Дмитриевна',
+          role: 'Объект 6',
+          phone: '+7 (999) 444-44-44',
+          email: 'volkova@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Новиков Дмитрий Александрович',
+          role: 'Объект 7',
+          phone: '+7 (999) 333-33-33',
+          email: 'novikov@ruqi.ru',
+          avatarUrl: null
+        },
+        {
+          name: 'Морозова Анна Игоревна',
+          role: 'Объект 8',
+          phone: '+7 (999) 222-22-22',
+          email: 'morozova@ruqi.ru',
           avatarUrl: null
         }
       ],
@@ -1088,6 +1130,7 @@ export default {
           
           // Показываем уведомление об успехе
           this.$store.dispatch('notifications/showNotification', {
+            type: 'success',
             text: 'Профиль успешно обновлён'
           })
         } else {
@@ -1125,9 +1168,7 @@ export default {
         
         if (result.success) {
           // Код успешно отправлен, модальное окно подтверждения уже открыто в PersonalData
-          this.$store.dispatch('notifications/showNotification', {
-            text: 'Код подтверждения отправлен'
-          })
+          // Уведомление снизу не показываем (по запросу дизайна)
         } else {
           const errorMsg = result.error?.[0]?.msg || 'Ошибка при запросе кода'
           this.$store.dispatch('notifications/showNotification', {
@@ -1158,9 +1199,7 @@ export default {
             text: 'Телефон подтверждён'
           }
           
-          this.$store.dispatch('notifications/showNotification', {
-            text: 'Телефон успешно изменён'
-          })
+          // Телефон успешно изменён — нижнее уведомление не показываем
         } else {
           const errorMsg = result.error?.[0]?.msg || 'Ошибка при подтверждении кода'
           this.$store.dispatch('notifications/showNotification', {
@@ -1183,9 +1222,7 @@ export default {
         const result = await authApiService.requestPhoneChange(phone)
         
         if (result.success) {
-          this.$store.dispatch('notifications/showNotification', {
-            text: 'Код подтверждения отправлен повторно'
-          })
+          // Код успешно отправлен повторно — уведомление снизу не показываем
         } else {
           const errorMsg = result.error?.[0]?.msg || 'Ошибка при повторной отправке кода'
           this.$store.dispatch('notifications/showNotification', {

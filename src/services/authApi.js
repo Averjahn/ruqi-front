@@ -469,7 +469,8 @@ class AuthApiService {
       const response = await axios.post('/api/v2/auth/client/organization', organizationData)
       
       // Проверяем успешность ответа от API
-      if (response.data.success) {
+      // Согласно документации, при успешном создании возвращается статус 201 и success: true
+      if (response.status === 201 || (response.data && response.data.success)) {
         return {
           success: true,
           data: response.data.data || response.data
@@ -822,6 +823,44 @@ class AuthApiService {
       formData.append('file', file) // имя поля строго "file" как в доке
 
       const response = await axios.post(`/api/v2/org/${orgUuid}/logo`, formData, {
+        headers: {
+          Accept: 'application/json',
+          // Content-Type для FormData axios сам поставит (с boundary)
+        },
+      })
+
+      if (response.data.success) {
+        return {
+          success: true,
+          data: response.data.data || response.data,
+        }
+      } else {
+        return {
+          success: false,
+          error: response.data.error,
+        }
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Загрузка документа организации
+   * POST /api/v2/org/{uuid}/document
+   * Требуется авторизация (Bearer токен)
+   * @param {string} orgUuid - UUID организации
+   * @param {File} file - Файл документа
+   * @param {string} documentType - Тип документа ('inn' или 'ogrn')
+   * @returns {Promise<Object>} Ответ API
+   */
+  async uploadOrganizationDocument(orgUuid, file, documentType) {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', documentType)
+
+      const response = await axios.post(`/api/v2/org/${orgUuid}/document`, formData, {
         headers: {
           Accept: 'application/json',
           // Content-Type для FormData axios сам поставит (с boundary)

@@ -58,6 +58,62 @@
       </Button>
     </div>
 
+    <!-- Bulk Actions Bar (появляется при выборе объектов) -->
+    <div v-if="selectedObjects.length > 0" class="objects-content__bulk-actions">
+      <div class="objects-content__bulk-actions-info">
+        <span class="objects-content__bulk-actions-count">
+          Выбрано: {{ selectedObjects.length }}
+        </span>
+      </div>
+      <div class="objects-content__bulk-actions-buttons">
+        <Button
+          type="outlined"
+          color="blue"
+          size="m"
+          @click="handleBulkEdit"
+          class="objects-content__bulk-action-button"
+        >
+          <img src="@/assets/icons/profile/Edit.svg" alt="Edit" class="objects-content__bulk-action-icon" />
+          Редактировать
+        </Button>
+        <Button
+          v-if="activeTab === 'active'"
+          type="outlined"
+          color="gray"
+          size="m"
+          @click="handleBulkArchive"
+          class="objects-content__bulk-action-button"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="objects-content__bulk-action-icon">
+            <path d="M2 4H14M6 2H10M3 4V13C3 13.5304 3.21071 14.0391 3.58579 14.4142C3.96086 14.7893 4.46957 15 5 15H11C11.5304 15 12.0391 14.7893 12.4142 14.4142C12.7893 14.0391 13 13.5304 13 13V4M5 7V11M8 7V11M11 7V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Архивировать
+        </Button>
+        <Button
+          v-else
+          type="outlined"
+          color="gray"
+          size="m"
+          @click="handleBulkDelete"
+          class="objects-content__bulk-action-button"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="objects-content__bulk-action-icon">
+            <path d="M2 4H14M6 2H10M3 4V13C3 13.5304 3.21071 14.0391 3.58579 14.4142C3.96086 14.7893 4.46957 15 5 15H11C11.5304 15 12.0391 14.7893 12.4142 14.4142C12.7893 14.0391 13 13.5304 13 13V4M5 7V11M8 7V11M11 7V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Удалить
+        </Button>
+        <button
+          class="objects-content__bulk-actions-clear"
+          @click="handleClearSelection"
+          title="Снять выделение"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="objects-content__grid">
       <div
@@ -269,6 +325,29 @@
       @close="showObjectModal = false"
       @menu-click="handleObjectMenuClick"
     />
+
+    <!-- Bulk Actions Modals -->
+    <BulkActionsModal
+      :show="showArchiveModal"
+      title="Архивирование объектов"
+      :message="`Вы уверены, что хотите архивировать ${selectedObjects.length} ${getObjectsWord(selectedObjects.length)}?`"
+      confirm-button-text="Архивировать"
+      action-button-color="gray"
+      :selected-objects="getSelectedObjectsData()"
+      @close="showArchiveModal = false"
+      @confirm="confirmBulkArchive"
+    />
+
+    <BulkActionsModal
+      :show="showDeleteModal"
+      title="Удаление объектов"
+      :message="`Вы уверены, что хотите удалить ${selectedObjects.length} ${getObjectsWord(selectedObjects.length)}? Это действие нельзя отменить.`"
+      confirm-button-text="Удалить"
+      action-button-color="red"
+      :selected-objects="getSelectedObjectsData()"
+      @close="showDeleteModal = false"
+      @confirm="confirmBulkDelete"
+    />
   </div>
 </template>
 
@@ -279,6 +358,7 @@ import Button from '@/components/atoms/Button.vue'
 import Pagination from '@/components/atoms/Pagination.vue'
 import Map from '@/components/organisms/Map.vue'
 import ObjectMapModal from '@/components/organisms/popups/ObjectMapModal.vue'
+import BulkActionsModal from '@/components/organisms/popups/BulkActionsModal.vue'
 
 const VIEW_MODE_STORAGE_KEY = 'uiObjects.viewMode'
 
@@ -289,7 +369,8 @@ export default {
     Button,
     Pagination,
     Map,
-    ObjectMapModal
+    ObjectMapModal,
+    BulkActionsModal
   },
   props: {
     objects: {
@@ -321,7 +402,9 @@ export default {
       sortOrder: 'asc', // 'asc' | 'desc'
       showObjectModal: false,
       selectedObjectData: null,
-      showHeaderActionsMenu: false
+      showHeaderActionsMenu: false,
+      showArchiveModal: false,
+      showDeleteModal: false
     }
   },
   computed: {
@@ -516,6 +599,68 @@ export default {
       }
       // Обработка клика на объект (карточка или строка)
       this.$emit('object-action', object)
+    },
+    handleBulkEdit() {
+      // TODO: Реализовать массовое редактирование
+      // Пока просто показываем уведомление
+      console.log('Массовое редактирование объектов:', this.selectedObjects)
+      // Можно открыть модальное окно для редактирования общих полей
+    },
+    handleBulkArchive() {
+      if (this.selectedObjects.length === 0) return
+      this.showArchiveModal = true
+    },
+    handleBulkDelete() {
+      if (this.selectedObjects.length === 0) return
+      this.showDeleteModal = true
+    },
+    handleClearSelection() {
+      this.selectedObjects = []
+    },
+    confirmBulkArchive() {
+      // TODO: Реализовать API вызов для архивирования
+      console.log('Архивирование объектов:', this.selectedObjects)
+      // После успешного архивирования очищаем выбор
+      this.selectedObjects = []
+      this.showArchiveModal = false
+      // Обновляем список объектов через emit или перезагрузку
+      this.$emit('filter-change', {
+        tab: this.activeTab,
+        search: this.searchQuery
+      })
+    },
+    confirmBulkDelete() {
+      // TODO: Реализовать API вызов для удаления
+      console.log('Удаление объектов:', this.selectedObjects)
+      // После успешного удаления очищаем выбор
+      this.selectedObjects = []
+      this.showDeleteModal = false
+      // Обновляем список объектов через emit или перезагрузку
+      this.$emit('filter-change', {
+        tab: this.activeTab,
+        search: this.searchQuery
+      })
+    },
+    getSelectedObjectsData() {
+      return this.selectedObjects
+        .map(id => this.objects.find(obj => obj.id === id))
+        .filter(obj => obj !== undefined)
+    },
+    getObjectsWord(count) {
+      const lastDigit = count % 10
+      const lastTwoDigits = count % 100
+      
+      if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return 'объектов'
+      }
+      
+      if (lastDigit === 1) {
+        return 'объект'
+      } else if (lastDigit >= 2 && lastDigit <= 4) {
+        return 'объекта'
+      } else {
+        return 'объектов'
+      }
     },
     handleMarkerClick(marker) {
       // Если это location маркер (для дизайна)
@@ -1044,6 +1189,102 @@ export default {
 
   &--high {
     color: #38A169;
+  }
+}
+
+.objects-content__bulk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #ffffff;
+  border: 1px solid #E3E5E4;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px;
+  }
+}
+
+.objects-content__bulk-actions-info {
+  display: flex;
+  align-items: center;
+}
+
+.objects-content__bulk-actions-count {
+  font-family: 'Source Sans 3', 'Source Sans Pro', 'Source Sans', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: #263043;
+}
+
+.objects-content__bulk-actions-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
+.objects-content__bulk-action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.objects-content__bulk-action-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  
+  path {
+    stroke: currentColor;
+  }
+}
+
+.objects-content__bulk-actions-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #666666;
+  border-radius: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #F6F8FB;
+    color: #263043;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #E3E5E4;
+    margin-top: 8px;
   }
 }
 

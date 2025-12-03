@@ -168,6 +168,156 @@ export const isCardNumberValid = (ccNumb) => {
   return bResult
 }
 
+// Валидация расчетного счета - только формат (при вводе)
+export const validateSettlementAccountFormat = (account) => {
+  if (typeof account === 'number') {
+    account = account.toString()
+  } else if (typeof account !== 'string') {
+    account = ''
+  }
+  if (account.length === 0) {
+    return true // Пустое значение валидно при вводе
+  }
+  if (/[^0-9]/.test(account)) {
+    return 'Расчетный счет может состоять только из цифр'
+  }
+  if (account.length > 20) {
+    return 'Расчетный счет не может быть больше 20 цифр'
+  }
+  return true
+}
+
+// Валидация расчетного счета - полная (при blur)
+// Принимает account и опционально bik для проверки контрольного числа
+export const validateSettlementAccount = (account, bik = null) => {
+  if (typeof account === 'number') {
+    account = account.toString()
+  } else if (typeof account !== 'string') {
+    account = ''
+  }
+  if (account.length < 1) {
+    return 'Расчетный счет пуст'
+  }
+  if (/[^0-9]/.test(account)) {
+    return 'Расчетный счет может состоять только из цифр'
+  }
+  if (account.length !== 20) {
+    return 'Расчетный счет должен состоять из 20 цифр'
+  }
+  
+  // Проверка контрольного числа, если БИК указан
+  if (bik) {
+    if (typeof bik === 'number') {
+      bik = bik.toString()
+    } else if (typeof bik !== 'string') {
+      bik = ''
+    }
+    
+    // Проверяем, что БИК валиден (9 цифр)
+    if (bik.length === 9 && /^[0-9]+$/.test(bik)) {
+      // Составляем 23-значное число из 3-х последних цифр БИК и расчетного счета
+      const bikRs = bik.slice(-3) + account
+      let checksum = 0
+      const coefficients = [7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1]
+      
+      for (let i = 0; i < coefficients.length; i++) {
+        checksum += coefficients[i] * (parseInt(bikRs[i]) % 10)
+      }
+      
+      if (checksum % 10 !== 0) {
+        return 'Неправильное контрольное число, проверьте также БИК'
+      }
+    }
+  }
+  
+  return true
+}
+
+// Валидация корреспондентского счета - только формат (при вводе)
+export const validateCorrespondentAccountFormat = (account) => {
+  if (typeof account === 'number') {
+    account = account.toString()
+  } else if (typeof account !== 'string') {
+    account = ''
+  }
+  if (account.length === 0) {
+    return true // Пустое значение валидно при вводе
+  }
+  if (/[^0-9]/.test(account)) {
+    return 'Корреспондентский счет может состоять только из цифр'
+  }
+  if (account.length > 20) {
+    return 'Корреспондентский счет не может быть больше 20 цифр'
+  }
+  return true
+}
+
+// Валидация корреспондентского счета - полная (при blur)
+// Принимает account и опционально bik для проверки контрольного числа
+export const validateCorrespondentAccount = (account, bik = null) => {
+  if (typeof account === 'number') {
+    account = account.toString()
+  } else if (typeof account !== 'string') {
+    account = ''
+  }
+  if (account.length < 1) {
+    return 'Корреспондентский счет пуст'
+  }
+  if (/[^0-9]/.test(account)) {
+    return 'Корреспондентский счет может состоять только из цифр'
+  }
+  if (account.length !== 20) {
+    return 'Корреспондентский счет должен состоять из 20 цифр'
+  }
+  
+  // Проверка контрольного числа, если БИК указан
+  if (bik) {
+    if (typeof bik === 'number') {
+      bik = bik.toString()
+    } else if (typeof bik !== 'string') {
+      bik = ''
+    }
+    
+    // Проверяем, что БИК валиден (9 цифр)
+    if (bik.length === 9 && /^[0-9]+$/.test(bik)) {
+      // Для корреспондентского счета: '0' + 4-5 цифры БИК + корреспондентский счет
+      const bikKs = '0' + bik.slice(4, 6) + account
+      let checksum = 0
+      const coefficients = [7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1, 3, 7, 1]
+      
+      for (let i = 0; i < coefficients.length; i++) {
+        checksum += coefficients[i] * (parseInt(bikKs[i]) % 10)
+      }
+      
+      if (checksum % 10 !== 0) {
+        return 'Неправильное контрольное число, проверьте также БИК'
+      }
+    }
+  }
+  
+  return true
+}
+
+// Валидация БИК - только формат (при вводе)
+export const validateBikFormat = (bik) => {
+  if (typeof bik === 'number') {
+    bik = bik.toString()
+  } else if (typeof bik !== 'string') {
+    bik = ''
+  }
+  if (bik.length === 0) {
+    return true // Пустое значение валидно при вводе
+  }
+  if (/[^0-9]/.test(bik)) {
+    return 'БИК может состоять только из цифр'
+  }
+  if (bik.length > 9) {
+    return 'БИК не может быть больше 9 цифр'
+  }
+  return true
+}
+
+// Валидация БИК - полная (при blur)
 export const validateBik = (bik) => {
   if (typeof bik === 'number') {
     bik = bik.toString()
@@ -179,7 +329,7 @@ export const validateBik = (bik) => {
   } else if (/[^0-9]/.test(bik)) {
     return 'БИК может состоять только из цифр'
   } else if (bik.length !== 9) {
-    return 'БИК может состоять только из 9 цифр'
+    return 'БИК должен состоять из 9 цифр'
   }
   return true
 }
@@ -409,6 +559,12 @@ export const rules = {
   validateBasis,
   validateMailingAddress,
   validateLegalAddress,
+  validateBik,
+  validateBikFormat,
+  validateSettlementAccount,
+  validateSettlementAccountFormat,
+  validateCorrespondentAccount,
+  validateCorrespondentAccountFormat,
 }
 
 export const rulesSets = {

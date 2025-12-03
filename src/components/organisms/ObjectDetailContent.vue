@@ -1270,39 +1270,8 @@ padding-left: 24px;
   width: 20px;
   height: 20px;
   cursor: pointer;
-  border: 1.5px solid #666666;
-  border-radius: 4px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background: #ffffff;
-  position: relative;
   flex-shrink: 0;
-  background-image: none !important;
-  background-size: auto !important;
-
-  &:checked {
-    // Активное состояние чекбокса в вакансиях / заявках
-    background: #666666 !important;
-    border-color: #666666;
-    background-image: none !important;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 6px;
-      height: 10px;
-      border: solid white;
-      border-width: 0 2px 2px 0;
-      transform: translate(-50%, -60%) rotate(45deg);
-    }
-  }
-
-  &:hover {
-    border-color: #666666;
-  }
+  accent-color: #1735F5;
 }
 
 .object-detail-content__status {

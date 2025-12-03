@@ -444,9 +444,60 @@ export default {
         const organizationResult = await authApi.createClientOrganization(organizationData)
         
         if (organizationResult.success) {
+          const orgUuid = organizationResult.data?.uuid || organizationResult.data?.data?.uuid
+          
+          if (!orgUuid) {
+            this.showNotification({
+              type: 'error',
+              text: 'Не удалось получить UUID организации',
+            })
+            this.loading = false
+            return
+          }
+
+          // Загружаем документы после создания организации
+          const documentUploadPromises = []
+          
+          if (this.formData.innCertificate?.file) {
+            documentUploadPromises.push(
+              authApi.uploadOrganizationDocument(orgUuid, this.formData.innCertificate.file, 'inn')
+                .then(result => {
+                  if (!result.success) {
+                    console.error('Ошибка загрузки свидетельства ИНН:', result.error)
+                    this.showNotification({
+                      type: 'error',
+                      text: 'Ошибка при загрузке свидетельства ИНН',
+                    })
+                  }
+                  return result
+                })
+            )
+          }
+          
+          if (this.formData.ogrnCertificate?.file) {
+            documentUploadPromises.push(
+              authApi.uploadOrganizationDocument(orgUuid, this.formData.ogrnCertificate.file, 'ogrn')
+                .then(result => {
+                  if (!result.success) {
+                    console.error('Ошибка загрузки свидетельства ОГРН:', result.error)
+                    this.showNotification({
+                      type: 'error',
+                      text: 'Ошибка при загрузке свидетельства ОГРН',
+                    })
+                  }
+                  return result
+                })
+            )
+          }
+
+          // Ждем загрузки всех документов
+          if (documentUploadPromises.length > 0) {
+            await Promise.all(documentUploadPromises)
+          }
+
           this.showNotification({
             type: 'success',
-            text: organizationResult.data?.message || 'Организация успешно создана!',
+            text: 'Организация и документы успешно загружены!',
           })
           
           // Переход на страницу профиля
