@@ -315,6 +315,28 @@ export default {
   },
   methods: {
     ...mapActions('notifications', ['showNotification']),
+    
+    // Вспомогательная функция для извлечения сообщения об ошибке из ответа API
+    getErrorMessage(error) {
+      if (!error) return 'Произошла ошибка'
+      
+      // Если error - массив объектов [{code, msg}]
+      if (Array.isArray(error)) {
+        return error[0]?.msg || error[0]?.message || 'Произошла ошибка'
+      }
+      
+      // Если error - объект {code, msg}
+      if (error.msg) {
+        return error.msg
+      }
+      
+      // Если error - объект {code, message}
+      if (error.message) {
+        return error.message
+      }
+      
+      return 'Произошла ошибка'
+    },
 
     persistSignupState () {
       if (typeof window === 'undefined') return
@@ -422,13 +444,16 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при отправке номера телефона'
+            text: this.getErrorMessage(result.error) || 'Ошибка при отправке номера телефона'
           })
         }
       } catch (error) {
+        const errorMsg = error?.response?.data?.error 
+          ? this.getErrorMessage(error.response.data.error)
+          : (getAPIError(error) || 'Ошибка при отправке номера телефона')
         this.showNotification({
           type: 'error',
-          text: getAPIError(error) || 'Ошибка при отправке номера телефона'
+          text: errorMsg
         })
       } finally {
         this.loading = false
@@ -455,13 +480,16 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.msg || result.error?.[0]?.msg || 'Ошибка при запросе кода'
+            text: this.getErrorMessage(result.error) || 'Ошибка при запросе кода'
           })
         }
       } catch (error) {
+        const errorMsg = error?.response?.data?.error 
+          ? this.getErrorMessage(error.response.data.error)
+          : (getAPIError(error) || 'Ошибка при запросе кода')
         this.showNotification({
           type: 'error',
-          text: getAPIError(error) || 'Ошибка при запросе кода'
+          text: errorMsg
         })
       } finally {
         this.loading = false
@@ -513,13 +541,16 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.msg || result.error?.[0]?.msg || 'Неверный код подтверждения'
+            text: this.getErrorMessage(result.error) || 'Неверный код подтверждения'
           })
         }
       } catch (error) {
+        const errorMsg = error?.response?.data?.error 
+          ? this.getErrorMessage(error.response.data.error)
+          : (getAPIError(error) || 'Ошибка при подтверждении кода')
         this.showNotification({
           type: 'error',
-          text: getAPIError(error) || 'Ошибка при подтверждении кода'
+          text: errorMsg
         })
       } finally {
         this.loading = false
@@ -614,14 +645,17 @@ export default {
         } else {
           this.showNotification({
             type: 'error',
-            text: result.error?.[0]?.msg || 'Ошибка при установке пароля'
+            text: this.getErrorMessage(result.error) || 'Ошибка при установке пароля'
           })
         }
       } catch (error) {
         console.error('Ошибка установки пароля:', error)
+        const errorMsg = error?.response?.data?.error 
+          ? this.getErrorMessage(error.response.data.error)
+          : (getAPIError(error) || 'Ошибка при установке пароля')
         this.showNotification({
           type: 'error',
-          text: getAPIError(error) || 'Ошибка при установке пароля'
+          text: errorMsg
         })
       } finally {
         this.loading = false
