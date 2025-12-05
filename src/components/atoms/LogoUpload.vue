@@ -85,7 +85,7 @@ export default {
     maxSize: { type: Number, default: 4 * 1024 * 1024 },
     minWidth: { type: Number, default: 98 },
     minHeight: { type: Number, default: 98 },
-    organizationUuid: { type: String, required: true },
+    organizationUuid: { type: String, default: null },
   },
   emits: ['update:modelValue', 'error'],
   data() {
@@ -109,6 +109,10 @@ export default {
     organizationUuid(newVal, oldVal) {
       if (newVal && newVal !== oldVal) {
         this.downloadLogo(newVal)
+        // Если был выбран файл до получения UUID, загружаем его
+        if (this.pendingFile || (this.modelValue && this.modelValue instanceof File)) {
+          this.uploadPendingLogo(newVal)
+        }
       }
     }
   },
@@ -116,6 +120,9 @@ export default {
   async mounted() {
     if (this.organizationUuid) {
       this.downloadLogo(this.organizationUuid)
+    } else if (this.modelValue && typeof this.modelValue === 'string') {
+      // Если передан URL логотипа, показываем его
+      this.createPreview(this.modelValue)
     }
   },
   beforeUnmount() {
@@ -254,25 +261,58 @@ export default {
     async handleAvatarReady({ blob, dataUrl }) {
       const file = new File([blob], this.pendingFile.name, { type: 'image/png' })
 
+      // Сохраняем файл локально (для последующей загрузки после создания организации)
       this.$emit('update:modelValue', file)
       this.createPreview(file)
 
-      if (!this.organizationUuid) {
-        this.setError('Не передан UUID организации')
-        this.closeCropper()
+      // Если UUID организации есть, загружаем сразу
+      if (this.organizationUuid) {
+        this.isUploading = true
+        try {
+          const result = await authApiService.uploadOrganizationLogo(
+            this.organizationUuid,
+            file
+          )
+
+          if (!result.success) {
+            this.setError(result.error?.msg || 'Не удалось загрузить логотип организации')
+          } else {
+            const serverUrl = result.data?.logo_url
+            if (serverUrl) {
+              this.previewUrl = serverUrl
+              this.$emit('update:modelValue', serverUrl)
+            }
+            this.$emit('uploaded', result.data)
+          }
+        } catch (e) {
+          this.setError('Ошибка при загрузке логотипа организации')
+        } finally {
+          this.isUploading = false
+        }
+      } else {
+        // Если UUID нет (регистрация), просто сохраняем файл локально
+        // Загрузка произойдет после создания организации
+        this.$emit('file-ready', file)
+      }
+      
+      this.closeCropper()
+    },
+
+    closeCropper() {
+      this.showCropper = false
+      this.pendingFile = null
+    },
+    
+    async uploadPendingLogo(orgUuid) {
+      const fileToUpload = this.pendingFile || (this.modelValue instanceof File ? this.modelValue : null)
+      if (!fileToUpload || !orgUuid) {
         return
       }
-
+      
       this.isUploading = true
       try {
-        const result = await authApiService.uploadOrganizationLogo(
-          this.organizationUuid,
-          file
-        )
-
-        if (!result.success) {
-          this.setError(result.error?.msg || 'Не удалось загрузить логотип организации')
-        } else {
+        const result = await authApiService.uploadOrganizationLogo(orgUuid, fileToUpload)
+        if (result.success) {
           const serverUrl = result.data?.logo_url
           if (serverUrl) {
             this.previewUrl = serverUrl
@@ -281,16 +321,11 @@ export default {
           this.$emit('uploaded', result.data)
         }
       } catch (e) {
-        this.setError('Ошибка при загрузке логотипа организации')
+        console.error('Ошибка при загрузке отложенного логотипа:', e)
       } finally {
         this.isUploading = false
-        this.closeCropper()
+        this.pendingFile = null
       }
-    },
-
-    closeCropper() {
-      this.showCropper = false
-      this.pendingFile = null
     }
   }
 }

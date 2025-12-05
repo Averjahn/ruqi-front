@@ -538,6 +538,20 @@ export default {
             return
           }
 
+          // Загружаем логотип после создания организации (если он был выбран)
+          if (this.formData.logo && this.formData.logo instanceof File) {
+            try {
+              const logoResult = await authApi.uploadOrganizationLogo(orgUuid, this.formData.logo)
+              if (logoResult.success && logoResult.data?.logo_url) {
+                this.formData.logo = logoResult.data.logo_url
+              } else {
+                console.warn('Не удалось загрузить логотип:', logoResult.error)
+              }
+            } catch (error) {
+              console.error('Ошибка при загрузке логотипа:', error)
+            }
+          }
+
           // Загружаем документы после создания организации
           const documentUploadPromises = []
           
