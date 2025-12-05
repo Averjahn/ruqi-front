@@ -32,18 +32,20 @@
             :file="formData.innCertificate"
             sample-link-text="Смотреть образец"
             :sample-image="require('@/assets/imgs/INN.jpg')"
-            hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG"
+            hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG, PDF, DOC, DOCX"
+            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             input-ref="innFileInput"
             @view-sample="openDocumentSample"
             @view-file="openDocumentModal('innCertificate')"
             @remove="removeInnCertificate"
             @upload="triggerInnFileInput"
+            @file-selected="handleInnFileSelected"
           />
               <input 
                 type="file" 
                 ref="innFileInput" 
                 @change="handleInnFileUpload" 
-                accept="image/png,image/jpg,image/jpeg" 
+                accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
                 style="display: none"
               />
 
@@ -53,18 +55,20 @@
             :file="formData.ogrnCertificate"
             sample-link-text="Смотреть образец"
             :sample-image="require('@/assets/imgs/OGRN.jpg')"
-            hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG"
+            hint="Файлы до 5 МВ в форматах PNG, JPG, JPEG, PDF, DOC, DOCX"
+            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             input-ref="ogrnFileInput"
             @view-sample="openDocumentSample"
             @view-file="openDocumentModal('ogrnCertificate')"
             @remove="removeOgrnCertificate"
             @upload="triggerOgrnFileInput"
+            @file-selected="handleOgrnFileSelected"
           />
               <input 
                 type="file" 
                 ref="ogrnFileInput" 
                 @change="handleOgrnFileUpload" 
-                accept="image/png,image/jpg,image/jpeg" 
+                accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
                 style="display: none"
               />
         </div>
@@ -113,6 +117,9 @@ import DocumentUploadCard from '@/components/molecules/DocumentUploadCard.vue'
 import DocumentModal from '@/components/organisms/DocumentModal.vue'
 import OrganisationDataForm from '@/components/organisms/OrganisationDataForm.vue'
 import authApi from '@/services/authApi'
+import { saveFormData, loadFormData, clearFormData } from '@/utils/formStorage'
+
+const ORGANISATION_DATA_STORAGE_KEY = 'organisation_data_v1'
 
 export default {
   name: 'OrganisationData',
@@ -262,15 +269,91 @@ export default {
       return hasInn && hasFullName && hasInnCertificate && hasOgrnCertificate
     }
   },
+  mounted() {
+    // Восстанавливаем данные из localStorage при загрузке страницы
+    this.restoreFormData()
+  },
+  beforeUnmount() {
+    // Очищаем таймер при размонтировании
+    if (this._saveTimeout) {
+      clearTimeout(this._saveTimeout)
+    }
+  },
   watch: {
     'formData.logo'(newLogo) {
       // console.log('🖼️ formData.logo изменился:', newLogo)
       if (newLogo) {
       }
+    },
+    formData: {
+      handler(newValue) {
+        // Сохраняем данные формы в localStorage при изменении (с debounce)
+        if (this._saveTimeout) {
+          clearTimeout(this._saveTimeout)
+        }
+        this._saveTimeout = setTimeout(() => {
+          this.saveFormData()
+        }, 300)
+      },
+      deep: true
+    },
+    currentStep() {
+      // Сохраняем текущий шаг
+      this.saveFormData()
     }
   },
   methods: {
     ...mapActions('notifications', ['showNotification']),
+    
+    saveFormData() {
+      // Сохраняем данные формы и текущий шаг
+      const dataToSave = {
+        formData: this.formData,
+        currentStep: this.currentStep
+      }
+      saveFormData(ORGANISATION_DATA_STORAGE_KEY, dataToSave)
+    },
+    
+    restoreFormData() {
+      // Восстанавливаем данные из localStorage
+      const saved = loadFormData(ORGANISATION_DATA_STORAGE_KEY, {
+        formData: this.formData,
+        currentStep: this.currentStep
+      })
+      
+      if (saved && saved.formData) {
+        // Восстанавливаем данные формы, исключая файлы
+        Object.keys(saved.formData).forEach(key => {
+          // Пропускаем файлы, так как они не могут быть восстановлены из localStorage
+          if (key === 'innCertificate' || key === 'ogrnCertificate' || key === 'logo') {
+            // Восстанавливаем только метаданные файлов, если они есть
+            if (saved.formData[key] && typeof saved.formData[key] === 'object' && saved.formData[key].name) {
+              this.formData[key] = {
+                ...this.formData[key],
+                name: saved.formData[key].name,
+                size: saved.formData[key].size,
+                isImage: saved.formData[key].isImage
+              }
+            }
+          } else {
+            // Восстанавливаем остальные поля
+            if (saved.formData[key] !== undefined && saved.formData[key] !== null) {
+              this.formData[key] = saved.formData[key]
+            }
+          }
+        })
+      }
+      
+      if (saved && typeof saved.currentStep === 'number') {
+        this.currentStep = saved.currentStep
+      }
+    },
+    
+    clearFormData() {
+      // Очищаем сохраненные данные формы
+      clearFormData(ORGANISATION_DATA_STORAGE_KEY)
+    },
+    
     openDocumentModal(documentType = null) {
       this.currentSampleImage = null
       this.currentDocumentFile = documentType
@@ -500,6 +583,9 @@ export default {
             text: 'Организация и документы успешно загружены!',
           })
           
+          // Очищаем сохраненные данные после успешной отправки
+          this.clearFormData()
+          
           // Переход на страницу профиля
           setTimeout(() => {
             this.$router.push('/ui-new/profile')
@@ -512,6 +598,9 @@ export default {
               type: 'info',
               text: 'У вас уже есть организация. Переходим на страницу профиля.',
             })
+            
+            // Очищаем сохраненные данные, если организация уже существует
+            this.clearFormData()
             
             setTimeout(() => {
               this.$router.push('/ui-new/profile')
@@ -554,13 +643,20 @@ export default {
     handleOgrnFileUpload(event) {
       const file = event.target.files[0]
       if (file) {
+        const isImage = file.type.startsWith('image/')
         this.formData.ogrnCertificate = {
           file: file,
           name: file.name,
           size: this.formatFileSize(file.size),
-          preview: URL.createObjectURL(file)
+          preview: isImage ? URL.createObjectURL(file) : null,
+          isImage: isImage
         }
       }
+    },
+    
+    handleOgrnFileSelected(fileData) {
+      // Обработчик события fileSelected из DocumentUploadCard
+      this.formData.ogrnCertificate = fileData
     },
 
     removeOgrnCertificate() {
@@ -590,13 +686,20 @@ export default {
     handleInnFileUpload(event) {
       const file = event.target.files[0]
       if (file) {
+        const isImage = file.type.startsWith('image/')
         this.formData.innCertificate = {
           file: file,
           name: file.name,
           size: this.formatFileSize(file.size),
-          preview: URL.createObjectURL(file)
+          preview: isImage ? URL.createObjectURL(file) : null,
+          isImage: isImage
         }
       }
+    },
+    
+    handleInnFileSelected(fileData) {
+      // Обработчик события fileSelected из DocumentUploadCard
+      this.formData.innCertificate = fileData
     },
 
     removeInnCertificate() {

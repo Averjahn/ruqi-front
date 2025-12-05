@@ -67,7 +67,7 @@ export default {
       default: false,
     },
     validationType: {
-      type: String, // input, change
+      type: String, // input, change, blur
       default: 'change',
     },
     clearable: {
@@ -152,6 +152,10 @@ export default {
       this.$emit('update:modelValue', e.target.value)
       if (this.validationType === 'input') debounce(this.validate, 50)()
       if (this.validationType === 'change') this.resetError()
+      // Для blur сбрасываем ошибку при вводе, но не валидируем
+      if (this.validationType === 'blur' && this.isTouched) {
+        this.resetError()
+      }
     },
     clear () {
       const e = {
@@ -167,7 +171,10 @@ export default {
     onChange (e) {
       this.$emit('change', e)
       this.$emit('update:modelValue', e.target.value)
-      this.isTouched = true
+      // isTouched устанавливается только при blur для validationType === 'blur'
+      if (this.validationType !== 'blur') {
+        this.isTouched = true
+      }
       this.afterChange()
     },
     onBlur (e) {
@@ -176,7 +183,11 @@ export default {
       this.$emit('blur', e)
     },
     afterChange () {
-      if (this.validationType === 'change') setTimeout(() => this.validate(), 50)
+      // Валидация при change только если validationType === 'change' и не 'blur'
+      if (this.validationType === 'change') {
+        setTimeout(() => this.validate(), 50)
+      }
+      // Для validationType === 'blur' валидация не срабатывает здесь
     },
     shakeIt () {
       this.shake = true

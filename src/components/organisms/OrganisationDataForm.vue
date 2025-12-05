@@ -86,6 +86,7 @@
         @blur="handleFieldBlur('fullName')"
         placeholder="Введите полное наименование"
         :rules="fullNameValidationRules"
+        validation-type="blur"
         class="organisation-data-form__input"
       />
     </div>
@@ -103,6 +104,7 @@
             @blur="handleInnBlur"
             placeholder="Введите ИНН"
             :rules="innValidationRules"
+            validation-type="blur"
             class="organisation-data-form__input"
           />
       </div>
@@ -125,6 +127,7 @@
           @blur="handleFieldBlur('kpp')"
           placeholder="Введите КПП"
           :rules="kppValidationRules"
+          validation-type="blur"
           class="organisation-data-form__input"
         />
       </div>
@@ -139,6 +142,7 @@
           @blur="handleFieldBlur('ogrn')"
           placeholder="Введите ОГРН"
           :rules="ogrnValidationRules"
+          validation-type="blur"
           class="organisation-data-form__input"
         />
       </div>
@@ -153,6 +157,7 @@
           @blur="handleFieldBlur('okato')"
           placeholder="Введите ОКАТО"
           :rules="okatoValidationRules"
+          validation-type="blur"
           class="organisation-data-form__input"
         />
       </div>
@@ -171,6 +176,7 @@
           @blur="handleFieldBlur('okato')"
           placeholder="Введите ОКАТО"
           :rules="okatoValidationRules"
+          validation-type="blur"
           class="organisation-data-form__input"
         />
       </div>
@@ -186,6 +192,7 @@
             @blur="handleInnBlur"
             placeholder="Введите ИНН"
             :rules="innValidationRules"
+            validation-type="blur"
             class="organisation-data-form__input"
           />
         </div>
@@ -208,6 +215,7 @@
           @blur="handleFieldBlur('kpp')"
           placeholder="Введите КПП"
           :rules="kppValidationRules"
+          validation-type="blur"
           class="organisation-data-form__input"
         />
       </div>
@@ -222,6 +230,7 @@
           @blur="handleFieldBlur('ogrn')"
           placeholder="Введите ОГРН"
           :rules="ogrnValidationRules"
+          validation-type="blur"
           class="organisation-data-form__input"
         />
       </div>
@@ -239,6 +248,7 @@
         @blur="handleFieldBlur('fullNamePerson')"
         placeholder="Введите ФИО"
         :rules="fullNamePersonValidationRules"
+        validation-type="blur"
         class="organisation-data-form__input"
       />
     </div>
@@ -255,6 +265,7 @@
         @blur="handleFieldBlur('position')"
         placeholder="Введите должность"
         :rules="positionValidationRules"
+        validation-type="blur"
         class="organisation-data-form__input"
       />
     </div>
@@ -271,6 +282,7 @@
         @blur="handleFieldBlur('basis')"
         placeholder="Введите основание"
         :rules="basisValidationRules"
+        validation-type="blur"
         class="organisation-data-form__input"
       />
     </div>
@@ -287,6 +299,7 @@
         @blur="handleFieldBlur('mailingAddress')"
         placeholder="Введите почтовый адрес"
         :rules="mailingAddressValidationRules"
+        validation-type="blur"
         class="organisation-data-form__input"
       />
     </div>
@@ -303,6 +316,7 @@
         @blur="handleFieldBlur('legalAddress')"
         placeholder="Введите юридический адрес"
         :rules="legalAddressValidationRules"
+        validation-type="blur"
         class="organisation-data-form__input"
       />
     </div>
@@ -319,6 +333,7 @@
           @update:model-value="updateField('settlementAccount', $event)"
           @blur="handleFieldBlur('settlementAccount')"
           :rules="settlementAccountValidationRules"
+          validation-type="blur"
           placeholder="Введите расчётный счёт"
           class="organisation-data-form__input"
         />
@@ -333,6 +348,7 @@
           @update:model-value="updateField('correspondentAccount', $event)"
           @blur="handleFieldBlur('correspondentAccount')"
           :rules="correspondentAccountValidationRules"
+          validation-type="blur"
           placeholder="Введите корреспондентский счёт"
           class="organisation-data-form__input"
         />
@@ -351,6 +367,7 @@
           @update:model-value="handleBicUpdate($event)"
           @blur="handleBicBlur"
           :rules="bicValidationRules"
+          validation-type="blur"
           placeholder="Введите БИК"
           class="organisation-data-form__input"
         />
@@ -362,6 +379,7 @@
         <Input
           :model-value="modelValue.bank"
           @update:model-value="updateField('bank', $event)"
+          validation-type="blur"
           placeholder="Введите банк"
           class="organisation-data-form__input"
         />

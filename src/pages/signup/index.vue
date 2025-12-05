@@ -241,6 +241,12 @@ export default {
   created () {
     this.restoreSignupState()
   },
+  beforeUnmount() {
+    // Очищаем таймер при размонтировании
+    if (this._saveTimeout) {
+      clearTimeout(this._saveTimeout)
+    }
+  },
   computed: {
     remainingTimeString () {
       return getStringFromSeconds(this.remaining)
@@ -340,22 +346,32 @@ export default {
 
     persistSignupState () {
       if (typeof window === 'undefined') return
-      const state = {
-        step: this.step,
-        phone: this.phone,
-        code: this.code,
-        onceToken: this.onceToken,
-        authToken: this.authToken,
-        clientUuid: this.clientUuid,
-        accountUuid: this.accountUuid,
-        termAgree: this.termAgree,
-        agree: this.agree,
+      
+      // Используем debounce для сохранения
+      if (this._saveTimeout) {
+        clearTimeout(this._saveTimeout)
       }
-      try {
-        localStorage.setItem(SIGNUP_STATE_KEY, JSON.stringify(state))
-      } catch (error) {
-        // ignore
-      }
+      
+      this._saveTimeout = setTimeout(() => {
+        const state = {
+          step: this.step,
+          phone: this.phone,
+          code: this.code,
+          password: this.password,
+          confirmPassword: this.confirmPassword,
+          onceToken: this.onceToken,
+          authToken: this.authToken,
+          clientUuid: this.clientUuid,
+          accountUuid: this.accountUuid,
+          termAgree: this.termAgree,
+          agree: this.agree,
+        }
+        try {
+          localStorage.setItem(SIGNUP_STATE_KEY, JSON.stringify(state))
+        } catch (error) {
+          // ignore
+        }
+      }, 300)
     },
     restoreSignupState () {
       if (typeof window === 'undefined') return
@@ -366,6 +382,8 @@ export default {
         if (state.step) this.step = state.step
         if (typeof state.phone === 'string') this.phone = state.phone
         if (typeof state.code === 'string') this.code = state.code
+        if (typeof state.password === 'string') this.password = state.password
+        if (typeof state.confirmPassword === 'string') this.confirmPassword = state.confirmPassword
         if (typeof state.onceToken === 'string') this.onceToken = state.onceToken
         if (typeof state.authToken === 'string') this.authToken = state.authToken
         if (typeof state.clientUuid === 'string') this.clientUuid = state.clientUuid
@@ -378,6 +396,10 @@ export default {
     },
     clearSignupState () {
       if (typeof window === 'undefined') return
+      // Очищаем таймер сохранения
+      if (this._saveTimeout) {
+        clearTimeout(this._saveTimeout)
+      }
       localStorage.removeItem(SIGNUP_STATE_KEY)
     },
 

@@ -13,13 +13,18 @@
     </div>
     
     <!-- Uploaded File View -->
-    <div v-if="file && file.file" class="document-upload-card__uploaded-file">
+    <div v-if="file && (file.file || file.name)" class="document-upload-card__uploaded-file">
       <div class="document-upload-card__file-thumbnail" @click="$emit('viewFile')">
         <img 
+          v-if="file.preview && (file.isImage === true || file.isImage === undefined)" 
           :src="file.preview || file.file" 
           alt="Document" 
           class="document-upload-card__document-image" 
         />
+        <div v-else class="document-upload-card__document-icon">
+          <div class="document-upload-card__icon-placeholder">📄</div>
+          <span class="document-upload-card__document-type">{{ getFileExtension(file.name || (file.file && file.file.name) || '') }}</span>
+        </div>
       </div>
       <div class="document-upload-card__file-info">
         <p class="document-upload-card__file-name">{{ file.name }}</p>
@@ -46,6 +51,7 @@
         :accept="accept"
         style="display: none"
         @change="handleFileSelect"
+        @click="(e) => e.target.value = ''"
       />
       <div class="document-upload-card__upload-content">
         <p class="document-upload-card__upload-text">Перетащите файлы сюда или</p>
@@ -53,7 +59,7 @@
           <div class="document-upload-card__icon-placeholder">📎</div>
           загрузите документы
         </button>
-        <p class="document-upload-card__upload-hint">{{ hint || 'Файлы до 5 МВ в форматах PNG, JPG, JPEG' }}</p>
+        <p class="document-upload-card__upload-hint">{{ hint || 'Файлы до 5 МВ в форматах PNG, JPG, JPEG, PDF, DOC, DOCX' }}</p>
       </div>
     </div>
   </div>
@@ -85,7 +91,7 @@ export default {
     },
     accept: {
       type: String,
-      default: 'image/png,image/jpg,image/jpeg'
+      default: '.png,.jpg,.jpeg,.pdf,.doc,.docx,image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     },
     inputRef: {
       type: String,
@@ -126,19 +132,72 @@ export default {
       }
     },
     processFile(file) {
-      // Проверка типа файла
-      const acceptedTypes = this.accept.split(',').map(type => type.trim())
-      const fileType = file.type
-      const isValidType = acceptedTypes.some(type => {
-        if (type.startsWith('.')) {
-          return file.name.toLowerCase().endsWith(type.toLowerCase())
-        }
-        return fileType === type || fileType.startsWith(type.split('/')[0] + '/')
-      })
+      const fileType = file.type || ''
+      const fileName = file.name.toLowerCase()
       
-      if (!isValidType) {
-        this.$emit('upload-error', 'Неподдерживаемый формат файла')
+      // Проверяем расширения файлов (приоритетная проверка)
+      const validExtensions = ['.png', '.jpg', '.jpeg', '.pdf', '.doc', '.docx']
+      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext))
+      
+      // Если расширение валидное, принимаем файл (независимо от MIME типа)
+      if (hasValidExtension) {
+        // Продолжаем обработку файла
+      } else {
+        // Если расширение не валидно, проверяем MIME типы как дополнительную проверку
+        const acceptedTypes = this.accept.split(',').map(type => type.trim())
+        let isValidMimeType = false
+        
+        // Проверяем расширения из accept (если они там есть)
+        const acceptExtensions = acceptedTypes.filter(type => type.startsWith('.'))
+        if (acceptExtensions.length > 0) {
+          isValidMimeType = acceptExtensions.some(ext => fileName.endsWith(ext.toLowerCase()))
+        }
+        
+        // Если не нашли по расширению, проверяем MIME типы
+        if (!isValidMimeType) {
+          isValidMimeType = acceptedTypes.some(type => {
+            if (type.startsWith('.')) {
+              return false // Уже проверили выше
+            }
+            // Для MIME типов проверяем точное совпадение
+            if (fileType && fileType === type) {
+              return true
+            }
+            // Для image/* проверяем начало
+            if (type.startsWith('image/') && fileType && fileType.startsWith('image/')) {
+              return true
+            }
+            // Для application/pdf (разные варианты MIME типов)
+            if (type === 'application/pdf' && fileType && 
+                (fileType === 'application/pdf' || 
+                 fileType === 'application/x-pdf' ||
+                 fileType === 'application/acrobat' ||
+                 fileType === 'text/pdf')) {
+              return true
+            }
+            // Для DOC
+            if (type === 'application/msword' && fileType && 
+                (fileType === 'application/msword' || 
+                 fileType === 'application/x-msword' ||
+                 fileType === 'application/doc' ||
+                 fileType === 'application/x-doc')) {
+              return true
+            }
+            // Для DOCX (может определяться как ZIP)
+            if (type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && fileType && 
+                (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                 fileType === 'application/zip' ||
+                 fileType === 'application/x-zip-compressed')) {
+              return true
+            }
+            return false
+          })
+        }
+        
+        if (!isValidMimeType) {
+          this.$emit('upload-error', 'Неподдерживаемый формат файла. Разрешены: PNG, JPG, JPEG, PDF, DOC, DOCX')
         return
+        }
       }
       
       // Проверка размера (5 МБ)
@@ -149,17 +208,36 @@ export default {
       }
       
       // Создание preview
+      const isImage = file.type.startsWith('image/') || 
+                     fileName.endsWith('.png') || 
+                     fileName.endsWith('.jpg') || 
+                     fileName.endsWith('.jpeg')
+      
+      if (isImage) {
+        // Для изображений создаем preview
       const reader = new FileReader()
       reader.onload = (e) => {
+          const fileData = {
+            file: file,
+            name: file.name,
+            size: this.formatFileSize(file.size),
+            preview: e.target.result,
+            isImage: true
+          }
+          this.$emit('fileSelected', fileData)
+        }
+        reader.readAsDataURL(file)
+      } else {
+        // Для PDF и DOC файлов не создаем preview, используем null
         const fileData = {
           file: file,
           name: file.name,
           size: this.formatFileSize(file.size),
-          preview: e.target.result
+          preview: null,
+          isImage: false
         }
         this.$emit('fileSelected', fileData)
       }
-      reader.readAsDataURL(file)
     },
     formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes'
@@ -167,6 +245,13 @@ export default {
       const sizes = ['Bytes', 'KB', 'MB', 'GB']
       const i = Math.floor(Math.log(bytes) / Math.log(k))
       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+    },
+    getFileExtension(fileName) {
+      const parts = fileName.split('.')
+      if (parts.length > 1) {
+        return parts[parts.length - 1].toUpperCase()
+      }
+      return 'FILE'
     }
   }
 }
@@ -303,6 +388,25 @@ export default {
   height: 116px;
   object-fit: cover;
   object-position: center;
+}
+
+.document-upload-card__document-icon {
+  width: 118px;
+  height: 116px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 8px;
+  gap: 8px;
+}
+
+.document-upload-card__document-type {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
 }
 
 .document-upload-card__file-info {
