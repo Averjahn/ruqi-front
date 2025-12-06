@@ -172,12 +172,9 @@
             <!-- Electronic Signature Content -->
             <div v-else-if="activeContent === 'signature'" class="ui-profile__content-block">
               <ElectronicSignatureContent @archive="handleSignatureArchive" />
-    </div>
-    
-    <!-- Cookie Consent Modal -->
-    <CookieConsent />
-  </div>
-</template>
+            </div>
+          </div>
+        </template>
 
         <!-- Desktop: Right Column: Content -->
         <!-- При выборе Объекты контент занимает всю ширину -->
@@ -335,6 +332,9 @@
         @resend-code="handleResendEmailCode"
       />
     </Popup>
+    
+    <!-- Cookie Consent Modal -->
+    <CookieConsent />
   </div>
 </template>
 
@@ -606,7 +606,7 @@ export default {
 
     // Всегда загружаем статус клиента при заходе на страницу профиля
     await this.$store.dispatch('auth/checkClientStatus')
-    
+
     // Инициализируем контакты из статуса (приоритетный источник для телефона и email)
     this.initContactsFromStatus()
 
@@ -618,65 +618,65 @@ export default {
     this.cleanupMobileTracking()
   },
   methods: {
-initContactsFromStatus() {
-  const status = this.$store.getters['auth/clientStatus']
+      initContactsFromStatus() {
+        const status = this.$store.getters['auth/clientStatus']
 
-  if (!status) {
-    return
-  }
+        if (!status) {
+          return
+        }
 
   // Проверяем оба варианта: login_phone и phone (API может возвращать любой из них)
   const phoneNumber = status.login_phone || status.phone
   
   if (phoneNumber) {
     const raw = String(phoneNumber)
-    const digits = raw.replace(/\D/g, '')
+          const digits = raw.replace(/\D/g, '')
 
-    let formatted = raw
+          let formatted = raw
 
-    if (digits.length === 11 && digits.charAt(0) === '7') {
-      formatted =
-        '+7 (' +
-        digits.slice(1, 4) + ') ' +
-        digits.slice(4, 7) + '-' +
-        digits.slice(7, 9) + '-' +
-        digits.slice(9, 11)
-    } else if (raw.charAt(0) !== '+') {
-      formatted = '+' + raw
-    }
+          if (digits.length === 11 && digits.charAt(0) === '7') {
+            formatted =
+              '+7 (' +
+              digits.slice(1, 4) + ') ' +
+              digits.slice(4, 7) + '-' +
+              digits.slice(7, 9) + '-' +
+              digits.slice(9, 11)
+          } else if (raw.charAt(0) !== '+') {
+            formatted = '+' + raw
+          }
 
-    this.contacts.phone = formatted
+          this.contacts.phone = formatted
 
     // 👉 Как в почте: если телефон есть в статусе — считаем его подтверждённым
     const isConfirmed =
       true // или, если хочешь подстраховаться: !!phoneNumber || status.phone_verified === true
 
-    this.contacts.phoneStatus = {
-      type: isConfirmed ? 'success' : 'error',
-      icon: isConfirmed
-        ? require('@/assets/icons/checkmark_circle.svg')
-        : require('@/assets/icons/profile/input-status-red.svg'),
-      text: isConfirmed ? 'Телефон подтверждён' : 'Телефон не подтверждён'
-    }
-  }
+          this.contacts.phoneStatus = {
+            type: isConfirmed ? 'success' : 'error',
+            icon: isConfirmed
+              ? require('@/assets/icons/checkmark_circle.svg')
+              : require('@/assets/icons/profile/input-status-red.svg'),
+            text: isConfirmed ? 'Телефон подтверждён' : 'Телефон не подтверждён'
+          }
+        }
 
   // email часть можно оставить как есть
   const email = status.login_email || status.email
-  
+
   if (email) {
     this.contacts.email = email
 
     const isEmailConfirmed = status.email_verified === true
 
-    this.contacts.emailStatus = {
-      type: isEmailConfirmed ? 'success' : 'error',
-      icon: isEmailConfirmed
-        ? require('@/assets/icons/checkmark_circle.svg')
-        : require('@/assets/icons/profile/input-status-red.svg'),
-      text: isEmailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
-    }
-  }
-},
+          this.contacts.emailStatus = {
+            type: isEmailConfirmed ? 'success' : 'error',
+            icon: isEmailConfirmed
+              ? require('@/assets/icons/checkmark_circle.svg')
+              : require('@/assets/icons/profile/input-status-red.svg'),
+            text: isEmailConfirmed ? 'Email подтверждён' : 'Email не подтверждён'
+          }
+        }
+      },
 
     initMobileTracking() {
       if (typeof window !== 'undefined' && window.matchMedia) {
@@ -1384,10 +1384,10 @@ initContactsFromStatus() {
         })
         
         if (result.success) {
-          // Сохраняем номер телефона и открываем модальное окно с кодом
-          this.changePasswordPhone = phone
-          this.showChangePasswordPhoneModal = false
-          this.showChangePasswordCodeModal = true
+      // Сохраняем номер телефона и открываем модальное окно с кодом
+      this.changePasswordPhone = phone
+      this.showChangePasswordPhoneModal = false
+      this.showChangePasswordCodeModal = true
           
           this.$store.dispatch('notifications/showNotification', {
             text: 'Код восстановления отправлен'
@@ -1422,7 +1422,7 @@ initContactsFromStatus() {
 
       if (this.passwordChangeMethod === 'phone') {
         // Возвращаемся к модальному окну с кодом для сценария по телефону
-        this.showChangePasswordCodeModal = true
+      this.showChangePasswordCodeModal = true
       } else if (this.passwordChangeMethod === 'email') {
         // Возвращаемся к модальному окну с кодом для сценария по email
         this.showChangePasswordEmailCodeModal = true
@@ -1449,7 +1449,7 @@ initContactsFromStatus() {
             this.$store.dispatch('notifications/showNotification', {
               text: 'Пароль успешно изменён'
             })
-            this.showChangePasswordNewPasswordModal = false
+      this.showChangePasswordNewPasswordModal = false
             this.passwordChangeMethod = null
           } else {
             const errorMsg = result.error?.[0]?.msg || result.error?.msg || 'Ошибка при смене пароля'

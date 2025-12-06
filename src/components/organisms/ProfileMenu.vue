@@ -117,7 +117,6 @@ export default {
   height: 24px;
   flex-shrink: 0;
   object-fit: contain;
-  transition: filter 0.2s ease;
   opacity: 1;
   display: block;
   // Базовый цвет для иконок (серый #666666)
