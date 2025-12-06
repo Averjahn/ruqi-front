@@ -180,7 +180,9 @@ export default {
       this.$nextTick(() => {
         this.formattedPhone = formattedValue
         this.$nextTick(() => {
-          event.target.setSelectionRange(cursorPosition, cursorPosition)
+          if (event?.target?.setSelectionRange) {
+            event.target.setSelectionRange(cursorPosition, cursorPosition)
+          }
         })
       })
     },

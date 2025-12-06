@@ -19,7 +19,7 @@
         <Select
           :model-value="modelValue.counterpartyType"
           @update:model-value="updateField('counterpartyType', $event)"
-          :options="counterpartyTypes"
+          :options="finalCounterpartyTypes"
           placeholder="Выберите вид контрагента"
           class="organisation-data-form__input"
           item-value="value"
@@ -51,7 +51,7 @@
         <Select
           :model-value="modelValue.counterpartyType"
           @update:model-value="updateField('counterpartyType', $event)"
-          :options="counterpartyTypes"
+          :options="finalCounterpartyTypes"
           placeholder="Выберите вид контрагента"
           class="organisation-data-form__input"
           item-value="value"
@@ -447,6 +447,16 @@ export default {
     },
   },
   emits: ['update:modelValue', 'data-filled', 'upload-error'],
+  computed: {
+    // Гарантируем, что используются только правильные опции
+    finalCounterpartyTypes() {
+      // Всегда возвращаем только нужные опции для регистрации
+      return [
+        { value: 'legal', label: 'Юридическое лицо' },
+        { value: 'other', label: 'Прочее' }
+      ]
+    }
+  },
   data() {
     return {
       rules,

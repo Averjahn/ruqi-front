@@ -172,9 +172,12 @@
             <!-- Electronic Signature Content -->
             <div v-else-if="activeContent === 'signature'" class="ui-profile__content-block">
               <ElectronicSignatureContent @archive="handleSignatureArchive" />
-            </div>
-          </div>
-        </template>
+    </div>
+    
+    <!-- Cookie Consent Modal -->
+    <CookieConsent />
+  </div>
+</template>
 
         <!-- Desktop: Right Column: Content -->
         <!-- При выборе Объекты контент занимает всю ширину -->
@@ -360,6 +363,7 @@ import ChangePasswordNewPasswordModal from '@/components/organisms/popups/Change
 import ChangePasswordEmailModal from '@/components/organisms/popups/ChangePasswordEmailModal.vue'
 import ChangePasswordEmailInputModal from '@/components/organisms/popups/ChangePasswordEmailInputModal.vue'
 import ChangePasswordEmailCodeModal from '@/components/organisms/popups/ChangePasswordEmailCodeModal.vue'
+import CookieConsent from '@/components/atoms/CookieConsent.vue'
 import { mapState } from 'vuex'
 import authApiService from '@/services/authApi'
 
@@ -389,6 +393,7 @@ export default {
     ChangePasswordEmailModal,
     ChangePasswordEmailInputModal,
     ChangePasswordEmailCodeModal,
+    CookieConsent,
   },
   data() {
     return {

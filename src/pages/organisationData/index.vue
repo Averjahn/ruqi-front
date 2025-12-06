@@ -307,6 +307,7 @@ export default {
     
     saveFormData() {
       // Сохраняем данные формы и текущий шаг
+      // НЕ сохраняем counterpartyTypes, так как это конфигурация, а не данные формы
       const dataToSave = {
         formData: this.formData,
         currentStep: this.currentStep

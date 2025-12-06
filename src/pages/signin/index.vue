@@ -363,7 +363,9 @@ export default {
       this.$nextTick(() => {
         this.phone = formattedValue
         this.$nextTick(() => {
-          event.target.setSelectionRange(cursorPosition, cursorPosition)
+          if (event?.target?.setSelectionRange) {
+            event.target.setSelectionRange(cursorPosition, cursorPosition)
+          }
         })
       })
     },
@@ -408,17 +410,12 @@ export default {
       }
       this.loading = true
       try {
-        // Используем правильный API согласно документации
+        // Используем правильный API для отправки SMS кода при входе
         const phone = clearPhoneWithoutPlus(this.phone)
-        const response = await this.$axios.get(
-          'api/v2/auth/recovery/client/request-code',
-          { 
-            params: { 
-              login_phone: phone,
-              verification_by: 'telegram' // По умолчанию telegram
-            },
-            errorMessage: 'Ошибка при запросе кода' 
-          },
+        const response = await this.$axios.post(
+          'api/v2/auth/login/client/sms/sendcode',
+          { phone: phone },
+          { errorMessage: 'Ошибка при запросе кода' }
         )
         if (response?.data?.success) {
           // Сохраняем телефон в store
@@ -428,10 +425,13 @@ export default {
           })
           
           this.callRequested = true
-          this.onceToken = response?.data?.data?.once_token
-          // Согласно документации, код отправляется через Telegram или SMS
-          // Не используем waitcall метод
-          this.oldMethod = false // Для отображения экрана ввода кода из телеграм
+          // once_token может не возвращаться для входа по SMS, это нормально
+          // Сохраняем его только если он есть в ответе
+          if (response?.data?.data?.once_token) {
+            this.onceToken = response?.data?.data?.once_token
+          }
+          // Код отправляется через SMS
+          this.oldMethod = false // Для отображения экрана ввода кода
         } else {
           this.callRequestErrorMsg = getAPIErrorMessage(response)
           this.showNotification({
@@ -592,15 +592,17 @@ export default {
       if (this.loading) return
       this.loading = true
       try {
-        const response = await this.$axios.get(
-          'api/v2/auth/recovery/client/request-code',
-          { 
-            params: { login_phone: clearPhoneWithoutPlus(this.phone) },
-            errorMessage: 'Ошибка при запросе кода' 
-          },
+        const response = await this.$axios.post(
+          'api/v2/auth/login/client/sms/sendcode',
+          { phone: clearPhoneWithoutPlus(this.phone) },
+          { errorMessage: 'Ошибка при запросе кода' }
         )
         if (response?.data?.success) {
           this.showNotification({ type: 'success', text: 'Код отправлен повторно' })
+          // Обновляем once_token, если он вернулся в ответе
+          if (response?.data?.data?.once_token) {
+            this.onceToken = response?.data?.data?.once_token
+          }
         }
       } finally {
         this.loading = false
@@ -609,58 +611,41 @@ export default {
 
     async submitSmsCode () {
       if (this.loading) return
-      if (!this.onceToken) {
+      
+      // Проверяем, что код введен
+      if (!this.smsCode || this.smsCode.length < 4) {
         this.showNotification({
           type: 'error',
-          text: 'Ошибка: отсутствует токен. Пожалуйста, запросите код заново.'
+          text: 'Пожалуйста, введите код из SMS'
         })
         return
       }
 
       this.loading = true
       try {
-        // Используем правильный API для подтверждения кода восстановления
+        // Используем правильный API для входа по SMS коду
+        // Для входа клиента по коду используем endpoint входа с параметром code
+        // once_token не требуется для входа по SMS коду
+        const phone = clearPhoneWithoutPlus(this.phone)
         const response = await this.$axios.post(
-          'api/v2/auth/recovery/client/submit-code',
+          'api/v2/auth/login/client',
           {
-            once_token: this.onceToken,
+            phone: phone,
             code: this.smsCode
           },
-          { errorMessage: 'Ошибка при отправке кода' },
+          { errorMessage: 'Ошибка при подтверждении кода' },
         )
         if (response?.data?.success) {
-          // После подтверждения кода получаем новый once_token для установки пароля
-          // Но для входа по звонку нужно авторизовать пользователя
-          // Согласно документации, после подтверждения кода нужно установить пароль
-          // Но для входа по звонку это не требуется - пользователь уже авторизован
-          // Проверяем, есть ли токен в ответе
-          const newOnceToken = response.data.data?.once_token
-          if (newOnceToken) {
-            // Сохраняем новый токен для возможной установки пароля
-            this.onceToken = newOnceToken
-            // Для входа по звонку после подтверждения кода пользователь авторизован
-            // Но токен авторизации должен быть получен отдельно
-            // Пока что просто переходим на главную
-            this.showNotification({
-              type: 'success',
-              text: 'Код подтвержден'
-            })
-            // Если в ответе есть токен авторизации, используем его
-            if (response.data.data?.token || response.data.data?.authToken) {
-              const token = response.data.data?.token || response.data.data?.authToken
-              await this.auth(token)
-              this.clearSigninState()
-              this.$router.push('/client/profile')
-            } else {
-              // Если токена нет, возможно нужно установить пароль
-              // Пока что просто переходим на главную
-              this.clearSigninState()
-              this.$router.push('/')
-            }
+          // Получаем токен авторизации из ответа
+          const token = response.data.data?.token || response.data.data?.authToken
+          if (token) {
+            await this.auth(token)
+            this.clearSigninState()
+            this.$router.push('/client/profile')
           } else {
             this.showNotification({
               type: 'error',
-              text: 'Токен не получен'
+              text: 'Токен авторизации не получен'
             })
           }
         } else {

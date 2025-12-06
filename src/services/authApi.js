@@ -87,6 +87,30 @@ class AuthApiService {
   }
 
   /**
+   * Отправка SMS кода для входа клиента
+   * POST /api/v2/auth/login/client/sms/sendcode
+   * @param {string} phone - Номер телефона (10-11 цифр, без +)
+   * @returns {Promise<Object>} Ответ API
+   */
+  async sendClientLoginSmsCode(phone) {
+    try {
+      // Очищаем телефон от + и пробелов, оставляем только цифры
+      const cleanPhone = phone.replace(/\D/g, '')
+      
+      const response = await axios.post('/api/v2/auth/login/client/sms/sendcode', {
+        phone: cleanPhone
+      })
+      
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
    * Авторизация клиента по телефону и паролю
    * @param {string} phone - Номер телефона (10-11 цифр, без +)
    * @param {string} password - Пароль
